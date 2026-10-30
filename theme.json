@@ -1,0 +1,41 @@
+{
+  "colors": {
+    "bg": "#020803",
+    "bgCard": "#03120a",
+    "bgCardHover": "#06180d",
+    "bgElevated": "#06150c",
+    "bgInset": "#000000",
+    "bgSectionTint": "#03120a",
+    "text": "#b9f5c8",
+    "textMuted": "#7fbf92",
+    "textSubtle": "#4f8a5e",
+    "border": "#0f2a17",
+    "borderSubtle": "#0f2a17",
+    "borderStrong": "#2c5238",
+    "accent": "#39ff7a",
+    "accentHover": "#7dffa6",
+    "accentContrast": "#000000",
+    "success": "#39ff7a",
+    "successText": "#b9f5c8",
+    "successBorder": "#1d6b3a",
+    "successBg": "#06200f",
+    "warning": "#ffd27f",
+    "warningText": "#ffd27f",
+    "warningBorder": "#4a3d1c",
+    "warningBg": "#1a1406",
+    "error": "#ff4d4d",
+    "errorText": "#ff8080",
+    "info": "#7ff7ff",
+    "infoText": "#7ff7ff"
+  },
+  "typography": {
+    "fontFamily": "'JetBrains Mono', ui-monospace, Menlo, monospace",
+    "fontFamilyMono": "'JetBrains Mono', ui-monospace, Menlo, monospace"
+  },
+  "radii": {
+    "xs": "2px",
+    "sm": "4px",
+    "md": "6px",
+    "lg": "8px"
+  }
+}

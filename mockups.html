@@ -1,0 +1,537 @@
+<title>Green Harness Mockups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Big+Shoulders+Display:wght@700;900&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Red+Hat+Display:wght@500;700;900&family=Red+Hat+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a quiet review sheet; each of the three directions sits in its own browser frame with its own fixed look. */
+:root {
+  --bg: #f3f5f3; --fg: #16201a; --muted: #5a665e; --line: #d3dbd5; --accent: #1d6b3a; --panel: #ffffff;
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1411; --fg: #e4ebe6; --muted: #98a59c; --line: #29332d; --accent: #6fc48d; --panel: #161d19; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1411; --fg: #e4ebe6; --muted: #98a59c; --line: #29332d; --accent: #6fc48d; --panel: #161d19; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 64px }
+.intro { display: grid; gap: 12px; max-width: 68ch }
+.intro .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
+.intro h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); line-height: 1.1; letter-spacing: -.02em; text-wrap: balance }
+.intro p { margin: 0; color: var(--muted) }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px }
+.jump a { font-family: var(--mono); font-size: 13px; color: var(--fg); text-decoration: none; border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; background: var(--panel) }
+.jump a:hover { border-color: var(--accent) }
+a:focus-visible, button:focus-visible, input:focus-visible + span, label:focus-within { outline: 2px solid #2f8f52; outline-offset: 2px }
+
+.option { display: grid; gap: 18px; scroll-margin-top: 24px }
+.opt-head { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; max-width: 80ch }
+.opt-letter { font-family: var(--mono); font-weight: 500; font-size: 14px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--accent); color: var(--accent) }
+.opt-head h2 { margin: 0 0 4px; font-size: 22px; letter-spacing: -.01em }
+.opt-head p { margin: 0; color: var(--muted) }
+.opt-head .fit { margin-top: 6px; font-size: 13px; color: var(--muted) }
+.opt-head .fit b { color: var(--fg); font-weight: 600 }
+
+.frame { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); box-shadow: 0 1px 0 rgba(0,0,0,.03), 0 18px 40px -28px rgba(10,40,20,.35) }
+.bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line) }
+.dots { display: flex; gap: 6px }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); display: block }
+.url { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--bg); padding: 3px 12px; border-radius: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.mock { overflow: hidden }
+.mock button { font: inherit; cursor: pointer }
+.mock input[type=checkbox] { position: absolute; opacity: 0; width: 1px; height: 1px }
+
+/* ---------- A: Build log ---------- */
+.ma { --p: #f7f8f5; --ink: #17201a; --soft: #5d685f; --rule: #dbe0da; --ok: #1f7a3a; --warn: #8f6200; --bad: #b42318; --tint: #e8f1ea;
+  background: var(--p); color: var(--ink); font-family: "Geist", system-ui, sans-serif; color-scheme: light }
+.ma .in { padding: 0 clamp(16px, 4vw, 48px) }
+.ma nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 18px; border-bottom: 1px solid var(--rule); flex-wrap: wrap }
+.ma .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: -.01em }
+.ma .logo i { width: 20px; height: 20px; border-radius: 50%; background: var(--ok); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 12px }
+.ma nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; font-size: 14px; color: var(--soft); flex-wrap: wrap }
+.ma .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 40px; padding-block: 56px 48px; align-items: center }
+.ma h3 { font-size: clamp(30px, 4.2vw, 50px); line-height: 1.04; letter-spacing: -.035em; margin: 0 0 18px; font-weight: 700; text-wrap: balance }
+.ma h3 em { font-style: normal; color: var(--ok) }
+.ma .lede { color: var(--soft); font-size: 17px; margin: 0 0 24px; max-width: 46ch }
+.ma .cta { display: grid; gap: 10px; max-width: 470px }
+.ma .cmd { font-family: "Geist Mono", monospace; font-size: 13px; background: var(--ink); color: #d8f0de; padding: 12px 14px; border-radius: 8px; display: flex; justify-content: space-between; gap: 12px; overflow-x: auto; white-space: nowrap }
+.ma .cmd span { color: #7fbf92 }
+.ma .doors { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px }
+.ma .doors a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule) }
+.ma .log { font-family: "Geist Mono", monospace; font-size: 12.5px; line-height: 1.65; background: #fff; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; min-width: 0 }
+.ma .log header { display: flex; justify-content: space-between; padding: 8px 14px; border-bottom: 1px solid var(--rule); color: var(--soft); font-size: 11.5px; gap: 8px; flex-wrap: wrap }
+.ma .log pre { margin: 0; padding: 14px; overflow-x: auto; white-space: pre }
+.ma .log .p { color: var(--soft) }
+.ma .log .x { color: var(--bad); font-weight: 500 }
+.ma .log .v { color: var(--ok); font-weight: 500 }
+.ma .log .n { color: var(--soft) }
+.ma .log .deny { display: block; background: #fbeeec; margin: 0 -14px; padding: 0 14px }
+.ma .log .pass { display: block; background: var(--tint); margin: 0 -14px; padding: 0 14px }
+.ma section.blk { padding-block: 40px; border-top: 1px solid var(--rule) }
+.ma .kicker { font-family: "Geist Mono", monospace; font-size: 12px; color: var(--soft); letter-spacing: .04em; margin: 0 0 6px }
+.ma h4 { font-size: 24px; letter-spacing: -.02em; margin: 0 0 20px }
+.ma .steps { display: grid; border: 1px solid var(--rule); border-radius: 10px; background: #fff; overflow: hidden }
+.ma .step { display: grid; grid-template-columns: 18px 170px 110px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 13px 16px; border-top: 1px solid var(--rule); font-size: 14px }
+.ma .step:first-child { border-top: 0 }
+.ma .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px var(--tint) }
+.ma .when { color: var(--soft) }
+.ma .part { font-family: "Geist Mono", monospace; font-weight: 500 }
+.ma .pill { font-family: "Geist Mono", monospace; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid currentColor; justify-self: end }
+.ma .pill.block { color: var(--bad) } .ma .pill.flag { color: var(--warn) } .ma .pill.ans { color: var(--ok) }
+.ma .two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px }
+.ma .picker { background: #fff; border: 1px solid var(--rule); border-radius: 10px; padding: 18px; display: grid; gap: 14px }
+.ma .profiles { display: flex; gap: 8px; flex-wrap: wrap }
+.ma .profiles button { border: 1px solid var(--rule); background: var(--p); color: var(--ink); padding: 5px 12px; border-radius: 6px; font-size: 13px }
+.ma .profiles button[aria-pressed=true] { border-color: var(--ok); background: var(--tint); color: var(--ok) }
+.ma .opts { display: grid; gap: 2px }
+.ma .opts label { display: grid; grid-template-columns: 18px 100px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 6px 4px; cursor: pointer; font-size: 14px; position: relative; border-radius: 6px }
+.ma .opts .box { width: 15px; height: 15px; border: 1.5px solid var(--soft); border-radius: 4px; align-self: center; display: grid; place-items: center; font-size: 11px; color: #fff }
+.ma .opts input:checked + .box { background: var(--ok); border-color: var(--ok) }
+.ma .opts input:checked + .box::after { content: "✓" }
+.ma .opts .nm { font-family: "Geist Mono", monospace; font-weight: 500 }
+.ma .opts .ds { color: var(--soft) }
+.ma .note { font-size: 12.5px; color: var(--warn); min-height: 1.2em; margin: 0 }
+.ma .never { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; font-size: 14px }
+.ma .never li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 10px }
+.ma .never li::before { content: "✓"; color: var(--ok); font-weight: 700 }
+.ma .never code { font-family: "Geist Mono", monospace; font-size: 12.5px; background: var(--tint); padding: 1px 5px; border-radius: 4px }
+
+/* ---------- B: Gear tag ---------- */
+.mb { --g: #163a28; --g2: #1d4a33; --web: #245c3f; --cream: #eef0e2; --hv: #ff7a1a; --soft: #b7c7b9;
+  background: var(--g); color: var(--cream); font-family: "Archivo", system-ui, sans-serif; color-scheme: dark }
+.mb .in { padding: 0 clamp(16px, 4vw, 48px) }
+.mb nav { display: flex; justify-content: space-between; align-items: center; padding-block: 18px; gap: 16px; flex-wrap: wrap }
+.mb .wm { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 22px; letter-spacing: .06em }
+.mb .wm b { color: var(--hv) }
+.mb nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--soft); flex-wrap: wrap }
+.mb .hero { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .9fr); gap: 40px; padding-block: 36px 56px; align-items: center }
+.mb h3 { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; text-transform: uppercase; font-size: clamp(48px, 8vw, 104px); line-height: .88; letter-spacing: -.005em; margin: 0 0 22px; text-wrap: balance }
+.mb h3 span { color: var(--hv) }
+.mb .lede { font-size: 18px; color: var(--soft); margin: 0 0 26px; max-width: 44ch }
+.mb .btns { display: flex; gap: 12px; flex-wrap: wrap }
+.mb .btn { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 700; font-size: 18px; letter-spacing: .06em; text-transform: uppercase; padding: 10px 20px; border: 2px solid var(--cream); color: var(--cream); text-decoration: none }
+.mb .btn.hv { background: var(--hv); border-color: var(--hv); color: #1b1206 }
+.mb .tag { background: var(--cream); color: #1d2a20; padding: 22px 22px 18px; position: relative; transform: rotate(1.6deg); box-shadow: 0 22px 40px -20px rgba(0,0,0,.55); border-radius: 4px 4px 14px 14px; max-width: 360px; justify-self: center; width: 100% }
+.mb .tag::before { content: ""; position: absolute; top: -26px; left: 50%; width: 46px; height: 34px; transform: translateX(-50%); background: repeating-linear-gradient(90deg, #2f7a52 0 3px, #2a6c49 3px 6px); border-radius: 2px }
+.mb .tag .tt { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 30px; letter-spacing: .04em; line-height: 1; margin: 0 }
+.mb .tag .md { font-family: "Red Hat Mono", monospace; font-size: 12px; margin: 4px 0 14px; color: #4a5a4e }
+.mb .tag dl { margin: 0; display: grid; grid-template-columns: auto 1fr; font-size: 13px; border-top: 2px solid #1d2a20 }
+.mb .tag dt, .mb .tag dd { padding: 6px 0; border-bottom: 1px solid #c8ccb8; margin: 0 }
+.mb .tag dt { color: #4a5a4e; padding-right: 14px; text-transform: uppercase; font-size: 11px; letter-spacing: .07em; align-self: center }
+.mb .tag dd { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums }
+.mb .tag .warn { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: center; margin-top: 14px; font-size: 12px; color: #4a5a4e }
+.mb .tri { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 24px solid #1d2a20; position: relative }
+.mb .tri::after { content: "!"; position: absolute; left: -3px; top: 7px; color: var(--cream); font-weight: 800; font-size: 14px }
+.mb .straps { display: grid; gap: 10px; padding-block: 8px 48px }
+.mb .strap { display: grid; grid-template-columns: 160px minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 16px 20px;
+  background: repeating-linear-gradient(90deg, var(--web) 0 2px, var(--g2) 2px 5px); border-top: 2px dashed rgba(238,240,226,.25); border-bottom: 2px dashed rgba(238,240,226,.25) }
+.mb .strap h5 { margin: 0; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 30px; text-transform: uppercase; letter-spacing: .03em; line-height: 1 }
+.mb .strap p { margin: 0; color: var(--cream); font-size: 15px }
+.mb .strap .lp { font-family: "Red Hat Mono", monospace; font-size: 11.5px; background: var(--hv); color: #1b1206; padding: 4px 10px; white-space: nowrap }
+.mb .sec { padding-block: 48px; border-top: 1px solid rgba(238,240,226,.15) }
+.mb h4 { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; text-transform: uppercase; font-size: 44px; line-height: 1; margin: 0 0 8px }
+.mb .sub { color: var(--soft); margin: 0 0 24px }
+.mb .two { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 40px }
+.mb .sizes { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap }
+.mb .sizes button { display: grid; gap: 2px; text-align: left; border: 2px solid rgba(238,240,226,.4); background: transparent; color: var(--cream); padding: 10px 16px; min-width: 110px }
+.mb .sizes button b { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 34px; line-height: 1 }
+.mb .sizes button span { font-size: 12px; color: var(--soft) }
+.mb .sizes button[aria-pressed=true] { border-color: var(--hv); background: rgba(255,122,26,.12) }
+.mb .opts { display: grid; gap: 6px }
+.mb .opts label { display: grid; grid-template-columns: 22px 120px minmax(0, 1fr); gap: 12px; align-items: center; cursor: pointer; position: relative; padding: 6px 0 }
+.mb .opts .box { width: 20px; height: 20px; border: 2px solid var(--cream); display: grid; place-items: center; color: #1b1206; font-weight: 800; font-size: 13px }
+.mb .opts input:checked + .box { background: var(--hv); border-color: var(--hv) }
+.mb .opts input:checked + .box::after { content: "✓" }
+.mb .opts .nm { font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 700; font-size: 22px; text-transform: uppercase; letter-spacing: .03em }
+.mb .opts .ds { color: var(--soft); font-size: 14px }
+.mb .out { margin-top: 16px; font-family: "Red Hat Mono", monospace; font-size: 14px; background: #0d2418; padding: 14px 16px; border-left: 4px solid var(--hv); overflow-x: auto; white-space: nowrap }
+.mb .note { font-size: 13px; color: var(--hv); min-height: 1.2em; margin: 8px 0 0 }
+.mb .check { list-style: none; padding: 0; margin: 0; border: 2px solid var(--cream); }
+.mb .check li { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 12px 16px; border-top: 1px solid rgba(238,240,226,.25); font-size: 15px; align-items: center }
+.mb .check li:first-child { border-top: 0; background: var(--cream); color: #1d2a20; font-family: "Big Shoulders Display", Impact, sans-serif; font-weight: 900; font-size: 20px; text-transform: uppercase; letter-spacing: .05em }
+.mb .check .ok { font-family: "Red Hat Mono", monospace; font-size: 12px; color: var(--hv) }
+
+/* ---------- C: Schematic ---------- */
+.mc { --paper: #eef3ef; --gridc: rgba(29,96,58,.08); --ink: #0f2f1d; --line: #1d603a; --soft: #557161; --sig: #23a35a; --white: #fbfdfb;
+  background-color: var(--paper); background-image: linear-gradient(var(--gridc) 1px, transparent 1px), linear-gradient(90deg, var(--gridc) 1px, transparent 1px); background-size: 24px 24px;
+  color: var(--ink); font-family: "Red Hat Display", system-ui, sans-serif; color-scheme: light }
+.mc .in { padding: 0 clamp(16px, 4vw, 48px) }
+.mc nav { display: flex; justify-content: space-between; align-items: center; padding-block: 18px; gap: 16px; border-bottom: 1.5px solid var(--line); flex-wrap: wrap }
+.mc .wm { font-weight: 900; letter-spacing: -.02em; font-size: 19px; display: flex; gap: 8px; align-items: center }
+.mc .wm svg { display: block }
+.mc nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; font-family: "Red Hat Mono", monospace; font-size: 12.5px; color: var(--soft); flex-wrap: wrap }
+.mc .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding-block: 52px 52px }
+.mc .ref { font-family: "Red Hat Mono", monospace; font-size: 12px; color: var(--soft); margin: 0 0 14px }
+.mc h3 { font-size: clamp(34px, 4.6vw, 58px); font-weight: 900; line-height: 1; letter-spacing: -.035em; margin: 0 0 20px; text-wrap: balance }
+.mc h3 span { color: var(--sig) }
+.mc .lede { font-size: 17px; color: var(--soft); margin: 0 0 28px; max-width: 46ch; font-weight: 500 }
+.mc .doors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.mc .door { background: var(--white); border: 1.5px solid var(--line); padding: 16px; display: grid; gap: 6px; text-decoration: none; color: var(--ink) }
+.mc .door small { font-family: "Red Hat Mono", monospace; color: var(--soft); font-size: 11.5px }
+.mc .door b { font-size: 17px }
+.mc .door code { font-family: "Red Hat Mono", monospace; font-size: 13px; color: var(--line) }
+.mc .door:hover { background: #e3efe6 }
+.mc .ladder { position: relative; display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 0 14px; align-content: start }
+.mc .axis { grid-row: 1 / span 5; position: relative; border-left: 1.5px solid var(--line); margin-left: 20px }
+.mc .axis span { position: absolute; top: 0; left: -10px; writing-mode: vertical-rl; transform: rotate(180deg); font-family: "Red Hat Mono", monospace; font-size: 11px; color: var(--soft); white-space: nowrap; height: 100%; text-align: right; padding-left: 4px }
+.mc .rail { display: none }
+.mc .rung { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 14px; background: var(--white); border: 1.5px solid var(--line); margin-top: -1.5px }
+.mc .rung .no { font-family: "Red Hat Mono", monospace; font-size: 13px; width: 28px; height: 28px; border: 1.5px solid var(--line); border-radius: 50%; display: grid; place-items: center }
+.mc .rung b { display: block; font-size: 16px }
+.mc .rung small { color: var(--soft); font-size: 13.5px; font-weight: 500 }
+.mc .rung .who { font-family: "Red Hat Mono", monospace; font-size: 12px; background: var(--ink); color: var(--paper); padding: 3px 9px; white-space: nowrap }
+.mc .rung.top { background: var(--ink); color: var(--paper) }
+.mc .rung.top small { color: #a9c6b3 }
+.mc .rung.top .no { border-color: var(--paper) }
+.mc .rung.top .who { background: var(--sig); color: var(--ink) }
+.mc .rope { grid-column: 2; margin-top: 12px; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; font-size: 13.5px; color: var(--soft); align-items: center; font-weight: 500 }
+.mc .rope i { height: 0; border-top: 2px dashed var(--sig) }
+.mc .rope code { font-family: "Red Hat Mono", monospace; color: var(--ink) }
+.mc .sec { padding-block: 44px; border-top: 1.5px solid var(--line) }
+.mc h4 { font-size: 28px; font-weight: 900; letter-spacing: -.02em; margin: 0 0 6px }
+.mc .sub { color: var(--soft); margin: 0 0 22px; font-weight: 500 }
+.mc .tbl { overflow-x: auto; background: var(--white); border: 1.5px solid var(--line) }
+.mc table { border-collapse: collapse; width: 100%; min-width: 640px; font: inherit; font-size: 14.5px; color: var(--ink) }
+.mc th { text-align: left; font-family: "Red Hat Mono", monospace; font-weight: 500; font-size: 11.5px; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; border-bottom: 1.5px solid var(--line) }
+.mc td { padding: 12px 14px; border-top: 1px solid #cfdcd3; vertical-align: middle }
+.mc td.nm { font-family: "Red Hat Mono", monospace; font-weight: 500 }
+.mc td.need { font-family: "Red Hat Mono", monospace; font-size: 12.5px; color: var(--soft) }
+.mc td label { display: inline-flex; position: relative; cursor: pointer }
+.mc .box { width: 18px; height: 18px; border: 1.5px solid var(--line); display: grid; place-items: center; font-size: 12px; color: var(--paper); background: var(--white) }
+.mc input:checked + .box { background: var(--line) }
+.mc input:checked + .box::after { content: "✓" }
+.mc .row-b { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 14px; flex-wrap: wrap }
+.mc .profiles { display: flex; gap: 0; border: 1.5px solid var(--line); background: var(--white) }
+.mc .profiles button { border: 0; border-left: 1.5px solid var(--line); background: transparent; color: var(--ink); padding: 7px 14px; font-family: "Red Hat Mono", monospace; font-size: 12.5px }
+.mc .profiles button:first-child { border-left: 0 }
+.mc .profiles button[aria-pressed=true] { background: var(--ink); color: var(--paper) }
+.mc .out { font-family: "Red Hat Mono", monospace; font-size: 14px; color: var(--ink); background: var(--white); border: 1.5px dashed var(--line); padding: 9px 14px; overflow-x: auto; white-space: nowrap; min-width: 0; max-width: 100% }
+.mc .note { font-family: "Red Hat Mono", monospace; font-size: 12px; color: #a35a00; min-height: 1.2em; margin: 8px 0 0 }
+.mc .spec { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1.5px solid var(--line); background: var(--white) }
+.mc .spec div { padding: 16px; border-left: 1.5px solid var(--line); display: grid; gap: 6px; align-content: start }
+.mc .spec div:first-child { border-left: 0 }
+.mc .spec small { font-family: "Red Hat Mono", monospace; color: var(--soft); font-size: 11px; letter-spacing: .06em; text-transform: uppercase }
+.mc .spec b { font-size: 15.5px; line-height: 1.3 }
+.mc .spec code { font-family: "Red Hat Mono", monospace; font-size: 12.5px }
+
+/* ---------- narrow ---------- */
+@media (max-width: 860px) {
+  .ma .hero, .ma .two, .mb .hero, .mb .two, .mc .hero { grid-template-columns: minmax(0, 1fr) }
+  .ma .step { grid-template-columns: 14px minmax(0, 1fr) auto; row-gap: 4px }
+  .ma .step .when { grid-column: 2 / -1; grid-row: 2 }
+  .ma .step .what { grid-column: 2 / -1; grid-row: 3 }
+  .ma .step .part { grid-column: 2; grid-row: 1 }
+  .ma .step .pill { grid-column: 3; grid-row: 1 }
+  .mb .strap { grid-template-columns: minmax(0, 1fr); gap: 8px }
+  .mb .strap .lp { justify-self: start }
+  .mb .tag { transform: none; margin-top: 24px }
+  .mc .spec { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+  .mc .spec div:nth-child(3) { border-left: 0 }
+  .mc .spec div:nth-child(n+3) { border-top: 1.5px solid var(--line) }
+}
+@media (max-width: 520px) {
+  .ma .opts label, .mb .opts label { grid-template-columns: 22px minmax(0, 1fr) }
+  .ma .opts .ds, .mb .opts .ds { grid-column: 2 }
+  .mc .doors, .mc .spec { grid-template-columns: minmax(0, 1fr) }
+  .mc .spec div { border-left: 0 !important; border-top: 1.5px solid var(--line) }
+  .mc .spec div:first-child { border-top: 0 }
+  .mc .rung { grid-template-columns: 30px minmax(0, 1fr) }
+  .mc .rung .who { grid-column: 2; justify-self: start }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">greenharness.dev · homepage directions</span>
+    <h1>Three ways the Green Harness site could look</h1>
+    <p>Each frame is the same homepage with the same content: what the harness is, where each part fires, an installer that lets you pick parts, and what it never does. Only the visual direction changes. The pickers work, so try a profile.</p>
+    <nav class="jump" aria-label="Directions">
+      <a href="#build-log">A · Build log</a>
+      <a href="#gear-tag">B · Gear tag</a>
+      <a href="#schematic">C · Schematic</a>
+    </nav>
+  </header>
+
+  <!-- ===================== A ===================== -->
+  <section class="option" id="build-log">
+    <div class="opt-head">
+      <span class="opt-letter">A</span>
+      <div>
+        <h2>Build log</h2>
+        <p>The page reads like a CI run. The hero shows a real catch: guardrails refuse a <code>git push … | tail</code>, then the gate passes the bare push. Green means what it means in CI.</p>
+        <p class="fit"><b>Best for</b> engineers who trust output more than adjectives. <b>Risk</b> looks close to many developer-tool sites.</p>
+      </div>
+    </div>
+    <div class="frame">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">greenharness.dev</span></div>
+      <div class="mock ma">
+        <div class="in">
+          <nav><span class="logo"><i>✓</i>green harness</span><ul><li>Parts</li><li>Audit</li><li>Docs</li><li>GitHub</li></ul></nav>
+          <div class="hero">
+            <div>
+              <h3>Your coding agent works fast. <em>Every step is checked.</em></h3>
+              <p class="lede">Five small tools that check what a coding agent decides, runs, commits and pushes, on your machine, before CI ever sees it.</p>
+              <div class="cta">
+                <div class="cmd"><code><span>$</span> curl -fsSL greenharness.dev/install | sh</code><span>copy</span></div>
+                <div class="doors"><a href="#build-log">Evaluating for a team? The 10-minute read →</a><a href="#build-log">Working on a repo? Run <code>grh audit</code> →</a></div>
+              </div>
+            </div>
+            <div class="log">
+              <header><span>agent session · trade-agents</span><span>14:02:11</span></header>
+<pre><span class="p">$</span> git push origin main 2&gt;&amp;1 | tail -5
+<span class="deny"><span class="x">✗ guardrails</span>  pipe-to-tail                 denied</span><span class="n">  A pipeline exits with its last command's
+  status: tail reports success on a rejected
+  push. Run the push bare.</span>
+
+<span class="p">$</span> git push origin main
+<span class="pass"><span class="v">✓ gate</span>        12 of 39 checks ran    2.4 s</span><span class="v">✓ pushed</span>      main → origin       a3f9c21</pre>
+            </div>
+          </div>
+        </div>
+
+        <section class="blk"><div class="in">
+          <p class="kicker">where each part fires</p>
+          <h4>Five parts, five moments in the work</h4>
+          <div class="steps">
+            <div class="step"><span class="dot"></span><span class="when">Before code is written</span><span class="part">decisions</span><span class="what">Answers what your team decided, from your ADRs, with an exit code.</span><span class="pill ans">answers</span></div>
+            <div class="step"><span class="dot"></span><span class="when">On every tool call</span><span class="part">guardrails</span><span class="what">Reads the agent's command before it runs and stops the known mistakes.</span><span class="pill block">blocks</span></div>
+            <div class="step"><span class="dot"></span><span class="when">On every task</span><span class="part">router</span><span class="what">Picks the model and effort, checks the result, escalates when it falls short.</span><span class="pill ans">verifies</span></div>
+            <div class="step"><span class="dot"></span><span class="when">On commit and push</span><span class="part">gate</span><span class="what">39 built-in checks, each one only where your repo uses the tool.</span><span class="pill block">blocks</span></div>
+            <div class="step"><span class="dot"></span><span class="when">In review</span><span class="part">conform</span><span class="what">Marks the lines that break a rule your team decided.</span><span class="pill flag">flags</span></div>
+          </div>
+        </div></section>
+
+        <section class="blk"><div class="in two">
+          <div>
+            <p class="kicker">install</p>
+            <h4>Take only the parts you need</h4>
+            <div class="picker" data-picker>
+              <div class="profiles">
+                <button type="button" data-profile="gate guardrails">Solo</button>
+                <button type="button" data-profile="decisions gate guardrails conform">Team</button>
+                <button type="button" data-profile="decisions gate guardrails router conform">Full</button>
+              </div>
+              <div class="opts">
+                <label for="a-decisions"><input type="checkbox" id="a-decisions" value="decisions"><span class="box"></span><span class="nm">decisions</span><span class="ds">what is decided, from your ADRs</span></label>
+                <label for="a-gate"><input type="checkbox" id="a-gate" value="gate" checked><span class="box"></span><span class="nm">gate</span><span class="ds">checks on commit and push</span></label>
+                <label for="a-guardrails"><input type="checkbox" id="a-guardrails" value="guardrails" checked><span class="box"></span><span class="nm">guardrails</span><span class="ds">checks each agent command</span></label>
+                <label for="a-router"><input type="checkbox" id="a-router" value="router"><span class="box"></span><span class="nm">router</span><span class="ds">right model per task, lower cost</span></label>
+                <label for="a-conform"><input type="checkbox" id="a-conform" value="conform"><span class="box"></span><span class="nm">conform</span><span class="ds">code against decided rules</span></label>
+              </div>
+              <p class="note" data-note aria-live="polite"></p>
+              <div class="cmd"><code data-out></code><span>copy</span></div>
+            </div>
+          </div>
+          <div>
+            <p class="kicker">limits</p>
+            <h4>What it never does</h4>
+            <ul class="never">
+              <li><span>Decide for you. <code>decisions</code> reads your records and never writes one.</span></li>
+              <li><span>Let <code>--no-verify</code> through. A skipped check is a refused command.</span></li>
+              <li><span>Force-push a release tag. A fix gets the next version.</span></li>
+              <li><span>Stay when you want it gone. <code>grh uninstall</code> takes every part back out.</span></li>
+            </ul>
+          </div>
+        </div></section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== B ===================== -->
+  <section class="option" id="gear-tag">
+    <div class="opt-head">
+      <span class="opt-letter">B</span>
+      <div>
+        <h2>Gear tag</h2>
+        <p>The harness as real climbing gear. Big condensed type, webbing straps for the parts, and the sewn-in spec label every harness carries. Profiles become sizes S, M and L, and the limits are an inspection checklist.</p>
+        <p class="fit"><b>Best for</b> being remembered; nobody else in dev tools looks like this. <b>Risk</b> the metaphor has to stay light or it gets in the way.</p>
+      </div>
+    </div>
+    <div class="frame">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">greenharness.dev</span></div>
+      <div class="mock mb">
+        <div class="in">
+          <nav><span class="wm">GREEN<b>/</b>HARNESS</span><ul><li>Parts</li><li>Sizes</li><li>Docs</li><li>GitHub</li></ul></nav>
+          <div class="hero">
+            <div>
+              <h3>Catches the fall <span>before</span> it happens.</h3>
+              <p class="lede">Five tools that clip your coding agent to the decisions, checks and limits your team already set.</p>
+              <div class="btns"><a class="btn hv" href="#gear-tag">Size your harness</a><a class="btn" href="#gear-tag">Run grh audit</a></div>
+            </div>
+            <div class="tag" aria-label="Product label">
+              <p class="tt">GREEN HARNESS</p>
+              <p class="md">MODEL GH-1 · FOR CODING AGENTS</p>
+              <dl>
+                <dt>Parts</dt><dd>5, fit separately</dd>
+                <dt>Built-in checks</dt><dd>39</dd>
+                <dt>Checks run</dt><dd>only for tools you use</dd>
+                <dt>Conforms to</dt><dd>your own ADRs</dd>
+                <dt>Works with</dt><dd>Claude Code, git</dd>
+                <dt>Removal</dt><dd>1 command</dd>
+              </dl>
+              <div class="warn"><span class="tri"></span><span>Read the guide before first use. Check every part before each climb.</span></div>
+            </div>
+          </div>
+          <div class="straps">
+            <div class="strap"><h5>Decisions</h5><p>Tells the agent what your team decided, from your ADRs, before it writes a line.</p><span class="lp">LOAD POINT · BEFORE CODE</span></div>
+            <div class="strap"><h5>Guardrails</h5><p>Reads every command the agent runs and stops the ones that fail silently.</p><span class="lp">LOAD POINT · EACH TOOL CALL</span></div>
+            <div class="strap"><h5>Gate</h5><p>Checks every commit and push with the linters and tests your repo already has.</p><span class="lp">LOAD POINT · COMMIT, PUSH</span></div>
+            <div class="strap"><h5>Conform</h5><p>Marks code that breaks a decided rule, so review starts at the right line.</p><span class="lp">LOAD POINT · REVIEW</span></div>
+            <div class="strap"><h5>Router</h5><p>Sends each task to the model that can do it for less, checks it, escalates.</p><span class="lp">LOAD POINT · EACH TASK</span></div>
+          </div>
+        </div>
+        <section class="sec"><div class="in two">
+          <div data-picker>
+            <h4>Size your harness</h4>
+            <p class="sub">Pick a size or fit the parts yourself.</p>
+            <div class="sizes">
+              <button type="button" data-profile="gate guardrails"><b>S</b><span>Solo · 2 parts</span></button>
+              <button type="button" data-profile="decisions gate guardrails conform"><b>M</b><span>Team · 4 parts</span></button>
+              <button type="button" data-profile="decisions gate guardrails router conform"><b>L</b><span>Full · 5 parts</span></button>
+            </div>
+            <div class="opts">
+              <label for="b-decisions"><input type="checkbox" id="b-decisions" value="decisions" checked><span class="box"></span><span class="nm">Decisions</span><span class="ds">what is decided</span></label>
+              <label for="b-gate"><input type="checkbox" id="b-gate" value="gate" checked><span class="box"></span><span class="nm">Gate</span><span class="ds">commit and push</span></label>
+              <label for="b-guardrails"><input type="checkbox" id="b-guardrails" value="guardrails" checked><span class="box"></span><span class="nm">Guardrails</span><span class="ds">each agent command</span></label>
+              <label for="b-router"><input type="checkbox" id="b-router" value="router"><span class="box"></span><span class="nm">Router</span><span class="ds">model per task</span></label>
+              <label for="b-conform"><input type="checkbox" id="b-conform" value="conform" checked><span class="box"></span><span class="nm">Conform</span><span class="ds">code vs decisions</span></label>
+            </div>
+            <p class="note" data-note aria-live="polite"></p>
+            <div class="out"><code data-out></code></div>
+          </div>
+          <div>
+            <h4>Inspection</h4>
+            <p class="sub">What the harness never does.</p>
+            <ul class="check">
+              <li><span>Checklist</span><span></span></li>
+              <li><span>Decides for you</span><span class="ok">NEVER</span></li>
+              <li><span>Lets --no-verify through</span><span class="ok">NEVER</span></li>
+              <li><span>Force-pushes a release tag</span><span class="ok">NEVER</span></li>
+              <li><span>Stays after grh uninstall</span><span class="ok">NEVER</span></li>
+            </ul>
+          </div>
+        </div></section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== C ===================== -->
+  <section class="option" id="schematic">
+    <div class="opt-head">
+      <span class="opt-letter">C</span>
+      <div>
+        <h2>Schematic</h2>
+        <p>A technical drawing on grid paper. The hero is the enforcement ladder: each part sits on the rung where it acts, from asked-for to impossible to skip, with the router running alongside like the rope. The installer is a spec table.</p>
+        <p class="fit"><b>Best for</b> team leads comparing tools; the ladder explains the whole bundle at once. <b>Risk</b> calmer and less memorable than B.</p>
+      </div>
+    </div>
+    <div class="frame">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">greenharness.dev</span></div>
+      <div class="mock mc">
+        <div class="in">
+          <nav><span class="wm"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="1" width="20" height="20" fill="none" stroke="#1d603a" stroke-width="1.5"/><path d="M6 11.5l3.2 3.2L16 7.5" fill="none" stroke="#23a35a" stroke-width="2"/></svg>Green Harness</span><ul><li>ladder</li><li>parts</li><li>docs</li><li>github</li></ul></nav>
+          <div class="hero">
+            <div>
+              <p class="ref">DWG GH-01 · REV A</p>
+              <h3>Agents move fast. <span>The harness holds the line.</span></h3>
+              <p class="lede">Your team's decisions, turned into checks a coding agent cannot skip. Five parts, each acting at its own point in the work.</p>
+              <div class="doors">
+                <a class="door" href="#schematic"><small>EVALUATING FOR A TEAM</small><b>The 10-minute read</b><code>overview →</code></a>
+                <a class="door" href="#schematic"><small>WORKING ON A REPOSITORY</small><b>See what fits it</b><code>$ grh audit</code></a>
+              </div>
+            </div>
+            <div class="ladder" aria-label="Enforcement ladder">
+              <div class="axis"><span>harder to get around →</span></div>
+              <div class="rung top"><span class="no">4</span><span><b>Blocked at commit and push</b><small>The bad commit never exists.</small></span><span class="who">gate</span></div>
+              <div class="rung"><span class="no">3</span><span><b>Blocked at the tool call</b><small>The command never runs.</small></span><span class="who">guardrails</span></div>
+              <div class="rung"><span class="no">2</span><span><b>Flagged in review</b><small>The line that breaks a rule is marked.</small></span><span class="who">conform</span></div>
+              <div class="rung"><span class="no">1</span><span><b>Written down and answered</b><small>The agent asks what is decided.</small></span><span class="who">decisions</span></div>
+              <div class="rope"><i></i><span>Alongside every rung: <code>router</code> picks who climbs each task, checks it, escalates.</span></div>
+            </div>
+          </div>
+        </div>
+        <section class="sec"><div class="in" data-picker>
+          <h4>Bill of parts</h4>
+          <p class="sub">Tick what to install. Each part also installs on its own.</p>
+          <div class="tbl"><table>
+            <thead><tr><th>Install</th><th>Part</th><th>Acts</th><th>Needs</th><th>Replaces today</th></tr></thead>
+            <tbody>
+              <tr><td><label for="c-decisions"><input type="checkbox" id="c-decisions" value="decisions" checked><span class="box"></span></label></td><td class="nm">decisions</td><td>Before code is written</td><td class="need">nothing</td><td class="need">aval</td></tr>
+              <tr><td><label for="c-gate"><input type="checkbox" id="c-gate" value="gate" checked><span class="box"></span></label></td><td class="nm">gate</td><td>On commit and push</td><td class="need">git</td><td class="need">amont</td></tr>
+              <tr><td><label for="c-guardrails"><input type="checkbox" id="c-guardrails" value="guardrails" checked><span class="box"></span></label></td><td class="nm">guardrails</td><td>On every agent tool call</td><td class="need">Claude Code</td><td class="need">amont-agent</td></tr>
+              <tr><td><label for="c-router"><input type="checkbox" id="c-router" value="router" checked><span class="box"></span></label></td><td class="nm">router</td><td>On every task</td><td class="need">Claude Code</td><td class="need">relais</td></tr>
+              <tr><td><label for="c-conform"><input type="checkbox" id="c-conform" value="conform" checked><span class="box"></span></label></td><td class="nm">conform</td><td>In review</td><td class="need">decisions</td><td class="need">adr-lint</td></tr>
+            </tbody>
+          </table></div>
+          <div class="row-b">
+            <div class="profiles">
+              <button type="button" data-profile="gate guardrails">solo</button>
+              <button type="button" data-profile="decisions gate guardrails conform">team</button>
+              <button type="button" data-profile="decisions gate guardrails router conform">full</button>
+            </div>
+            <div class="out"><code data-out></code></div>
+          </div>
+          <p class="note" data-note aria-live="polite"></p>
+        </div></section>
+        <section class="sec"><div class="in">
+          <h4>Limits</h4>
+          <p class="sub">What the harness never does.</p>
+          <div class="spec">
+            <div><small>decisions</small><b>Never decides for you</b><code>read-only</code></div>
+            <div><small>guardrails</small><b>Never lets a skipped check through</b><code>--no-verify → refused</code></div>
+            <div><small>releases</small><b>Never force-pushes a tag</b><code>a fix is the next version</code></div>
+            <div><small>removal</small><b>Comes out in one command</b><code>grh uninstall</code></div>
+          </div>
+        </div></section>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var order = ["decisions", "gate", "guardrails", "router", "conform"];
+  document.querySelectorAll("[data-picker]").forEach(function (p) {
+    var boxes = Array.prototype.slice.call(p.querySelectorAll("input[type=checkbox]"));
+    var out = p.querySelector("[data-out]");
+    var note = p.querySelector("[data-note]");
+    var get = function (v) { return boxes.filter(function (b) { return b.value === v; })[0]; };
+    function selected() { return order.filter(function (v) { return get(v).checked; }); }
+    function render() {
+      var sel = selected();
+      out.textContent = sel.length ? "$ grh install " + sel.join(" ") : "$ grh install   # pick at least one part";
+      var key = sel.join(" ");
+      p.querySelectorAll("[data-profile]").forEach(function (btn) {
+        var prof = order.filter(function (v) { return btn.dataset.profile.split(" ").indexOf(v) > -1; }).join(" ");
+        btn.setAttribute("aria-pressed", String(prof === key));
+      });
+    }
+    boxes.forEach(function (b) {
+      b.addEventListener("change", function () {
+        note.textContent = "";
+        if (b.value === "conform" && b.checked && !get("decisions").checked) {
+          get("decisions").checked = true; note.textContent = "conform needs decisions, so decisions was added.";
+        }
+        if (b.value === "decisions" && !b.checked && get("conform").checked) {
+          get("conform").checked = false; note.textContent = "conform needs decisions, so conform was removed too.";
+        }
+        render();
+      });
+    });
+    p.querySelectorAll("[data-profile]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var want = btn.dataset.profile.split(" ");
+        boxes.forEach(function (b) { b.checked = want.indexOf(b.value) > -1; });
+        note.textContent = "";
+        render();
+      });
+    });
+    render();
+  });
+})();
+</script>

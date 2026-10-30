@@ -1,0 +1,1022 @@
+<meta charset="utf-8">
+<title>Green Harness</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap">
+<!-- Duro 5.37: index.css defines the token variables (layered, so this page's own rules win), vars.css gives them their stable --duro-* names. -->
+<link rel="stylesheet" href="https://unpkg.com/@duro-app/ui@5.37.0/dist/index.css">
+<link rel="stylesheet" href="https://unpkg.com/@duro-app/tokens@5.37.0/dist/vars.css">
+<style>
+/* Layout: the hero is the game, a full-width ASCII canvas; a short legend below maps each thing on the road to a part. One dark world on purpose. */
+:root {
+  --void: #020803; --ink: #b9f5c8; --dim: #4f8a5e; --glow: #39ff7a; --line: #0f2a17; --bug: #ff4d4d; --slop: #ffb020; --boost: #7ff7ff;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { background: var(--void); color: var(--ink) }
+body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
+.pad { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 14px; max-width: 1240px; margin: 0 auto; flex-wrap: wrap }
+.logo { font-weight: 800; letter-spacing: .14em; color: var(--glow); text-transform: uppercase; font-size: 13px }
+.logo span { color: var(--ink) }
+.top ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--dim); flex-wrap: wrap }
+.top a { color: inherit; text-decoration: none }
+.top a:hover { color: var(--glow) }
+
+.stage { position: relative; max-width: 1240px; margin: 0 auto; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #000 }
+/* Hero height from the published Duro size tokens: never under the playable minimum, leaves room for the headline and the install command, capped on tall screens. svh stays put when a phone's URL bar collapses. */
+#game { display: block; width: 100%; height: clamp(var(--duro-size-hero-min-h), calc(100svh - var(--duro-size-hero-reserve)), var(--duro-size-hero-max-h)); outline: none; cursor: pointer; touch-action: none }
+/* Below heroMinH + heroReserve of viewport height the game would push the headline out of view: a poster stands in, and a tap opens the game at full height. */
+.poster { display: none; width: 100%; min-height: var(--duro-size-editor-min-h); place-items: center; align-content: center; gap: 6px; padding: 24px 16px; background: #000; color: var(--glow); border: 0; font: 600 16px var(--mono); cursor: pointer; text-align: center }
+.poster small { display: block; color: var(--dim); font-weight: 400; font-size: 12px }
+.poster:focus-visible { outline: 2px solid var(--glow); outline-offset: -4px }
+.stage.is-poster #game, .stage.is-poster .pads { display: none }
+.stage.is-poster .poster { display: grid }
+.stage.is-open #game { height: 100svh }
+.close { display: none; position: absolute; top: calc(64px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); z-index: 2; padding: 6px 12px; background: rgba(2,20,8,.8); color: var(--glow); border: 1px solid var(--glow); font: 600 12px var(--mono); cursor: pointer }
+.stage.is-open .close { display: block }
+.hint { display: none; position: absolute; right: 12px; bottom: 8px; font-size: 12px; color: var(--dim); pointer-events: none }
+#game:focus ~ .hint { display: block }
+@media (pointer: coarse) { #game:focus ~ .hint { display: none } }
+#game:focus { outline: 2px solid var(--glow); outline-offset: -2px }
+.pads { position: absolute; inset: auto 0 0 0; display: none; justify-content: space-between; padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px)); pointer-events: none }
+.pads button { pointer-events: auto; width: 76px; height: 76px; border-radius: 50%; border: 1px solid rgba(57,255,122,.45); background: rgba(2,20,8,.55); color: var(--glow); font: 600 26px var(--mono); touch-action: none; user-select: none; -webkit-user-select: none }
+.pads button.on { background: rgba(57,255,122,.22) }
+@media (pointer: coarse) { .pads { display: flex } }
+
+.under { max-width: 1240px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 40px }
+.under > * { min-width: 0 }
+.skip { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 8px; z-index: 10; padding: 6px 12px; background: var(--glow); color: #000; font-weight: 600; text-decoration: none; transform: translateY(-400%) }
+.skip:focus { transform: none; outline: 2px solid var(--ink); outline-offset: 2px }
+.pitch { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 40px; align-items: end }
+.pitch h1 { margin: 0; font-size: clamp(26px, 3.6vw, 42px); line-height: 1.12; letter-spacing: -.02em; color: #e6ffec; font-weight: 800; text-wrap: balance }
+.pitch h1 em { font-style: normal; color: var(--glow) }
+.pitch p { margin: 0; color: var(--dim); max-width: 52ch }
+.cmd { display: flex; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid var(--line); background: #03140a; padding: 12px 14px; border-radius: 4px; min-width: 0 }
+.cmd code { overflow-x: auto; white-space: nowrap; min-width: 0; color: var(--ink) }
+.cmd code b { color: var(--glow); font-weight: 400 }
+.cmd button { font: inherit; font-size: 12px; background: transparent; color: var(--glow); border: 1px solid var(--line); padding: 4px 10px; border-radius: 3px; cursor: pointer; flex: none }
+.cmd button:focus-visible, .top a:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
+
+.legend h2 { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); font-weight: 600; margin: 0 0 14px }
+.parts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line) }
+.part { padding: 16px; background: var(--void); display: grid; gap: 8px; align-content: start; min-width: 0 }
+.part.opt { background: #030d07 }
+.part.wide { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; align-items: start }
+.part.wide pre { grid-row: 1 / span 4 }
+@media (max-width: 480px) { .part.wide { grid-template-columns: minmax(0, 1fr) } .part.wide pre { grid-row: auto } }
+.part .optional { justify-self: start; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--you); border: 1px solid #4a3d1c; padding: 0 6px }
+.swatch .g1 { color: #39ff7a } .swatch .g2 { color: #1d8f45 } .swatch .g3 { color: #b9f5c8 } .swatch .r1 { color: #ff3030 } .swatch .r2 { color: #8f1d1d } .swatch .r3 { color: #ffb3b3 }
+.part pre { margin: 0; font: inherit; font-size: 12px; line-height: 1.25; color: var(--glow); min-height: 4.2em; overflow-x: auto }
+.part pre.bug { color: var(--bug) }
+.part b { color: #e6ffec; font-size: 15px }
+.part span { color: var(--dim); font-size: 13px }
+.part small { color: var(--ink); font-size: 12px; opacity: .8 }
+/* ---------- lifecycle road ---------- */
+:root { --s1: #7ff7ff; --s2: #39ff7a; --s3: #eafff0; --you: #ffd27f; --panel: #03120a; --faint: #2c5238 }
+.sec-head { display: grid; gap: 10px; max-width: 72ch }
+.sec-head h2 { margin: 0; font-size: clamp(22px, 2.8vw, 30px); color: #e6ffec; letter-spacing: -.01em; line-height: 1.2; text-wrap: balance }
+.sec-head p { margin: 0; color: var(--dim) }
+.kick { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim) }
+.sector-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 6px 18px; flex-wrap: wrap; align-items: center; padding: 10px 0; background: var(--void); border-bottom: 1px solid var(--line); font-size: 12.5px; margin-top: 18px }
+.sector-bar span { color: var(--dim); transition: color .2s }
+.sector-bar span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 8px; vertical-align: middle; background: var(--c); opacity: .5 }
+.sector-bar span.on { color: var(--c) }
+.sector-bar span.on::before { opacity: 1 }
+.sector-bar .you-key { margin-left: auto; color: var(--you) }
+.sector-bar .you-key::before { display: none }
+.road { position: relative }
+.road > svg { position: absolute; inset: 0; display: block; pointer-events: none }
+.road-end svg { display: block }
+.stop { position: relative; display: grid; gap: 10px; padding: 16px 18px; background: rgba(3,18,10,.94); border: 1px solid var(--line); border-left: 3px solid var(--sc) }
+.stop.on { box-shadow: 0 0 0 1px color-mix(in srgb, var(--sc) 35%, transparent), 0 0 28px -8px var(--sc) }
+.stop.idle { background: rgba(0,0,0,.9); border-style: dashed; border-left-style: solid }
+.stop .k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--sc) }
+.stop h3 { margin: 0; font-size: 18px; color: #e6ffec }
+.stop p { margin: 0; font-size: 13.5px }
+.lanes { margin: 0; display: grid; gap: 6px; font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 10px }
+.lanes div { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: baseline }
+.lanes dt { color: var(--dim); text-transform: uppercase; letter-spacing: .1em; font-size: 10.5px }
+.lanes dd { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 6px; min-width: 0 }
+.chip { border: 1px solid var(--faint); padding: 0 6px; border-radius: 2px; color: var(--ink); overflow-wrap: anywhere }
+.chip.check { border-color: var(--glow); color: var(--glow) }
+.none { color: var(--faint) }
+.lanes .you dt, .lanes .you dd { color: var(--you) }
+.lanes .dz dd { display: block; color: var(--ink) }
+.lanes .dz .optional-inline { margin-left: 4px }
+.term { margin: 0; font: inherit; font-size: 12px; line-height: 1.5; background: var(--panel); border-left: 2px solid var(--sc); padding: 8px 10px; overflow-x: auto; white-space: pre; color: var(--ink) }
+.term .x { color: var(--bug) } .term .v { color: var(--glow) } .term .p { color: var(--dim) }
+.road-end { position: absolute; bottom: 6px; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; width: max-content; max-width: 100%; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim) }
+
+.road .stop { position: absolute }
+.road .stop.ops:not(.on) { opacity: .82 }
+.border-line { position: absolute; left: 50%; transform: translateX(-50%); width: min(620px, 100%); display: grid; gap: 6px; text-align: center; padding: 14px 16px; background: var(--void); border-top: 1px dashed var(--glow); border-bottom: 1px dashed var(--faint); z-index: 1 }
+.border-line b { color: var(--glow); letter-spacing: .04em; font-size: 14px }
+.border-line .dev { color: var(--s2); font-size: 12.5px }
+.border-line .ops { color: var(--s3); font-size: 12.5px; opacity: .8 }
+.border-line small { color: var(--dim); font-size: 12px; text-wrap: balance }
+
+/* ---------- you ---------- */
+.yous { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid #4a3d1c; margin-top: 18px }
+.yous div { padding: 14px 16px; border-left: 1px solid #4a3d1c; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.yous div:first-child { border-left: 0 }
+.yous b { color: var(--you); font-size: 14.5px }
+.yous span { color: var(--dim); font-size: 13px }
+.yous small { color: var(--you); opacity: .75; font-size: 11px; letter-spacing: .1em; text-transform: uppercase }
+
+/* ---------- pit lane ---------- */
+.pit { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; counter-reset: pit }
+.pit li { position: relative; padding: 38px 14px 0 0; display: grid; gap: 6px; align-content: start; min-width: 0; counter-increment: pit }
+.pit li::before { content: counter(pit); position: absolute; top: 0; left: 0; width: 26px; height: 26px; border: 1px solid var(--glow); color: var(--glow); display: grid; place-items: center; font-size: 12px; background: var(--void); z-index: 1 }
+.pit li::after { content: ""; position: absolute; top: 13px; left: 26px; right: 0; border-top: 1px dashed var(--faint) }
+.pit li:last-child::after { content: "↺"; border: 0; color: var(--glow); left: 34px; top: 2px }
+.pit li.you::before { border-color: var(--you); color: var(--you) }
+.pit b { color: #e6ffec; font-size: 14px }
+.pit li.you b { color: var(--you) }
+.pit span { color: var(--dim); font-size: 13px }
+.pit code { color: var(--ink) }
+.notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 22px }
+.notes div { border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 6px; font-size: 13.5px; color: var(--dim) }
+.notes b { color: var(--ink) }
+
+/* ---------- skills & agents ---------- */
+.ship { overflow-x: auto; border: 1px solid var(--line); margin-top: 18px }
+.ship table { border-collapse: collapse; width: 100%; min-width: 680px; font: inherit; color: var(--ink); font-size: 13px }
+.ship th { text-align: left; font-weight: 600; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); padding: 10px 14px; border-bottom: 1px solid var(--line) }
+.ship td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top }
+.ship td:first-child { color: #e6ffec; font-weight: 600; white-space: nowrap }
+.ship td span { display: inline-block; margin: 0 6px 4px 0 }
+.optional-inline { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--you); font-weight: 400; margin-left: 6px }
+
+@media (max-width: 900px) {
+  .yous { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+  .yous div { border-top: 1px solid #4a3d1c }
+  .yous div:nth-child(odd) { border-left: 0 }
+  .yous div:nth-child(-n+2) { border-top: 0 }
+  .pit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); row-gap: 24px }
+  .notes { grid-template-columns: minmax(0, 1fr) }
+}
+@media (max-width: 560px) {
+  .yous, .pit { grid-template-columns: minmax(0, 1fr) }
+  .yous div { border-left: 0 !important; border-top: 1px solid #4a3d1c !important }
+  .yous div:first-child { border-top: 0 !important }
+  .pit li::after { display: none }
+  .sector-bar .you-key { margin-left: 0 }
+}
+@media (max-width: 900px) {
+  .pitch { grid-template-columns: minmax(0, 1fr) }
+  .parts { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
+}
+@media (max-width: 480px) {
+  .parts { grid-template-columns: minmax(0, 1fr) }
+}
+</style>
+
+<header class="top pad">
+  <span class="logo">Green<span>/</span>Harness</span>
+  <ul><li><a href="#parts">Parts</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
+</header>
+
+<div class="pad">
+  <a class="skip" href="#install" id="skipLink">Skip to install</a>
+  <div class="stage" id="stage">
+    <button type="button" class="poster" id="poster">▶ Play the driving game<small>dodge the bugs and the AI slop</small></button>
+    <button type="button" class="close" id="closeGame">✕ close</button>
+    <canvas id="game" tabindex="0" aria-label="Driving game. Click it or press Tab to focus it, then Space or Enter to start."></canvas>
+    <span class="hint" aria-hidden="true">Enter to play · Esc to leave</span>
+    <div class="pads" aria-hidden="true"><button type="button" id="padL">◀</button><button type="button" id="padR">▶</button></div>
+  </div>
+</div>
+
+<main class="under pad">
+  <section class="pitch" id="install">
+    <div>
+      <h1>Your coding agent drives fast. <em>The harness keeps it on the road.</em></h1>
+    </div>
+    <div style="display:grid;gap:14px;min-width:0">
+      <p>Six small tools that check what a coding agent decides, runs, commits and pushes, on your machine, and let CI skip what your laptop already proved. Plus a design system themed by your tokens. Every part is optional. Take the ones you need.</p>
+      <div class="cmd"><code id="cmdText"><b>$</b> curl -fsSL greenharness.dev/install | sh</code><button type="button" id="copy">copy</button></div>
+    </div>
+  </section>
+
+  <section class="legend" id="parts">
+    <h2>What you just drove through</h2>
+    <div class="parts">
+      <div class="part"><pre>║░        ░║
+║▓  road  ▓║
+║░        ░║</pre><b>guardrails</b><span>The road edges. Every command the agent runs is read first; the ones that go off the road are refused.</span><small>was amont-agent</small></div>
+      <div class="part"><pre>█══ GATE ══█
+█          █
+█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small>was amont</small></div>
+      <div class="part"><pre>┌─────────┐
+│decided: │
+│curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small>was aval</small></div>
+      <div class="part"><pre>  ▶▶
+ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed.</span><small>was relais</small></div>
+      <div class="part"><pre>    │
+    ¦
+    │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small>was adr-lint</small></div>
+      <div class="part"><pre>✓ gate ─┐
+  signed │
+CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
+      <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
+ tokens ⇄
+<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: change them and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><span class="optional">optional extension</span><small>the Duro design system</small></div>
+    </div>
+  </section>
+
+  <section id="lifecycle">
+    <div class="sec-head">
+      <span class="kick">one lap</span>
+      <h2>The road keeps going: one lap of the development lifecycle</h2>
+      <p>Each stop shows the check that runs there, the skills and agents the coding agent uses, and where you come in. Watch the line at git push: almost every check runs before it, on your machine.</p>
+    </div>
+    <div class="sector-bar" id="sectorBar">
+      <span data-s="1" style="--c: var(--s1)">S1 · before code</span>
+      <span data-s="2" style="--c: var(--s2)">S2 · while coding</span>
+      <span data-s="3" style="--c: var(--s3)">S3 · after the push</span>
+      <span class="you-key">● you</span>
+    </div>
+    <div class="road" id="road"></div>
+  </section>
+
+  <section id="you">
+    <div class="sec-head">
+      <span class="kick">human in the loop</span>
+      <h2>Where you are in the loop</h2>
+      <p>The agent drives between these points without asking. At these points it stops for you.</p>
+    </div>
+    <div class="yous">
+      <div><small>S1 · decide</small><b>You decide</b><span>You write and accept the ADRs. The harness only reads them, and stops when two of them disagree.</span></div>
+      <div><small>S1 · plan</small><b>You approve the plan</b><span>Reviewer agents read it first. Nothing is built until you say yes.</span></div>
+      <div><small>S1 · first task</small><b>You trust a repo once</b><span>The first task in a new repository asks you before the router works in it.</span></div>
+      <div><small>S3 · review, merge</small><b>You look, and you answer</b><span>UI changes open in your browser. The agent asks only what the plan left open, or anything destructive.</span></div>
+      <div><small>S3 · learn</small><b>You approve harness changes</b><span>A new rule or skill goes in only when you accept it.</span></div>
+    </div>
+  </section>
+
+  <section id="pit">
+    <div class="sec-head">
+      <span class="kick">self-improvement</span>
+      <h2>The pit lane: how the harness gets better each lap</h2>
+      <p>Every rule in the harness today came from a real slip on an earlier lap. This is the loop that turns one into the other.</p>
+    </div>
+    <ol class="pit">
+      <li><b>A slip</b><span>A command fails silently, a wrong stash is popped, time is lost on a guess.</span></li>
+      <li><b>The retro finds it</b><span>The <code>retro</code> skill reads the sessions and finds where time or quality was lost.</span></li>
+      <li><b>It proposes a fix</b><span>A new rule, a change to a skill, or an ADR, aimed at the cause.</span></li>
+      <li class="you"><b>You approve it</b><span>Nothing changes in the harness without you.</span></li>
+      <li><b>It ships as a warning</b><span>The new rule first advises the agent instead of blocking it, so a false alarm costs nothing.</span></li>
+      <li><b>It earns its place</b><span>A rule that proves right becomes a block. One that does not pay for itself is removed.</span></li>
+    </ol>
+    <div class="notes">
+      <div><b>The router learns on every task</b><span>It records which model and effort got each kind of task accepted, so the next one starts cheaper.</span></div>
+      <div><b>The track stays clean</b><span><code>worktree-sweep</code> removes finished worktrees, so old work never leaks into the next lap.</span></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head">
+      <span class="kick">skills and agents</span>
+      <h2>Skills and agents ship with the parts</h2>
+      <p>They live in one repository, github.com/greenharness/skills. Pick a part in the installer and its skills and agents come with it, or take them alone. The design part brings its own, built around its component catalog.</p>
+    </div>
+    <div class="ship"><table>
+      <thead><tr><th>With</th><th>Skills</th><th>Agents</th></tr></thead>
+      <tbody>
+        <tr><td>decisions</td><td><span class="chip">relais-architecture-conflict</span></td><td class="none">—</td></tr>
+        <tr><td>router</td><td><span class="chip">relais</span></td><td><span class="chip">relais-implementation</span><span class="chip">relais-research</span><span class="chip">relais-review</span></td></tr>
+        <tr><td>gate</td><td><span class="chip">relais-verified-push</span><span class="chip">merge-when-green</span><span class="chip">tag-release</span></td><td class="none">—</td></tr>
+        <tr><td>design <span class="optional-inline">optional</span></td><td><span class="chip">ui</span><span class="chip">colors</span><span class="chip">typography</span><span class="chip">duro-mockup</span></td><td><span class="chip">plan-review-ui-design</span><span class="chip">plan-review-react</span></td></tr>
+        <tr><td>workflow pack</td><td><span class="chip">plan-review</span><span class="chip">worktree-task</span><span class="chip">diagnosing-bugs</span><span class="chip">retro</span><span class="chip">worktree-sweep</span><span class="chip">interface-review</span></td><td><span class="chip">plan-review panel (9)</span><span class="chip">implementation-review</span><span class="chip">interface-review</span></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var cv = document.getElementById("game");
+  var ctx = cv.getContext("2d");
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- grid ----------
+  var W, H, cols, rows, cw, chh, ox, oy, fs;
+  var chars = [], colr = [];
+  var HZ; // horizon row
+  var Z = 6; // camera depth constant: a row at p sees the road d = Z / p metres ahead
+
+  function resize() {
+    var r = cv.getBoundingClientRect();
+    if (!r.width || !r.height) return; // hidden behind the poster
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fs = W < 640 ? 11 : 14;
+    ctx.font = fs + 'px "JetBrains Mono", ui-monospace, Menlo, monospace';
+    ctx.textBaseline = "top";
+    cw = ctx.measureText("M").width;
+    chh = Math.round(fs * 1.18);
+    cols = Math.max(40, Math.floor(W / cw));
+    rows = Math.max(24, Math.floor(H / chh));
+    ox = (W - cols * cw) / 2; oy = (H - rows * chh) / 2;
+    HZ = Math.floor(rows * 0.36);
+    chars = new Array(cols * rows); colr = new Array(cols * rows);
+    initRain();
+  }
+
+  function put(x, y, c, col) {
+    x = Math.round(x); y = Math.round(y);
+    if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+    var i = y * cols + x; chars[i] = c; colr[i] = col;
+  }
+  function text(x, y, s, col) { for (var k = 0; k < s.length; k++) put(x + k, y, s[k], col); }
+  function ctext(y, s, col) { text(Math.floor((cols - s.length) / 2), y, s, col); }
+  function sprite(cx, by, lines, colFn) {
+    var h = lines.length;
+    for (var j = 0; j < h; j++) {
+      var L = lines[j], x0 = Math.round(cx - L.length / 2);
+      for (var k = 0; k < L.length; k++) if (L[k] !== " ") put(x0 + k, by - (h - 1 - j), L[k], colFn(L[k], j));
+    }
+  }
+
+  // ---------- color ----------
+  var tint = 1; // 0 = red world (at the red light, or out of time), 1 = green world
+  var cache = {};
+  function tc(f) { // tinted color at brightness f (0..1)
+    f = Math.max(0, Math.min(1, f));
+    var key = ((f * 40) | 0) + ":" + ((tint * 20) | 0);
+    var v = cache[key];
+    if (v) return v;
+    var t = ((tint * 20) | 0) / 20, ff = ((f * 40) | 0) / 40;
+    var r = (255 + (40 - 255) * t) * ff, g = (60 + (255 - 60) * t) * ff, b = (70 + (110 - 70) * t) * ff;
+    v = "rgb(" + (r | 0) + "," + (g | 0) + "," + (b | 0) + ")";
+    cache[key] = v; return v;
+  }
+  var C = { bug: "#ff4d4d", slop: "#ffb020", boost: "#7ff7ff", car: "#dcffe6", tail: "#ff3b3b", white: "#eafff0", glitch: "#ff4dff" };
+
+  // ---------- matrix rain ----------
+  var GLY = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789:=+*<>¦";
+  function glyph(a, b) { var h = Math.imul(a * 73856093 ^ b * 19349663, 2654435761) >>> 0; return GLY[h % GLY.length]; }
+  var drops = [];
+  function initRain() {
+    drops = [];
+    for (var c = 0; c < cols; c++) drops.push({ y: Math.random() * rows * 1.5 - rows * .5, v: 5 + Math.random() * 13, len: 5 + Math.random() * 16, s: Math.random() * 99 | 0 });
+  }
+  function drawRain(dt, t) {
+    var boostF = S.state === "race" ? 1 + S.speed / 70 : 1;
+    // At rest the rain stops within 5 s (WCAG 2.2.2), at once under reduced motion.
+    var atRest = S.state !== "race" && S.state !== "count";
+    var mot = atRest && (reduce || S.clock - S.idleSince > 5) ? 0 : 1;
+    for (var c = 0; c < cols; c++) {
+      var d = drops[c];
+      d.y += d.v * dt * boostF * mot;
+      if (d.y - d.len > rows) { d.y = -Math.random() * 12; d.v = 5 + Math.random() * 13; d.len = 5 + Math.random() * 16; }
+      var head = Math.floor(d.y);
+      for (var k = 0; k < d.len; k++) {
+        var y = head - k; if (y < 0 || y >= rows) continue;
+        var ground = y > HZ;
+        var f = (1 - k / d.len) * (ground ? 0.38 : 0.85);
+        var g = glyph(c * 31 + y, Math.floor(t * 7) + d.s + (k === 0 ? 0 : y));
+        put(c, y, g, k === 0 && !ground ? C.white : tc(f));
+      }
+    }
+  }
+
+  // ---------- track ----------
+  function curveAt(s) {
+    var ramp = Math.max(0, Math.min(1, (s - 160) / 260));
+    return ramp * (Math.sin(s * 0.0042) * 0.65 + Math.sin(s * 0.0013 + 2) * 0.5);
+  }
+  function rowGeom(r) {
+    var p = (r - HZ) / (rows - HZ);
+    var hw = p * cols * 0.46 + 1;
+    var far = (1 - p) * (1 - p);
+    var cx = cols / 2 - S.x * hw + far * cols * 0.42 * curveAt(S.pos + 35);
+    return { p: p, hw: hw, cx: cx, d: Z / p };
+  }
+  function project(d) { // world distance ahead -> row, p
+    var p = Z / d; return { p: p, r: HZ + p * (rows - HZ) };
+  }
+
+  function drawRoad() {
+    // horizon
+    for (var c = 0; c < cols; c++) put(c, HZ, "─", tc(0.28));
+    for (var r = HZ + 1; r < rows; r++) {
+      var g = rowGeom(r), s = S.pos + g.d;
+      var stripe = Math.floor(s / 5) % 2 === 0;
+      var L = Math.round(g.cx - g.hw), R = Math.round(g.cx + g.hw);
+      var kw = Math.max(1, Math.round(g.p * 3));
+      for (var x = L; x <= R; x++) {
+        var ch = " ", col = tc(0.2);
+        if (((x * 7 + Math.floor(s * 0.6)) % 13) === 0) { ch = "."; col = tc(0.22); }
+        put(x, r, ch, col);
+      }
+      // center lane line (conform)
+      if (stripe) put(g.cx, r, g.p > 0.45 ? "│" : "¦", tc(0.55));
+      // kerbs
+      for (var k = 1; k <= kw; k++) {
+        put(L - k, r, stripe ? "▓" : "░", stripe ? tc(0.9) : tc(0.45));
+        put(R + k, r, stripe ? "▓" : "░", stripe ? tc(0.9) : tc(0.45));
+      }
+      // guardrails
+      var rail = g.p > 0.35 ? "║" : "|";
+      var hot = S.railHot > 0 && g.p > 0.6;
+      put(L - kw - 1, r, rail, hot && S.railSide < 0 ? C.white : tc(0.75));
+      put(R + kw + 1, r, rail, hot && S.railSide > 0 ? C.white : tc(0.75));
+      if (g.p > 0.5 && Math.floor(s / 5) % 3 === 0) { put(L - kw - 2, r, "╢", tc(0.6)); put(R + kw + 2, r, "╟", tc(0.6)); }
+    }
+  }
+
+  // ---------- entities ----------
+  var SLOP = ["delve", "as an AI", "synergy", "tapestry", "leverage", "rocket", "game-changer", "seamless"];
+  var SP = {
+    bug: { t: ["*"], s: [">o<"], b: [" \\  / ", "-(oo)-", "-(##)-", " /  \\ "] },
+    boost: { t: [">"], s: [">>"], b: ["  ▶▶  ", "ROUTER"] }
+  };
+  function slopSprite(w, size) {
+    if (size === "t") return ["~"];
+    if (size === "s") return ["~~~"];
+    var bar = new Array(w.length + 5).join("~");
+    return [" ." + bar + ". ", "(  " + w + "  )", " '" + bar + "' "];
+  }
+  function signSprite(lines, size) {
+    if (size === "t") return ["▪"];
+    if (size === "s") return ["┌┐", "└┘", "│ "].slice(0, 3);
+    var w = 0; lines.forEach(function (l) { w = Math.max(w, l.length); });
+    var top = "┌" + new Array(w + 3).join("─") + "┐";
+    var out = [top];
+    lines.forEach(function (l) { out.push("│ " + l + new Array(w - l.length + 1).join(" ") + " │"); });
+    out.push("└" + new Array(w + 3).join("─").replace(/^(.{1,})$/, function (m) { var h = Math.floor(m.length / 2); return m.slice(0, h) + "┬" + m.slice(h + 1); }) + "┘");
+    out.push(new Array(Math.floor((w + 4) / 2) + 1).join(" ") + "│");
+    return out;
+  }
+
+  function spawn(type, s, x, extra) { var e = { type: type, s: s, x: x, hit: false, done: false }; if (extra) for (var k in extra) e[k] = extra[k]; S.ents.push(e); }
+  function spawnAhead() {
+    while (S.nextObs < S.pos + 170) {
+      var s = S.nextObs, roll = Math.random();
+      if (roll < 0.55) spawn("bug", s, -0.7 + Math.random() * 1.4);
+      else if (roll < 0.88) spawn("slop", s, -0.65 + Math.random() * 1.3, { w: SLOP[Math.random() * SLOP.length | 0] });
+      else spawn("boost", s, -0.6 + Math.random() * 1.2);
+      if (Math.random() < Math.min(0.45, S.pos / 6000)) spawn("bug", s + 2, -0.7 + Math.random() * 1.4);
+      S.nextObs += Math.max(10, 30 - S.pos / 250) + Math.random() * 18;
+    }
+    while (S.nextSign < S.pos + 170) {
+      var c = curveAt(S.nextSign + 70), dir = c > 0.25 ? "curve →" : c < -0.25 ? "curve ←" : "straight ↑";
+      var adr = "ADR-00" + (30 + (Math.random() * 20 | 0));
+      spawn("sign", S.nextSign, (Math.random() < 0.5 ? -1 : 1) * 1.55, { lines: [adr, "decided:", dir], dir: dir, adr: adr });
+      S.nextSign += 180 + Math.random() * 80;
+    }
+    while (S.nextGate < S.pos + 170) { spawn("gate", S.nextGate, 0); S.nextGate += 520 + Math.random() * 120; }
+  }
+
+  function drawEntities() {
+    var list = S.ents.slice().sort(function (a, b) { return b.s - a.s; });
+    list.forEach(function (e) {
+      var d = e.s - S.pos; if (d <= 0.5 || e.hit && e.type !== "gate") return;
+      var pr = project(d); if (pr.p < 0.035 || pr.r > rows + 6) return;
+      var r = Math.round(pr.r);
+      var g = rowGeom(Math.min(rows - 1, Math.max(HZ + 1, r)));
+      var size = pr.p < 0.13 ? "t" : pr.p < 0.36 ? "s" : "b";
+      var cx = g.cx + e.x * g.hw;
+      if (e.type === "bug") sprite(cx, r, SP.bug[size], function () { return C.bug; });
+      else if (e.type === "boost") sprite(cx, r, SP.boost[size], function () { return C.boost; });
+      else if (e.type === "slop") sprite(cx, r, slopSprite(e.w, size), function (ch) { return ch === "~" || ch === "." || ch === "'" ? "#a8721a" : C.slop; });
+      else if (e.type === "sign") sprite(cx, r, signSprite(e.lines, size), function (ch, j) { return j >= 1 && j <= 3 && /[A-Za-z0-9:←→↑-]/.test(ch) ? C.white : tc(0.7); });
+      else if (e.type === "gate") {
+        var kw = Math.max(1, Math.round(g.p * 3));
+        var L = Math.round(g.cx - g.hw) - kw - 1, R = Math.round(g.cx + g.hw) + kw + 1;
+        var h = Math.max(1, Math.round(g.p * 14));
+        for (var j = 0; j < h; j++) { put(L, r - j, "█", tc(0.95)); put(R, r - j, "█", tc(0.95)); }
+        var top = r - h;
+        for (var x = L; x <= R; x++) put(x, top, "═", tc(0.95));
+        var label = g.p > 0.25 ? " GATE · 39 CHECKS " : g.p > 0.1 ? " GATE " : "";
+        if (label && R - L > label.length + 2) text(Math.round((L + R - label.length) / 2), top, label, C.white);
+      }
+    });
+  }
+
+  // ---------- car ----------
+  var CAR = [
+    "   .--------------.   ",
+    "  /  ____________  \\  ",
+    " |__/    GH-1    \\__| ",
+    " [##]============[##] ",
+    "  (__)          (__)  "
+  ];
+  function drawCar() {
+    var by = rows - 2, cx = cols / 2;
+    var lean = Math.round(S.steerVis * 1.6);
+    var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
+    for (var j = 0; j < CAR.length; j++) {
+      var L = CAR[j], off = j < 2 ? lean : 0;
+      var x0 = Math.round(cx - L.length / 2 + off + jig);
+      for (var k = 0; k < L.length; k++) {
+        var ch = L[k]; if (ch === " ") continue;
+        var col = ch === "#" ? (S.braking ? "#ff8080" : C.tail) : j === 2 && /[A-Z0-9-]/.test(ch) ? tc(1) : C.car;
+        put(x0 + k, by - (CAR.length - 1 - j), ch, col);
+      }
+    }
+    // exhaust / speed dust
+    if (S.state === "race" && S.speed > 20) for (var q = 0; q < 3; q++) put(cx + (Math.random() * 16 - 8), rows - 1, Math.random() < .5 ? "." : "·", tc(0.35));
+  }
+
+  // ---------- traffic light ----------
+  function drawLight() {
+    if (S.state === "ready") return;
+    var lit = S.state === "over" ? 3 : 0, green = false;
+    if (S.state === "count") { lit = Math.min(3, Math.floor(S.ct / 0.7) + 1); }
+    if (S.state === "race") { green = true; }
+    if (S.state === "race" && S.rt > 1.6) return;
+    var y = 1, w = 25, x = Math.floor((cols - w) / 2);
+    var box = ["┌───────────────────────┐", "│                       │", "│                       │", "└──────────┬┬───────────┘", "           ││"];
+    box.forEach(function (l, j) { text(x, y + j, l, "#5d6b62"); });
+    for (var i = 0; i < 3; i++) {
+      var lx = x + 3 + i * 7;
+      var on = green || i < lit;
+      var col = green ? "#39ff7a" : on ? "#ff3030" : "#3a1414";
+      text(lx, y + 1, "█████", col); text(lx, y + 2, "█████", col);
+    }
+  }
+
+  // ---------- messages ----------
+  function say(s, col) { S.msgs.push({ s: s, t: S.clock, c: col || tc(0.9) }); if (S.msgs.length > 4) S.msgs.shift(); }
+
+  // ---------- state ----------
+  var S;
+  function reset() {
+    S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
+      msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false,
+      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: S ? S.best : 0, idleSince: 0 };
+  }
+  reset();
+
+  function start() {
+    if (S.state === "ready" || S.state === "over") {
+      var best = S.best; reset(); S.best = best;
+      S.state = "count"; S.ct = 0;
+      say("$ grh install decisions gate guardrails router conform attest design", tc(0.7));
+    }
+  }
+
+  // Keys belong to the game only while its canvas has focus (WCAG 2.1.1, 2.1.2, 2.1.4).
+  var keys = {}, focused = false;
+  function pause() {
+    if (S.state !== "race" && S.state !== "count") return;
+    S.state = "paused"; S.idleSince = S.clock; keys = {}; padSteer = 0; touchSteer = 0;
+  }
+  function resume() { if (S.state === "paused") { S.state = "count"; S.ct = 0; } }
+  function toInstall() { var c = document.getElementById("copy"); c.focus(); c.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" }); }
+  document.getElementById("skipLink").addEventListener("click", function (e) { e.preventDefault(); toInstall(); });
+  function label() {
+    cv.setAttribute("aria-label", focused
+      ? "Driving game, focused. Space or Enter to start or resume, arrow keys or J and L to steer, Escape to leave."
+      : "Driving game. Click it or press Tab to focus it, then Space or Enter to start.");
+  }
+  cv.addEventListener("focus", function () { focused = true; label(); });
+  cv.addEventListener("blur", function () { focused = false; pause(); label(); });
+  function onKey(e, down) {
+    if (document.activeElement !== cv) return;
+    var k = e.key;
+    if (k === "Escape" && down) { e.preventDefault(); if (stage.classList.contains("is-open")) closeGame(); toInstall(); return; }
+    if ((k === " " || k === "Enter") && down) {
+      e.preventDefault();
+      if (S.state === "ready" || S.state === "over") start(); else if (S.state === "paused") resume();
+      return;
+    }
+    if ((k === "i" || k === "I") && down && S.state === "over") { e.preventDefault(); toInstall(); return; }
+    var game = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "d", "w", "s", "A", "D", "W", "S", "j", "l", "J", "L"].indexOf(k) > -1;
+    if (game && (S.state === "race" || S.state === "count")) { e.preventDefault(); keys[k.toLowerCase()] = down; }
+  }
+  addEventListener("keydown", function (e) { onKey(e, true); });
+  addEventListener("keyup", function (e) { onKey(e, false); });
+  cv.addEventListener("pointerdown", function (e) {
+    cv.focus({ preventScroll: true });
+    if (S.state === "ready" || S.state === "over") { start(); return; }
+    if (S.state === "paused") { resume(); return; }
+    if (e.pointerType === "touch") { var r = cv.getBoundingClientRect(); touchSteer = (e.clientX - r.left) < r.width / 2 ? -1 : 1; }
+  });
+  var touchSteer = 0;
+  cv.addEventListener("pointerup", function () { touchSteer = 0; });
+  cv.addEventListener("pointercancel", function () { touchSteer = 0; });
+  function pad(id, dir) {
+    var b = document.getElementById(id);
+    b.addEventListener("pointerdown", function (e) { e.preventDefault(); cv.focus({ preventScroll: true }); if (S.state === "ready" || S.state === "over") start(); else if (S.state === "paused") resume(); padSteer = dir; b.classList.add("on"); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) { b.addEventListener(ev, function () { if (padSteer === dir) padSteer = 0; b.classList.remove("on"); }); });
+  }
+  var padSteer = 0; pad("padL", -1); pad("padR", 1);
+
+  // Short viewports get the poster; the threshold comes from the computed Duro vars, so it follows the tokens.
+  var stage = document.getElementById("stage"), posterBtn = document.getElementById("poster");
+  var rootCss = getComputedStyle(document.documentElement);
+  var heroMin = parseFloat(rootCss.getPropertyValue("--duro-size-hero-min-h")), heroReserve = parseFloat(rootCss.getPropertyValue("--duro-size-hero-reserve"));
+  var shortMq = heroMin && heroReserve ? matchMedia("(max-height: " + (heroMin + heroReserve - 0.02) + "px)") : null;
+  function applyMode() {
+    var poster = !!(shortMq && shortMq.matches) && !stage.classList.contains("is-open");
+    if (poster) pause();
+    stage.classList.toggle("is-poster", poster);
+    resize();
+  }
+  function closeGame() { stage.classList.remove("is-open"); pause(); applyMode(); }
+  posterBtn.addEventListener("click", function () {
+    stage.classList.add("is-open"); applyMode();
+    stage.scrollIntoView({ block: "start", behavior: "auto" });
+    cv.focus({ preventScroll: true });
+    if (S.state === "ready" || S.state === "over") start(); else if (S.state === "paused") resume();
+  });
+  document.getElementById("closeGame").addEventListener("click", function () { closeGame(); if (stage.classList.contains("is-poster")) posterBtn.focus(); else cv.focus(); });
+  if (shortMq) { applyMode(); (shortMq.addEventListener ? shortMq.addEventListener("change", applyMode) : shortMq.addListener(applyMode)); }
+
+  // ---------- update ----------
+  function update(dt) {
+    S.clock += dt;
+    if (S.state === "paused") return;
+    if (S.state === "count") {
+      S.ct += dt;
+      tint = Math.max(0, tint - dt * 3);
+      if (S.ct >= 2.4) { S.state = "race"; S.rt = 0; say("● GREEN. Harness on.", "#39ff7a"); }
+      return;
+    }
+    if (S.state === "ready") { tint = Math.min(1, tint + dt); return; }
+    if (S.state === "over") { tint = Math.max(0, tint - dt); return; }
+    S.rt += dt;
+    tint = Math.min(1, tint + dt * 1.6);
+
+    var left = keys.arrowleft || keys.a || keys.j, right = keys.arrowright || keys.d || keys.l;
+    var steerIn = (right ? 1 : 0) - (left ? 1 : 0) || padSteer || touchSteer;
+    S.braking = !!(keys.arrowdown || keys.s);
+    var top = S.boost > 0 ? 92 : 68;
+    if (S.braking) S.speed -= 45 * dt;
+    else if (S.speed < top) S.speed += (keys.arrowup || keys.w ? 22 : 15) * dt;
+    else S.speed -= 20 * dt;
+    S.speed = Math.max(0, S.speed);
+    S.boost = Math.max(0, S.boost - dt);
+
+    var wob = S.glitch > 0 ? Math.sin(S.clock * 13) * 0.9 : 0;
+    S.steer += (steerIn - S.steer) * Math.min(1, dt * 10);
+    S.steerVis += (steerIn - S.steerVis) * Math.min(1, dt * 6);
+    var sp = S.speed / 68;
+    S.x += (S.steer * 1.55 * (0.35 + sp) + wob * 0.5) * dt;
+    S.x -= curveAt(S.pos) * sp * 0.95 * dt;
+    S.railHot = Math.max(0, S.railHot - dt);
+    if (Math.abs(S.x) > 0.86) {
+      S.railSide = S.x > 0 ? 1 : -1;
+      S.x = 0.86 * S.railSide; S.speed *= Math.pow(0.6, dt); S.railHot = 0.25;
+      if (S.clock - S.railMsg > 3) { S.railMsg = S.clock; say("✗ guardrails · off-road denied, back on the road"); }
+    }
+
+    S.pos += S.speed * dt;
+    S.time -= dt;
+    S.glitch = Math.max(0, S.glitch - dt);
+    S.shake = Math.max(0, S.shake - dt);
+    spawnAhead();
+
+    S.ents.forEach(function (e) {
+      if (e.done) return;
+      var d = e.s - S.pos;
+      if (e.type === "gate") {
+        if (d < Z * 0.9) { e.done = true; S.gates++; S.time += 12; say("✓ gate · 39 checks passed · signed · +12 s"); }
+        return;
+      }
+      if (e.type === "sign") {
+        if (d < Z * 2.5) { e.done = true; say("decisions · " + e.adr + " decided: " + e.dir, C.white); }
+        return;
+      }
+      if (!e.hit && d < Z * 1.15 && d > Z * 0.75) {
+        var reach = e.type === "slop" ? 0.26 : 0.22;
+        if (Math.abs(e.x - S.x) < reach) {
+          e.hit = true; e.done = true;
+          if (e.type === "bug") { S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45; say("✗ bug hit · −3 s", C.bug); }
+          else if (e.type === "slop") { S.hit.slop++; S.speed *= 0.6; S.glitch = 1.6; say("✗ AI slop · “" + e.w + "” · output scrambled", C.slop); }
+          else if (e.type === "boost") { S.boost = 3.5; S.speed = Math.max(S.speed, 75); say("▶▶ router · escalated to a stronger model", C.boost); }
+        }
+      }
+      if (d < Z * 0.6) { e.done = true; if (!e.hit && (e.type === "bug" || e.type === "slop")) S.dodged[e.type]++; }
+    });
+    S.ents = S.ents.filter(function (e) { return e.s - S.pos > -5; });
+
+    if (S.time <= 0) {
+      S.time = 0; S.state = "over"; S.idleSince = S.clock;
+      var km = S.pos / 1000; S.best = Math.max(S.best || 0, km);
+      say("■ time · " + km.toFixed(2) + " km driven");
+    }
+  }
+
+  // ---------- HUD / overlays ----------
+  function pad2(s, n) { s = String(s); while (s.length < n) s = " " + s; return s; }
+  function drawHud() {
+    if (S.state === "race" || S.state === "over") {
+      var tcol = S.time < 8 && Math.floor(S.clock * 4) % 2 ? C.bug : C.white;
+      text(2, 1, "TIME  " + pad2(S.time.toFixed(1), 5), tcol);
+      text(2, 2, "SPEED " + pad2(Math.round(S.speed * 3.6), 5) + " km/h", tc(0.9));
+      text(2, 3, "DIST  " + pad2((S.pos / 1000).toFixed(2), 5) + " km", tc(0.9));
+      if (S.boost > 0) text(2, 4, "▶▶ ROUTER BOOST", C.boost);
+      var rx = cols - 22;
+      if (cols > 60) {
+        text(rx, 1, "BUGS DODGED " + pad2(S.dodged.bug, 4), C.bug);
+        text(rx, 2, "SLOP DODGED " + pad2(S.dodged.slop, 4), C.slop);
+        text(rx, 3, "GATES       " + pad2(S.gates, 4), tc(0.9));
+      }
+    }
+    // terminal log
+    var shown = S.msgs.filter(function (m) { return S.clock - m.t < 5; }).slice(-2);
+    var y0 = HZ + 2;
+    shown.forEach(function (m, i) {
+      var s = "> " + m.s; if (s.length > cols - 4) s = s.slice(0, cols - 5) + "…";
+      var bx = 2;
+      for (var k = 0; k < s.length + 2; k++) put(bx - 1 + k, y0 + i, " ", "#000");
+      text(bx, y0 + i, s, m.c);
+    });
+
+    if (S.state === "ready") {
+      var y = HZ - 6;
+      box(y, [
+        "G R E E N   H A R N E S S",
+        "",
+        "Keep your coding agent on the road.",
+        "Dodge the bugs. Dodge the AI slop.",
+        "",
+        focused ? "[ SPACE / ENTER ]  start at the red light" : "[ CLICK / TAB HERE ]  to drive",
+        cols > 60 ? "← → or J L  steer   ↑ faster   ↓ brake" : "◀ ▶  steer",
+        focused ? "Esc  leave the game" : ""
+      ]);
+    }
+    if (S.state === "paused") {
+      box(HZ - 3, ["P A U S E D", "", focused ? "[ ENTER ]  resume" : "[ CLICK ]  resume", "Esc  leave the game"]);
+    }
+    if (S.state === "over") {
+      var lines = [
+        "T I M E",
+        "",
+        (S.pos / 1000).toFixed(2) + " km   ·   best " + (S.best || 0).toFixed(2) + " km",
+        "bugs dodged " + S.dodged.bug + "   ·   bugs hit " + S.hit.bug,
+        "slop dodged " + S.dodged.slop + "   ·   slop hit " + S.hit.slop,
+        "gates passed " + S.gates,
+        "",
+        focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
+        "[ I ]  install the harness  ↓"
+      ];
+      box(HZ - 6, lines);
+    }
+  }
+  function box(y, lines) {
+    var w = 0; lines.forEach(function (l) { w = Math.max(w, l.length); });
+    w = Math.min(w + 6, cols - 2);
+    var x = Math.floor((cols - w) / 2);
+    for (var j = -1; j <= lines.length; j++) for (var k = 0; k < w; k++) {
+      var edge = j === -1 || j === lines.length, side = k === 0 || k === w - 1;
+      var c = edge && side ? "+" : edge ? "-" : side ? "|" : " ";
+      put(x + k, y + j, c, tc(0.6));
+    }
+    lines.forEach(function (l, j) {
+      if (l.length > w - 4) l = l.slice(0, w - 5) + "…";
+      text(Math.floor((cols - l.length) / 2), y + j, l, j === 0 ? tc(1) : /^\[/.test(l) ? C.white : tc(0.75));
+    });
+  }
+
+  // ---------- render ----------
+  function render(dt) {
+    for (var i = 0; i < chars.length; i++) { chars[i] = " "; colr[i] = ""; }
+    drawRain(dt, S.clock);
+    drawRoad();
+    drawEntities();
+    drawCar();
+    drawLight();
+    drawHud();
+    if (S.glitch > 0) {
+      var n = Math.floor(chars.length * 0.05 * (S.glitch / 1.6));
+      for (var q = 0; q < n; q++) { var j = Math.random() * chars.length | 0; chars[j] = glyph(j, q); colr[j] = Math.random() < .5 ? C.glitch : C.slop; }
+    }
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+    var sx = S.shake > 0 ? (Math.random() * 6 - 3) : 0, sy = S.shake > 0 ? (Math.random() * 4 - 2) : 0;
+    var buckets = {};
+    for (var i2 = 0; i2 < chars.length; i2++) {
+      var c = chars[i2]; if (c === " ") continue;
+      (buckets[colr[i2]] || (buckets[colr[i2]] = [])).push(i2);
+    }
+    for (var key in buckets) {
+      ctx.fillStyle = key; var list = buckets[key];
+      for (var m = 0; m < list.length; m++) {
+        var idx = list[m], row = (idx / cols) | 0, x = idx - row * cols;
+        var gshift = S.glitch > 0 && row % 7 === ((S.clock * 20) | 0) % 7 ? 2 * cw : 0;
+        ctx.fillText(chars[idx], ox + x * cw + sx + gshift, oy + row * chh + sy);
+      }
+    }
+  }
+
+  var last = 0;
+  function frame(t) {
+    var dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
+    update(dt); render(dt);
+    requestAnimationFrame(frame);
+  }
+
+  var ro = new ResizeObserver(function () { resize(); });
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    resize(); ro.observe(cv); requestAnimationFrame(frame);
+  });
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var b = this, txt = "curl -fsSL greenharness.dev/install | sh";
+    var done = function () { b.textContent = "copied"; setTimeout(function () { b.textContent = "copy"; }, 1600); };
+    try { navigator.clipboard.writeText(txt).then(done, function () { selectCmd(); }); } catch (e) { selectCmd(); }
+  });
+  function selectCmd() { var r = document.createRange(); r.selectNodeContents(document.getElementById("cmdText")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var SEC = { 1: { c: "#7ff7ff", n: "before code" }, 2: { c: "#39ff7a", n: "while coding" }, 3: { c: "#eafff0", n: "after the push" } };
+  var STOPS = [
+    { name: "Decide", sec: 1, check: "decisions", skills: ["relais-architecture-conflict"], agents: [],
+      you: "You write and accept the ADRs. The harness only reads them.",
+      what: "Before planning, the agent asks what your team already decided. If two records disagree, it stops and asks you instead of picking a side.",
+      term: '<span class="p">$</span> grh decisions resolve auth.session\n<span class="v">decided</span> · ADR-0031 · exit 0' },
+    { name: "Plan", sec: 1, check: null, skills: ["plan-review"], agents: ["plan-review panel: architect, backend, language, platform, product, UX research…"],
+      design: "UI design and React reviewers check the plan against the component catalog.",
+      you: "You approve the plan. Nothing is built before that.",
+      what: "The agent writes a plan. A panel of reviewer agents reads it before you do, each from its own angle, and the plan is fixed before it reaches you." },
+    { name: "Hand out the task", sec: 1, check: "router", skills: ["relais"], agents: ["relais-implementation", "relais-research", "relais-review"],
+      you: "You trust a repository once, the first time.",
+      what: "Each bounded task goes to the cheapest model that can do it, runs in its own worktree, and is checked before it is accepted. When it falls short, it escalates.",
+      term: '<span class="p">$</span> grh router run "fix the flaky retry test"\n→ small model · low effort\n<span class="v">✓</span> checks green · accepted' },
+    { name: "Code", sec: 2, check: "guardrails", skills: ["worktree-task", "diagnosing-bugs"], agents: [], you: null,
+      design: "The agent builds from the component catalog, served over MCP, with the ui, colors and typography skills.",
+      what: "Work happens in an isolated worktree. Every command the agent runs is read first, and known mistakes are refused with the reason. A bug with an unknown cause starts from a failing check, not a guess.",
+      term: '<span class="p">$</span> git push 2>&1 | tail -5\n<span class="x">✗ guardrails</span> · pipe-to-tail · denied' },
+    { name: "Commit", sec: 2, check: "gate", skills: [], agents: [], you: null,
+      design: "Design-system lint rules run too: no raw colors or sizes, no raw HTML elements.",
+      what: "The git pre-commit hook checks the message, conflict markers and secrets, plus the linters of the languages your repository uses.",
+      term: '<span class="p">$</span> git commit -m "fix: retry on 503"\n<span class="v">✓ gate</span> · message · secrets · markers · clippy' },
+    { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "interface-review"], you: null,
+      what: "Before the push, a reviewer agent reads the diff against the plan, and the push is refused if that review did not run. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
+    { name: "Review", sec: 3, check: "conform", skills: ["interface-review"], agents: [],
+      design: "duro doctor checks how the app wires the design system into its build.",
+      you: "You look at UI changes in your own browser.",
+      what: "Lines that break a decided rule are marked with the ADR behind them. Interface changes open in your browser for you to see.",
+      term: '<span class="p">$</span> grh conform check src/\nsrc/api.rs:42  ADR-0044 · no unwrap in handlers' },
+    { name: "CI", sec: 3, check: "attest", skills: ["merge-when-green"], agents: [], you: null,
+      what: "CI stays yours, and it gets faster. attest verifies the signature from your push and skips the checks your laptop already ran on that exact tree. Anything unsigned runs as usual. merge-when-green reads the run's real result.",
+      term: '<span class="p">attest:</span> covered by you@example.com\n  pre-push-cargo-test · pre-push-clippy · skipped' },
+    { name: "Merge and release", sec: 3, check: "guardrails", skills: ["merge-when-green", "tag-release"], agents: [],
+      you: "Asked only for what the plan left open, or anything destructive.",
+      what: "With green checks and an approved review, the agent merges and releases the plan you approved. Auto-merge and pushes straight to main are refused. A tag is cut only after the commit landed, and never force-pushed." },
+    { name: "Deploy", sec: 3, check: null, idle: true, skills: [], agents: [], you: null,
+      what: "Nothing. Deploying is your platform's job." },
+    { name: "Learn", sec: 3, check: null, skills: ["retro", "worktree-sweep"], agents: [],
+      you: "You approve each change to the harness.",
+      what: "A retro reads the sessions, finds where time was lost or a mistake got through, and proposes the change that stops it. The pit lane below shows how." }
+  ];
+
+  var road = document.getElementById("road"), bar = document.getElementById("sectorBar");
+  var LEFT = 6; // stops that happen on your machine, up to and including Push
+  var path, car, samples = [], cards = [], built = 0, H = 0;
+  function mk(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function chips(l) { return l.length ? l.map(function (s) { return '<span class="chip">' + s + '</span>'; }).join("") : '<span class="none">—</span>'; }
+  function count(a, b) { var n = 0; for (var i = a; i < b; i++) if (STOPS[i].check) n++; return n; }
+  function cardHTML(s, i) {
+    return '<span class="k">T' + (i + 1) + ' · S' + s.sec + ' ' + SEC[s.sec].n + '</span><h3>' + s.name + '</h3><p>' + s.what + '</p>' +
+      '<dl class="lanes">' +
+      '<div><dt>check</dt><dd>' + (s.check ? '<span class="chip check">' + s.check + '</span>' : '<span class="none">' + (s.idle ? 'nothing to do here' : '—') + '</span>') + '</dd></div>' +
+      '<div><dt>skills</dt><dd>' + chips(s.skills) + '</dd></div>' +
+      '<div><dt>agents</dt><dd>' + chips(s.agents) + '</dd></div>' +
+      (s.design ? '<div class="dz"><dt>design</dt><dd>' + s.design + ' <span class="optional-inline">optional</span></dd></div>' : '') +
+      (s.you ? '<div class="you"><dt>● you</dt><dd>' + s.you + '</dd></div>' : '<div><dt>you</dt><dd><span class="none">the agent drives</span></dd></div>') +
+      '</dl>' + (s.term ? '<pre class="term">' + s.term + '</pre>' : '');
+  }
+  function infinity(cx, cy, a) {
+    var d = "";
+    for (var u = 0; u <= Math.PI * 2 + 1e-9; u += 0.05) {
+      var s = Math.sin(u), c = Math.cos(u), k = 1 + s * s;
+      d += (d ? " L " : "M ") + (cx + a * c / k).toFixed(1) + " " + (cy + a * 0.95 * s * c / k).toFixed(1);
+    }
+    return d + " Z";
+  }
+
+  function build() {
+    var w = road.clientWidth; if (!w || w === built) return; built = w;
+    road.innerHTML = ""; cards = [];
+    var narrow = w < 760;
+    var cw = narrow ? w - 76 : Math.min(470, w / 2 - 80);
+    STOPS.forEach(function (s, i) {
+      var el = document.createElement("article");
+      el.className = "stop" + (s.idle ? " idle" : "") + (i >= LEFT ? " ops" : "");
+      el.style.setProperty("--sc", SEC[s.sec].c);
+      el.style.width = cw + "px";
+      el.style.left = (narrow ? 68 : (i % 2 === 0 ? w / 2 - 60 - cw : w / 2 + 60)) + "px";
+      el.innerHTML = cardHTML(s, i);
+      road.appendChild(el); cards.push(el);
+    });
+    // the line where code leaves your machine
+    var border = document.createElement("div");
+    border.className = "border-line";
+    border.innerHTML =
+      '<span class="dev">▲ DEV · your machine · ' + count(0, LEFT) + ' of ' + LEFT + ' stops checked</span>' +
+      '<b>── git push · your code leaves your machine ──</b>' +
+      '<span class="ops">▼ OPS · after the push · ' + count(LEFT, STOPS.length) + ' of ' + (STOPS.length - LEFT) + ' stops checked</span>' +
+      '<small>◀◀ Shift left: a mistake caught above this line costs seconds. Below it, it costs a CI run, a review round or an incident.</small>';
+    road.appendChild(border);
+    var bh = border.offsetHeight;
+
+    // stack: alternate sides on wide screens, one column on narrow ones; the push line gets its own band
+    var y = 70, lastBottom = [0, 0], prevTop = -1e9, borderTop = 0;
+    cards.forEach(function (el, i) {
+      var h = el.offsetHeight, side = narrow ? 0 : i % 2, top;
+      if (i === LEFT) {
+        borderTop = Math.max(lastBottom[0], lastBottom[1]) + 56;
+        top = borderTop + bh + 56;
+      } else if (narrow) top = Math.max(y, lastBottom[0] + 36);
+      else top = Math.max(y, lastBottom[side] + 30, prevTop + 130);
+      el.style.top = top + "px";
+      lastBottom[side] = top + h;
+      prevTop = top; y = top;
+      el._dot = top + 26;
+    });
+    border.style.top = borderTop + "px";
+    var lapH = 96;
+    H = Math.max(lastBottom[0], lastBottom[1]) + 60 + lapH;
+    road.style.height = H + "px";
+
+    var svg = mk("svg", { width: w, height: H, viewBox: "0 0 " + w + " " + H });
+    road.insertBefore(svg, road.firstChild);
+    var xs = narrow ? [22, 46] : [w / 2 - 26, w / 2 + 26], x0 = narrow ? 34 : w / 2;
+    var pts = [{ x: x0, y: 0, s: 1 }];
+    cards.forEach(function (el, i) { pts.push({ x: xs[i % 2], y: el._dot, s: STOPS[i].sec }); });
+    var endY = H - lapH + 18;
+    pts.push({ x: x0, y: endY, s: 3 });
+    function seg(a, b) { var m = (b.y - a.y) / 2; return " C " + a.x + " " + (a.y + m) + " " + b.x + " " + (b.y - m) + " " + b.x + " " + b.y; }
+    var rw = narrow ? 24 : 40;
+    var d = "M " + pts[0].x + " " + pts[0].y;
+    for (var i = 1; i < pts.length; i++) {
+      d += seg(pts[i - 1], pts[i]);
+      var dev = i <= LEFT;
+      // dense, bright kerbs where the checks are; sparse, dim ones after the push
+      mk("path", { d: "M " + pts[i - 1].x + " " + pts[i - 1].y + seg(pts[i - 1], pts[i]), fill: "none", stroke: SEC[pts[i].s].c,
+        "stroke-width": rw + 6, "stroke-dasharray": dev ? "6 5" : "3 14", opacity: dev ? .8 : .3 }, svg);
+    }
+    mk("path", { d: d, fill: "none", stroke: "#06150c", "stroke-width": rw }, svg);
+    mk("path", { d: d, fill: "none", stroke: "#2c5238", "stroke-width": 1.2, "stroke-dasharray": "5 7" }, svg);
+    path = mk("path", { d: d, fill: "none", stroke: "none" }, svg);
+    var L = path.getTotalLength(); samples = [];
+    for (var l = 0; l <= L; l += 4) samples.push([l, path.getPointAtLength(l).y]);
+    var by = borderTop + bh / 2;
+    mk("line", { x1: 0, y1: by, x2: w, y2: by, stroke: "#39ff7a", "stroke-width": 1, "stroke-dasharray": "8 6", opacity: .5 }, svg);
+    STOPS.forEach(function (s, i) {
+      var p = pts[i + 1], dim = i >= LEFT;
+      if (s.you) mk("circle", { cx: p.x, cy: p.y, r: narrow ? 10 : 12, fill: "none", stroke: "#ffd27f", "stroke-width": 2 }, svg);
+      mk("circle", { cx: p.x, cy: p.y, r: narrow ? 5.5 : 7, fill: s.check ? SEC[s.sec].c : "#000", stroke: SEC[s.sec].c, "stroke-width": 1.5, opacity: dim && !s.check ? .6 : 1 }, svg);
+    });
+    cards.forEach(function (el, i) {
+      var p = pts[i + 1], cx = parseFloat(el.style.left), right = narrow || i % 2 === 1;
+      mk("line", { x1: p.x + (right ? 12 : -12), y1: p.y, x2: right ? cx : cx + el.offsetWidth, y2: p.y, stroke: SEC[STOPS[i].sec].c, "stroke-width": 1, "stroke-dasharray": "2 3", opacity: .7 }, svg);
+    });
+    // the lap marker: the road runs into a small infinity loop
+    var lap = document.createElement("div");
+    lap.className = "road-end";
+    lap.style.left = x0 + "px";
+    lap.innerHTML = '<svg viewBox="0 0 120 44" width="120" height="44" aria-hidden="true"><path d="' + infinity(60, 22, 52) + '" fill="none" stroke="#39ff7a" stroke-width="2" stroke-dasharray="5 4"/></svg><span>↺ lap 2 starts in the pit lane</span>';
+    road.appendChild(lap);
+    car = mk("g", {}, svg);
+    mk("rect", { x: -7, y: -11, width: 14, height: 22, rx: 4, fill: "#000", stroke: "#dcffe6", "stroke-width": 1.6 }, car);
+    mk("rect", { x: -4, y: -6, width: 8, height: 6, fill: "#39ff7a" }, car);
+    mk("rect", { x: -6, y: 8, width: 3, height: 2.4, fill: "#ff3b3b" }, car);
+    mk("rect", { x: 3, y: 8, width: 3, height: 2.4, fill: "#ff3b3b" }, car);
+    move();
+  }
+  function lenAtY(y) {
+    var lo = 0, hi = samples.length - 1;
+    while (lo < hi) { var m = (lo + hi) >> 1; if (samples[m][1] < y) lo = m + 1; else hi = m; }
+    return samples[lo] ? samples[lo][0] : 0;
+  }
+  function move() {
+    if (!path) return;
+    var top = road.getBoundingClientRect().top;
+    var y = Math.max(0, Math.min(H, innerHeight * 0.45 - top));
+    var L = path.getTotalLength(), l = lenAtY(y);
+    var p = path.getPointAtLength(l), q = path.getPointAtLength(Math.min(L, l + 1));
+    var ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI - 90;
+    car.setAttribute("transform", "translate(" + p.x.toFixed(1) + " " + p.y.toFixed(1) + ") rotate(" + ang.toFixed(1) + ")");
+    var sec = 0;
+    cards.forEach(function (c, i) {
+      var t = parseFloat(c.style.top), on = y > t - 30 && y < t + c.offsetHeight + 10;
+      c.classList.toggle("on", on);
+      if (y > t - 30) sec = STOPS[i].sec;
+    });
+    Array.prototype.forEach.call(bar.querySelectorAll("[data-s]"), function (s) { s.classList.toggle("on", String(sec) === s.dataset.s); });
+  }
+  addEventListener("scroll", move, { passive: true });
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    new ResizeObserver(build).observe(road);
+    build();
+  });
+})();
+</script>
