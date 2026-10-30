@@ -1,0 +1,385 @@
+<title>Lifecycle Circuit Options</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap">
+<style>
+/* Layout: same dark world as the game page; three options stacked, each in its own framed, scrollable demo of the lifecycle circuit. */
+:root {
+  --void: #020803; --panel: #03120a; --ink: #b9f5c8; --dim: #5f9a6e; --faint: #2c5238; --glow: #39ff7a; --line: #0f2a17;
+  --bug: #ff4d4d; --cyan: #7ff7ff; --white: #eafff0; --amber: #ffb020;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box }
+html, body { background: var(--void); color: var(--ink) }
+body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 80px }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 72px }
+.intro { display: grid; gap: 12px; max-width: 74ch }
+.eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim) }
+h1 { margin: 0; font-size: clamp(26px, 3.6vw, 38px); line-height: 1.15; color: var(--white); letter-spacing: -.02em; text-wrap: balance }
+.intro p { margin: 0; color: var(--dim) }
+.jump { display: flex; gap: 8px; flex-wrap: wrap }
+.jump a { color: var(--ink); text-decoration: none; border: 1px solid var(--line); padding: 6px 12px; border-radius: 3px; font-size: 13px }
+.jump a:hover { border-color: var(--glow); color: var(--glow) }
+a:focus-visible, button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
+
+.opt { display: grid; gap: 18px; scroll-margin-top: 20px }
+.opt-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; max-width: 86ch }
+.letter { width: 36px; height: 36px; border: 1px solid var(--glow); color: var(--glow); display: grid; place-items: center; font-weight: 800 }
+.opt-head h2 { margin: 0 0 6px; font-size: 21px; color: var(--white) }
+.opt-head p { margin: 0 0 6px; color: var(--ink) }
+.opt-head .meta { color: var(--dim); font-size: 13px }
+.opt-head .meta b { color: var(--ink); font-weight: 600 }
+.frame { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #000 }
+.frame-bar { display: flex; justify-content: space-between; gap: 12px; padding: 8px 14px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--dim); flex-wrap: wrap }
+.frame-bar b { color: var(--glow); font-weight: 600 }
+
+/* shared stage content */
+.k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim) }
+.tag { display: inline-block; justify-self: start; font-size: 12px; padding: 1px 8px; border: 1px solid var(--glow); color: var(--glow); border-radius: 2px }
+.tag.none { border-color: var(--faint); color: var(--dim) }
+.term { margin: 0; font: inherit; font-size: 12.5px; line-height: 1.5; background: var(--panel); border-left: 2px solid var(--glow); padding: 10px 12px; overflow-x: auto; white-space: pre; color: var(--ink) }
+.term .x { color: var(--bug) } .term .v { color: var(--glow) } .term .p { color: var(--dim) }
+
+/* ---------- A: track map ---------- */
+.a-scroll { height: 600px; overflow-y: auto; overscroll-behavior: contain; position: relative }
+.a-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 }
+.a-map { position: sticky; top: 0; height: 600px; padding: 24px; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; border-right: 1px solid var(--line); background: #000 }
+.a-map svg { width: 100%; height: 100%; display: block }
+.a-now { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap }
+.a-now b { color: var(--white); font-size: 18px }
+.a-list { padding: 260px 28px 300px; display: grid; gap: 140px }
+.a-card { display: grid; gap: 10px; opacity: .35; transition: opacity .3s }
+.a-card.on { opacity: 1 }
+.a-card h3 { margin: 0; font-size: 20px; color: var(--white) }
+.a-card p { margin: 0 }
+.a-card.idle h3 { color: var(--dim) }
+.legend-a { display: flex; gap: 16px; font-size: 12px; color: var(--dim); flex-wrap: wrap }
+.legend-a i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--glow); margin-right: 6px; vertical-align: middle }
+.legend-a i.n { background: transparent; border: 1px solid var(--faint) }
+
+/* ---------- B: road descends ---------- */
+.b-scroll { height: 620px; overflow-y: auto; overscroll-behavior: contain; position: relative; background:
+  radial-gradient(circle at 50% 0, rgba(57,255,122,.05), transparent 60%), #000 }
+.b-track { position: relative }
+.b-track svg { position: absolute; inset: 0; display: block }
+.b-card { position: absolute; display: grid; gap: 8px; padding: 14px 16px; border: 1px solid var(--line); background: rgba(3,18,10,.92); max-width: 420px }
+.b-card h3 { margin: 0; font-size: 17px; color: var(--white) }
+.b-card p { margin: 0; font-size: 13.5px }
+.b-card.idle { border-style: dashed; background: rgba(0,0,0,.85) }
+.b-card.idle h3 { color: var(--dim) }
+.b-card.on { border-color: var(--glow); box-shadow: 0 0 0 1px rgba(57,255,122,.25), 0 0 24px -6px rgba(57,255,122,.35) }
+.b-start, .b-end { position: absolute; left: 0; right: 0; text-align: center; font-size: 12px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase }
+
+/* ---------- C: sector board ---------- */
+.c-body { display: grid; gap: 0 }
+.c-map { padding: 18px 20px 6px; border-bottom: 1px solid var(--line) }
+.c-map svg { width: 100%; height: auto; display: block; max-height: 260px }
+.c-sectors { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--dim); padding: 6px 0 10px }
+.c-sectors span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 8px; vertical-align: middle; background: var(--c) }
+.c-board { overflow-x: auto }
+.c-board table { width: 100%; border-collapse: collapse; min-width: 640px; font: inherit; color: var(--ink) }
+.c-board th { text-align: left; font-weight: 600; font-size: 11px; letter-spacing: .12em; color: var(--dim); padding: 10px 14px; border-bottom: 1px solid var(--line); text-transform: uppercase }
+.c-board td { padding: 0; border-bottom: 1px solid var(--line) }
+.c-row button { all: unset; box-sizing: border-box; display: grid; grid-template-columns: 52px minmax(0, 1.3fr) 120px 130px 110px; gap: 12px; width: 100%; padding: 11px 14px; cursor: pointer; align-items: center }
+.c-row button:hover { background: rgba(57,255,122,.05) }
+.c-row button:focus-visible { outline: 2px solid var(--glow); outline-offset: -2px }
+.c-row.on button { background: rgba(57,255,122,.09) }
+.c-pos { color: var(--dim); font-variant-numeric: tabular-nums }
+.c-name { color: var(--white); font-weight: 600 }
+.c-sec { font-size: 12px }
+.c-st { font-size: 11.5px; letter-spacing: .08em; font-weight: 600 }
+.c-st.ok { color: var(--glow) } .c-st.no { color: var(--dim) }
+.c-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 4px 14px 16px 78px }
+.c-detail p { margin: 0 }
+.c-detail[hidden] { display: none }
+.c-head-row { display: grid; grid-template-columns: 52px minmax(0, 1.3fr) 120px 130px 110px; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 11px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; min-width: 640px }
+
+@media (max-width: 760px) {
+  .a-grid { grid-template-columns: minmax(0, 1fr) }
+  .a-map { height: 250px; border-right: 0; border-bottom: 1px solid var(--line); z-index: 2; padding: 12px 16px }
+  .a-list { padding: 60px 16px 260px; gap: 110px }
+  .c-detail { grid-template-columns: minmax(0, 1fr); padding-left: 14px }
+}
+@media (prefers-reduced-motion: reduce) { .a-card { transition: none } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">greenharness.dev · section below “What you just drove through”</span>
+    <h1>Three ways to drive the development lifecycle as a circuit</h1>
+    <p>All three use the same ten stops, from deciding what to build to learning from a mistake, and the lap starts again. At each stop the page says what the harness does there. At CI and deploy it does nothing, and the page says so. Scroll inside A and B; click rows in C.</p>
+    <nav class="jump" aria-label="Options"><a href="#track-map">A · Track map</a><a href="#road-down">B · The road goes on</a><a href="#sector-board">C · Timing board</a></nav>
+  </header>
+
+  <section class="opt" id="track-map">
+    <div class="opt-head"><span class="letter">A</span><div>
+      <h2>Track map</h2>
+      <p>A top-down circuit stays pinned on the left like a race track map, with the ten stops as corners. As you scroll the stops on the right, the car drives to that corner and the map names it.</p>
+      <p class="meta"><b>Best for</b> seeing the whole loop at once while reading one stop. <b>Risk</b> on phones the map has to shrink to a strip above the text.</p>
+    </div></div>
+    <div class="frame">
+      <div class="frame-bar"><span>scroll inside this frame</span><span><b>●</b> harness acts · ○ yours alone</span></div>
+      <div class="a-scroll" id="aScroll" tabindex="0" aria-label="Track map demo, scrollable">
+        <div class="a-grid">
+          <div class="a-map">
+            <div class="a-now"><span class="k" id="aTurn">T1</span><b id="aName">Decide</b><span class="tag" id="aPart">decisions</span></div>
+            <svg viewBox="0 0 420 320" id="aSvg" aria-hidden="true"></svg>
+            <div class="legend-a"><span><i></i>harness acts</span><span><i class="n"></i>yours alone</span><span>↺ the lap starts again</span></div>
+          </div>
+          <div class="a-list" id="aList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="road-down">
+    <div class="opt-head"><span class="letter">B</span><div>
+      <h2>The road goes on</h2>
+      <p>The road from the game keeps going down the page. The car follows it as you scroll, and each bend has a pit board for its stop. Stops where the harness does nothing are plain road signs. At the bottom the lap starts again.</p>
+      <p class="meta"><b>Best for</b> continuity with the game; it feels like the same drive. <b>Risk</b> the longest section, and the winding road takes width on phones.</p>
+    </div></div>
+    <div class="frame">
+      <div class="frame-bar"><span>scroll inside this frame</span><span>the car follows your scroll</span></div>
+      <div class="b-scroll" id="bScroll" tabindex="0" aria-label="Road demo, scrollable"><div class="b-track" id="bTrack"></div></div>
+    </div>
+  </section>
+
+  <section class="opt" id="sector-board">
+    <div class="opt-head"><span class="letter">C</span><div>
+      <h2>Timing board</h2>
+      <p>A compact circuit split into three sectors like a race timing screen: before code, while coding, after the push. The car laps on its own. The board lists every stop; open a row to see what the harness does and the car pulls in there.</p>
+      <p class="meta"><b>Best for</b> a short page and scanning: the whole lifecycle fits in one screen. <b>Risk</b> less of a story; it reads more like a spec.</p>
+    </div></div>
+    <div class="frame">
+      <div class="frame-bar"><span>click a row</span><span>the car laps until you pick a stop</span></div>
+      <div class="c-body">
+        <div class="c-map">
+          <svg viewBox="0 0 640 230" id="cSvg" aria-hidden="true"></svg>
+          <div class="c-sectors"><span style="--c:#7ff7ff">S1 · before code</span><span style="--c:#39ff7a">S2 · while coding</span><span style="--c:#eafff0">S3 · after the push</span></div>
+        </div>
+        <div class="c-board"><div class="c-head-row"><span>Turn</span><span>Stop</span><span>Sector</span><span>Harness</span><span>Status</span></div><div id="cRows"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var STAGES = [
+    { name: "Decide", sec: 1, part: "decisions", what: "Before planning, the agent asks what your team already decided. The answer comes from your ADRs, with an exit code.",
+      term: '<span class="p">$</span> grh decisions resolve auth.session\n<span class="v">decided</span> · ADR-0031 · server-side sessions · exit 0' },
+    { name: "Hand out the task", sec: 1, part: "router", what: "Each bounded task goes to the cheapest model that can do it, with the effort it needs. If the result falls short, it escalates.",
+      term: '<span class="p">$</span> grh router run "fix the flaky retry test"\n→ small model · low effort\n<span class="v">✓</span> checks green · accepted' },
+    { name: "Code", sec: 2, part: "guardrails", what: "Every command the agent runs is read before it runs. Known mistakes are refused, with the reason and the fix.",
+      term: '<span class="p">$</span> git push 2>&1 | tail -5\n<span class="x">✗ guardrails</span> · pipe-to-tail · denied\n  tail would report success on a rejected push' },
+    { name: "Commit", sec: 2, part: "gate", what: "The git pre-commit hook checks the message, conflict markers and secrets, plus the linters of the languages your repo uses.",
+      term: '<span class="p">$</span> git commit -m "fix: retry on 503"\n<span class="v">✓ gate</span> · message · secrets · conflict markers · clippy' },
+    { name: "Push", sec: 2, part: "gate", what: "The git pre-push hook runs the tests. Then the push is checked to have really reached the remote.",
+      term: '<span class="p">$</span> git push\n<span class="v">✓ gate</span> · tests passed\n<span class="v">✓</span> origin/fix-retry moved' },
+    { name: "Review", sec: 3, part: "conform", what: "Lines that break a decided rule are marked, with the ADR that decided it, so review starts in the right place.",
+      term: '<span class="p">$</span> grh conform check src/\nsrc/api.rs:42  ADR-0044 · no unwrap in handlers' },
+    { name: "CI", sec: 3, part: null, what: "Nothing. CI stays yours. The same checks already ran on the laptop, so it is rarely red." },
+    { name: "Merge", sec: 3, part: "guardrails", what: "Merging without a green run is refused, and so is pushing straight to main.",
+      term: '<span class="p">$</span> gh pr merge --auto\n<span class="x">✗ guardrails</span> · merge-auto · denied\n  wait for the checks, then merge' },
+    { name: "Deploy", sec: 3, part: null, what: "Nothing. Deploying is your platform's job." },
+    { name: "Learn", sec: 3, part: "guardrails", what: "A mistake that got through becomes a new check, so the next lap is safer than this one.",
+      term: '<span class="v">+</span> new rule · bare-stash-pop\n  from a real slip: the wrong stash was popped' }
+  ];
+  STAGES.forEach(function (s, i) { s.turn = "T" + (i + 1); });
+  function mk(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function body(s) {
+    return '<p>' + s.what + '</p>' + (s.term ? '<pre class="term">' + s.term + '</pre>' : '');
+  }
+  function partTag(s) { return s.part ? '<span class="tag">' + s.part + '</span>' : '<span class="tag none">nothing to do here</span>'; }
+
+  // car glyph: rear-view ASCII shrunk to a top-down marker
+  function carGroup(parent) {
+    var g = mk("g", {}, parent);
+    mk("rect", { x: -7, y: -11, width: 14, height: 22, rx: 4, fill: "#000", stroke: "#dcffe6", "stroke-width": 1.6 }, g);
+    mk("rect", { x: -4, y: -6, width: 8, height: 6, fill: "#39ff7a" }, g);
+    mk("rect", { x: -6, y: 8, width: 3, height: 2.4, fill: "#ff3b3b" }, g);
+    mk("rect", { x: 3, y: 8, width: 3, height: 2.4, fill: "#ff3b3b" }, g);
+    return g;
+  }
+  function placeCar(g, path, len) {
+    var L = path.getTotalLength(), l = ((len % L) + L) % L;
+    var p = path.getPointAtLength(l), q = path.getPointAtLength((l + 1) % L);
+    var ang = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI + 90;
+    g.setAttribute("transform", "translate(" + p.x.toFixed(1) + " " + p.y.toFixed(1) + ") rotate(" + ang.toFixed(1) + ")");
+  }
+  function drawRoad(svg, d, w) {
+    mk("path", { d: d, fill: "none", stroke: "#39ff7a", "stroke-width": w + 6, "stroke-dasharray": "6 6", opacity: .55 }, svg);
+    mk("path", { d: d, fill: "none", stroke: "#06150c", "stroke-width": w }, svg);
+    mk("path", { d: d, fill: "none", stroke: "#2c5238", "stroke-width": 1.2, "stroke-dasharray": "5 7" }, svg);
+    return mk("path", { d: d, fill: "none", stroke: "none" }, svg);
+  }
+
+  // ---------------- A ----------------
+  (function () {
+    var svg = document.getElementById("aSvg"), list = document.getElementById("aList"), scroller = document.getElementById("aScroll");
+    var d = "M 70 270 L 300 270 C 370 270 395 215 360 180 L 290 125 C 260 100 280 62 320 60 L 350 58 C 385 55 385 18 350 18 L 120 18 C 55 18 30 60 55 105 L 105 170 C 125 200 80 215 60 225 C 35 238 40 270 70 270 Z";
+    var path = drawRoad(svg, d, 16);
+    var L = path.getTotalLength();
+    var dots = [];
+    STAGES.forEach(function (s, i) {
+      s.aLen = L * (0.04 + i * 0.096);
+      var p = path.getPointAtLength(s.aLen);
+      var g = mk("g", {}, svg);
+      var c = mk("circle", { cx: p.x, cy: p.y, r: 7.5, fill: s.part ? "#39ff7a" : "#000", stroke: s.part ? "#39ff7a" : "#2c5238", "stroke-width": 1.5 }, g);
+      var t = mk("text", { x: p.x, y: p.y + 3.4, "text-anchor": "middle", "font-size": 9, "font-family": "JetBrains Mono, monospace", fill: s.part ? "#000" : "#5f9a6e", "font-weight": 700 }, g);
+      t.textContent = i + 1;
+      dots.push(c);
+    });
+    var start = path.getPointAtLength(0);
+    var flag = mk("text", { x: start.x - 4, y: start.y + 22, "font-size": 10, "font-family": "JetBrains Mono, monospace", fill: "#5f9a6e" }, svg); flag.textContent = "START ▸";
+    var car = carGroup(svg);
+    var cur = STAGES[0].aLen, target = cur;
+    placeCar(car, path, cur);
+    list.innerHTML = STAGES.map(function (s, i) {
+      return '<article class="a-card' + (s.part ? '' : ' idle') + '" data-i="' + i + '"><span class="k">' + s.turn + ' · ' + ["", "before code", "while coding", "after the push"][s.sec] + '</span><h3>' + s.name + '</h3>' + partTag(s) + body(s) + '</article>';
+    }).join("") + '<article class="a-card" data-i="lap"><span class="k">↺ lap 2</span><h3>The next lap starts with what you learned</h3><p>Every rule the harness has today came from a real slip on an earlier lap.</p></article>';
+    var cards = Array.prototype.slice.call(list.querySelectorAll(".a-card"));
+    function setActive(i) {
+      cards.forEach(function (c) { c.classList.toggle("on", c.dataset.i === String(i)); });
+      var base = Math.floor(cur / L) * L;
+      if (i === "lap") { target = base + L + STAGES[0].aLen; i = 0; } else { target = base + STAGES[i].aLen; }
+      var s = STAGES[i];
+      document.getElementById("aTurn").textContent = s.turn;
+      document.getElementById("aName").textContent = s.name;
+      var pt = document.getElementById("aPart"); pt.textContent = s.part || "nothing to do here"; pt.className = "tag" + (s.part ? "" : " none");
+      dots.forEach(function (c, k) { c.setAttribute("r", k === i ? 10 : 7.5); });
+    }
+    function pick() {
+      var mid = scroller.getBoundingClientRect().top + scroller.clientHeight * 0.5, best = null, bd = 1e9;
+      cards.forEach(function (c) { var r = c.getBoundingClientRect(), dd = Math.abs(r.top + r.height / 2 - mid); if (dd < bd) { bd = dd; best = c; } });
+      if (best && !best.classList.contains("on")) setActive(best.dataset.i === "lap" ? "lap" : +best.dataset.i);
+    }
+    scroller.addEventListener("scroll", pick, { passive: true });
+    setActive(0);
+    (function tick() {
+      cur += (target - cur) * (reduce ? 1 : 0.08);
+      if (Math.abs(target - cur) < 0.3) cur = target;
+      if (cur >= L * 2) { cur -= L; target -= L; }
+      placeCar(car, path, cur);
+      requestAnimationFrame(tick);
+    })();
+  })();
+
+  // ---------------- B ----------------
+  (function () {
+    var scroller = document.getElementById("bScroll"), track = document.getElementById("bTrack");
+    var path, car, samples = [], cards = [], built = 0;
+    function build() {
+      var w = track.clientWidth; if (!w || w === built) return; built = w;
+      track.innerHTML = "";
+      var narrow = w < 640, gap = narrow ? 340 : 215, top = 90, H = top + STAGES.length * gap + 200;
+      track.style.height = H + "px";
+      var svg = mk("svg", { width: w, height: H, viewBox: "0 0 " + w + " " + H }, track);
+      var xs = narrow ? [32, 64] : [w / 2 - 34, w / 2 + 34];
+      var pts = [{ x: narrow ? 57 : w / 2, y: 0 }];
+      STAGES.forEach(function (s, i) { pts.push({ x: xs[i % 2], y: top + i * gap + gap * 0.35 }); });
+      pts.push({ x: narrow ? 57 : w / 2, y: H });
+      var d = "M " + pts[0].x + " " + pts[0].y;
+      for (var i = 1; i < pts.length; i++) { var a = pts[i - 1], b = pts[i], m = (b.y - a.y) / 2; d += " C " + a.x + " " + (a.y + m) + " " + b.x + " " + (b.y - m) + " " + b.x + " " + b.y; }
+      path = drawRoad(svg, d, narrow ? 26 : 44);
+      var L = path.getTotalLength(); samples = [];
+      for (var l = 0; l <= L; l += 4) samples.push([l, path.getPointAtLength(l).y]);
+      // stop markers
+      cards = [];
+      STAGES.forEach(function (s, i) {
+        var p = pts[i + 1];
+        mk("circle", { cx: p.x, cy: p.y, r: narrow ? 6 : 8, fill: s.part ? "#39ff7a" : "#000", stroke: s.part ? "#39ff7a" : "#2c5238", "stroke-width": 1.5 }, svg);
+        var el = document.createElement("article");
+        el.className = "b-card" + (s.part ? "" : " idle");
+        el.innerHTML = '<span class="k">' + s.turn + ' · ' + ["", "before code", "while coding", "after the push"][s.sec] + '</span><h3>' + s.name + '</h3>' + partTag(s) + body(s);
+        var cw = narrow ? w - 112 : Math.min(440, w / 2 - 110);
+        el.style.width = cw + "px";
+        el.style.left = (narrow ? 100 : (i % 2 === 0 ? w / 2 - 90 - cw : w / 2 + 90)) + "px";
+        el.style.top = (p.y - 40) + "px";
+        track.appendChild(el); cards.push(el);
+      });
+      var st = document.createElement("div"); st.className = "b-start"; st.style.top = "18px"; st.textContent = narrow ? "" : "▼ from the game above"; track.appendChild(st);
+      var en = document.createElement("div"); en.className = "b-end"; en.style.bottom = "26px"; en.textContent = "↺ lap 2 starts with what you learned"; track.appendChild(en);
+      car = carGroup(svg);
+      move();
+    }
+    function lenAtY(y) {
+      var lo = 0, hi = samples.length - 1;
+      while (lo < hi) { var m = (lo + hi) >> 1; if (samples[m][1] < y) lo = m + 1; else hi = m; }
+      return samples[lo] ? samples[lo][0] : 0;
+    }
+    function move() {
+      if (!path) return;
+      var y = scroller.scrollTop + scroller.clientHeight * 0.42;
+      placeCar(car, path, lenAtY(y));
+      cards.forEach(function (c) { var t = parseFloat(c.style.top); c.classList.toggle("on", y > t - 40 && y < t + c.offsetHeight + 40); });
+    }
+    scroller.addEventListener("scroll", move, { passive: true });
+    new ResizeObserver(build).observe(track);
+    build();
+  })();
+
+  // ---------------- C ----------------
+  (function () {
+    var svg = document.getElementById("cSvg"), rowsEl = document.getElementById("cRows");
+    var d = "M 130 30 L 500 30 C 590 30 620 95 595 140 C 572 185 515 192 465 170 L 385 132 C 345 115 305 128 275 160 C 245 192 190 200 125 196 C 55 192 25 140 38 95 C 50 52 80 30 130 30 Z";
+    var path = drawRoad(svg, d, 18), L = path.getTotalLength();
+    var SEC = { 1: [0, 0.2], 2: [0.2, 0.5], 3: [0.5, 1] }, COL = { 1: "#7ff7ff", 2: "#39ff7a", 3: "#eafff0" };
+    [1, 2, 3].forEach(function (k) {
+      var a = SEC[k][0], b = SEC[k][1];
+      mk("path", { d: d, fill: "none", stroke: COL[k], "stroke-width": 3, opacity: .85, "stroke-dasharray": ((b - a) * L) + " " + L, "stroke-dashoffset": -a * L }, svg);
+      var p = path.getPointAtLength(a * L + 2);
+      var t = mk("text", { x: p.x, y: p.y - 14, "font-size": 11, "font-family": "JetBrains Mono, monospace", fill: COL[k], "font-weight": 700 }, svg); t.textContent = "S" + k;
+    });
+    var counts = { 1: 0, 2: 0, 3: 0 }, idx = { 1: 0, 2: 0, 3: 0 };
+    STAGES.forEach(function (s) { counts[s.sec]++; });
+    var dots = [];
+    STAGES.forEach(function (s, i) {
+      var r = SEC[s.sec], f = r[0] + (r[1] - r[0]) * ((idx[s.sec]++ + 0.5) / counts[s.sec]);
+      s.cLen = f * L;
+      var p = path.getPointAtLength(s.cLen);
+      dots.push(mk("circle", { cx: p.x, cy: p.y, r: 6, fill: s.part ? "#39ff7a" : "#000", stroke: s.part ? "#39ff7a" : "#2c5238", "stroke-width": 1.5 }, svg));
+      var t = mk("text", { x: p.x, y: p.y + 22, "text-anchor": "middle", "font-size": 10, "font-family": "JetBrains Mono, monospace", fill: s.part ? "#b9f5c8" : "#5f9a6e" }, svg); t.textContent = s.turn;
+    });
+    var car = carGroup(svg);
+    rowsEl.innerHTML = STAGES.map(function (s, i) {
+      return '<div class="c-row" data-i="' + i + '"><button type="button" aria-expanded="false" aria-controls="cd' + i + '">' +
+        '<span class="c-pos">' + s.turn + '</span><span class="c-name">' + s.name + '</span>' +
+        '<span class="c-sec" style="color:' + COL[s.sec] + '">S' + s.sec + ' · ' + ["", "before code", "while coding", "after push"][s.sec] + '</span>' +
+        '<span>' + (s.part ? '<span class="tag">' + s.part + '</span>' : '<span class="c-st no">—</span>') + '</span>' +
+        '<span class="c-st ' + (s.part ? 'ok">● CHECKED' : 'no">YOURS') + '</span></button>' +
+        '<div class="c-detail" id="cd' + i + '" hidden>' + body(s) + '</div></div>';
+    }).join("");
+    var rows = Array.prototype.slice.call(rowsEl.querySelectorAll(".c-row"));
+    var cur = 0, hold = -1, holdUntil = 0;
+    function open(i) {
+      rows.forEach(function (r, k) {
+        var on = k === i && !r.classList.contains("on");
+        r.classList.toggle("on", on);
+        r.querySelector("button").setAttribute("aria-expanded", String(on));
+        r.querySelector(".c-detail").hidden = !on;
+        dots[k].setAttribute("r", on ? 9 : 6);
+        if (on) { hold = k; holdUntil = performance.now() + 6000; }
+      });
+      if (!rows[i].classList.contains("on")) hold = -1;
+    }
+    rows.forEach(function (r, i) { r.querySelector("button").addEventListener("click", function () { open(i); }); });
+    open(3);
+    (function tick(now) {
+      if (hold >= 0 && now < holdUntil) {
+        var t = STAGES[hold].cLen; while (t < cur) t += L;
+        cur += Math.min(t - cur, 6);
+      } else if (!reduce) cur += 1.1;
+      if (cur > L * 4) cur -= L * 2;
+      placeCar(car, path, cur);
+      requestAnimationFrame(tick);
+    })(performance.now());
+  })();
+})();
+</script>
