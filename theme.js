@@ -118,7 +118,7 @@
       car: mix(tokens.text, WHITE, 0.45),
       tail: mix(tokens.error, BLACK, 0.08),
       white: mix(tokens.text, WHITE, 0.55),
-      glitch: "#ff4dff",
+      glitch: mix(tokens.error, tokens.info, 0.5),
       slop: tokens.warning,
       slopShade: mix(tokens.warning, BLACK, 0.35),
       bug: tokens.error,
@@ -211,17 +211,25 @@
     for (var i = 0; i < CORE_KEYS.length; i++) if (state.core[CORE_KEYS[i]] !== p.core[CORE_KEYS[i]]) return true;
     return Object.keys(state.overrides).length > 0;
   }
+  function coreIsPreset(state, p) {
+    for (var i = 0; i < CORE_KEYS.length; i++) if (state.core[CORE_KEYS[i]] !== p.core[CORE_KEYS[i]]) return false;
+    return true;
+  }
+  /* Preset values first (exact for Phosphor while its core is untouched), the core derivation for a
+   * changed core, then the overrides on top: one Advanced edit never re-derives the other tokens. */
   function resolve(state) {
     var p = PRESETS[state.preset] || PRESETS.phosphor;
-    var pristine = !isCustom(state);
-    var tokens = pristine && p.exact ? copy(p.exact) : derive(state.core, p.extra);
+    var exact = coreIsPreset(state, p) && p.exact;
+    var tokens = exact ? copy(p.exact) : derive(state.core, p.extra);
+    var base = copy(tokens);
     Object.keys(state.overrides).forEach(function (k) { tokens[k] = state.overrides[k]; });
-    var game = pristine && p.game ? copy(p.game) : deriveGame(tokens);
-    var tint = pristine && p.tint ? { green: p.tint.green.slice(), red: p.tint.red.slice() } : {
+    var same = function (keys) { return keys.every(function (k) { return tokens[k] === base[k]; }); };
+    var game = exact && p.game && same(["text", "error", "errorText", "warning", "info", "textSubtle"]) ? copy(p.game) : deriveGame(tokens);
+    var tint = exact && p.tint && same(["accent", "error"]) ? { green: p.tint.green.slice(), red: p.tint.red.slice() } : {
       green: [parseHex(tokens.accent).r, parseHex(tokens.accent).g, parseHex(tokens.accent).b],
       red: [parseHex(tokens.error).r, parseHex(tokens.error).g, parseHex(tokens.error).b]
     };
-    var page = pristine && p.exact ? copy(PHOSPHOR_PAGE) : derivePage(tokens, game);
+    var page = exact && same(["text", "bg", "accent", "error", "warning"]) ? copy(PHOSPHOR_PAGE) : derivePage(tokens, game);
     return { tokens: tokens, active: deriveActive(tokens), game: game, tint: tint, page: page, custom: isCustom(state) };
   }
   function setCore(state, key, hex) {
@@ -294,8 +302,8 @@
     ["muted text on bg", "textMuted", "bg", 4.5], ["muted text on card", "textMuted", "bgCard", 4.5],
     ["subtle text on bg", "textSubtle", "bg", 4.5], ["subtle text on card", "textSubtle", "bgCard", 4.5],
     ["contrast text on accent", "accentContrast", "accent", 4.5],
-    ["accent on bg", "accent", "bg", 3], ["danger on bg", "error", "bg", 3],
-    ["warning on bg", "warning", "bg", 3], ["info on bg", "info", "bg", 3]
+    ["accent on bg", "accent", "bg", 4.5], ["danger on bg", "error", "bg", 4.5],
+    ["warning on bg", "warning", "bg", 4.5], ["info on bg", "info", "bg", 3]
   ];
   function report(tokens) {
     return BARS.map(function (b) {
@@ -305,7 +313,7 @@
   }
   function warnings(tokens) {
     var w = [];
-    if (rgbDistance(tokens.accent, tokens.error) < 150) w.push("accent and danger are too close to tell apart (red and green must stay readable)");
+    if (rgbDistance(tokens.accent, tokens.error) < 150) w.push("Accent and danger look too alike: pick a danger colour further from the accent");
     return w;
   }
   function darkOnly(bg) { var n = norm(bg); return !!n && luminance(n) <= 0.15; }
@@ -355,7 +363,9 @@
   }
   function get() { return current; }
   function onChange(fn) { listeners.push(fn); return function () { listeners = listeners.filter(function (f) { return f !== fn; }); }; }
-  function hold(on) { holding = !!on; listeners.slice().forEach(function (fn) { try { fn(resolve(current)); } catch (e) { /* ignore */ } }); }
+  // Holding only changes how the game reads its tint, which it does every frame: nothing to notify,
+  // so a focus move inside the picker never rebuilds the road.
+  function hold(on) { holding = !!on; }
   function isHolding() { return holding; }
   function current_() { return resolve(current); }
 
@@ -375,7 +385,7 @@
   // Before first paint: apply the stored theme, or Phosphor. The page reads only these variables,
   // so they are always set, even with nothing stored.
   if (root.document) {
-    var stored = root.localStorage ? load() : null;
+    var stored = load(); // load() catches: reading localStorage itself throws when site data is blocked
     if (stored) current = stored;
     paint();
   }

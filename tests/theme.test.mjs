@@ -60,7 +60,17 @@ test("a preset's accent keeps 15 degrees of OKLCH hue from warning and info (not
   }
 });
 
-test("every game colour maps to a named token, and bug, slop and boost differ from the accent", () => {
+test("every game colour follows its rule from the tokens, and bug, slop and boost differ from the accent", () => {
+  for (const name of T.PRESET_ORDER.filter((n) => n !== "phosphor")) {
+    const r = T.resolve(fresh(name)), t = r.tokens;
+    const rule = {
+      car: T.mix(t.text, "#ffffff", 0.45), tail: T.mix(t.error, "#000000", 0.08), white: T.mix(t.text, "#ffffff", 0.55),
+      glitch: T.mix(t.error, t.info, 0.5), slop: t.warning, slopShade: T.mix(t.warning, "#000000", 0.35),
+      bug: t.error, boost: t.info, brake: t.errorText, hud: t.textSubtle
+    };
+    assert.deepEqual(Object.keys(rule).sort(), [...T.GAME_COLORS].sort());
+    for (const k of T.GAME_COLORS) assert.equal(r.game[k], rule[k], `${name}.${k}`);
+  }
   for (const name of T.PRESET_ORDER) {
     const r = T.resolve(fresh(name));
     for (const k of T.GAME_COLORS) assert.match(r.game[k], /^#[0-9a-f]{6}$/, `${name}.${k}`);
@@ -96,7 +106,46 @@ test("an Advanced override, then a core edit, then a reload, then an export: the
   const out = T.exportTheme(reloaded, theme);
   assert.equal(out.colors.textMuted, "#123456");
   assert.equal(out.colors.accent, "#ff8800");
-  assert.deepEqual(JSON.parse(JSON.stringify(out)), out); // JSON round trip, no re-derivation
+  // The exported file, read back as an Advanced edit of every token, gives the same colours: no re-derivation.
+  const text = JSON.stringify(out, null, 2);
+  let back = T.presetState("amber");
+  for (const k of T.TOKENS) back = T.setToken(back, k, JSON.parse(text).colors[k]);
+  const again = T.exportTheme(back, theme).colors;
+  for (const k of T.TOKENS) assert.equal(again[k], out.colors[k], k);
+});
+
+test("an Advanced edit keeps Phosphor's other values exact: only the edited token moves", () => {
+  const r = T.resolve(T.setToken(fresh(), "textMuted", "#123456"));
+  for (const k of T.TOKENS) assert.equal(r.tokens[k], k === "textMuted" ? "#123456" : theme.colors[k], k);
+  assert.deepEqual(r.tint, { green: [40, 255, 110], red: [255, 60, 70] });
+  assert.equal(r.game.car, "#dcffe6");
+  assert.equal(r.page.head, "#e6ffec");
+  assert.equal(r.custom, true);
+});
+
+test("theme.js loads when reading localStorage throws (site data blocked)", async () => {
+  const { readFileSync: rf } = await import("node:fs");
+  const vm = await import("node:vm");
+  const set = {};
+  const sandbox = {
+    document: { documentElement: { style: { setProperty: (k, v) => { set[k] = v; } } } },
+    get localStorage() { throw new Error("SecurityError: access denied"); }
+  };
+  sandbox.self = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(rf(new URL("../theme.js", import.meta.url), "utf8"), sandbox);
+  assert.equal(typeof sandbox.ghTheme, "object");
+  assert.equal(set["--duro-color-accent"], "#39ff7a");
+  assert.doesNotThrow(() => sandbox.ghTheme.set(sandbox.ghTheme.presetState("amber")));
+  assert.equal(set["--duro-color-accent"], T.PRESETS.amber.core.accent);
+});
+
+test("hold notifies no listener, so a focus move never rebuilds the road", () => {
+  let calls = 0;
+  const off = T.onChange(() => calls++);
+  T.hold(true); T.hold(false);
+  assert.equal(calls, 0);
+  off();
 });
 
 test("an Advanced edit to a core token updates the core input, not an override", () => {
