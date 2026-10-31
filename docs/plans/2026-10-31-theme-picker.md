@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 branch: feat/theme-picker
 repos: [greenharness.github.io]
 adrs: [ui.mockup-handoff (ADR-0016)]
@@ -204,7 +204,7 @@ separate change in your dotfiles; I will not touch it without you.
 - Each core row counts the derived pairs it breaks. A pair with text on it is blamed on the text colour; a pair whose foreground comes from no core colour (warning, info) is blamed on the background.
 - A refused hex entry keeps its text and its reason when the field loses focus, until a valid colour is applied or a preset or Reset replaces it.
 
-## Verification (observed 2026-10-31, tree 9a5a3aa, Chrome via the agent's browser on a local server)
+## Verification (observed 2026-10-31, tree df2d059, Chrome via the agent's browser on a local server)
 
 | Check | Input | Expected | Actual |
 |---|---|---|---|
@@ -220,7 +220,8 @@ separate change in your dotfiles; I will not touch it without you.
 | background pair | background `#666666` | counted on the Background row | "1 pair too low" (warning on bg 4.04:1) |
 | refusal kept | `zzz`, then Tab out | the text and its reason stay | `zzz`, `aria-invalid`, error kept, accent unchanged; cleared by a valid colour or Reset |
 | blocked storage | `localStorage` getter throws (node vm test) | the page still themes | `ghTheme` loads, variables set |
-| close colours | danger `#3fff7f` | warning | "accent and danger are too close" |
+| refusal kept, Advanced | `zzz` in textMuted, then Tab out | the text and its reason stay | `zzz`, `aria-invalid`, error kept; Reset puts back #7fbf92 |
+| close colours | danger `#3fff7f` | warning that names the fix | "Accent and danger look too alike: pick a danger colour further from the accent" |
 | Custom | custom, then Amber, then Custom | the custom state comes back | danger #3fff7f restored |
 | Advanced | open, edit `textMuted`, then accent | 27 rows; override survives a core edit | 27 rows, `over` class, override kept, accent mirrored |
 | override and reload | reload | override still there and marked | kept, row marked "edited" |
@@ -228,12 +229,25 @@ separate change in your dotfiles; I will not touch it without you.
 | hold | focus inside the section, then out | holding true, then false | true, false |
 | corrupt storage | `{"v":1,"preset":"neon",...}`, reload | Phosphor, no error | Phosphor, no new console error |
 | narrow, touch | 320 px, touch, Advanced open | no horizontal scroll, nothing clipped, 44 px targets, Copy reachable | all true |
-| sweep card | every capability named | present in the tool's SKILL.md | lines 19-36 of `worktree-sweep/SKILL.md` (kinds lsp, browser, mcp, process; never-touched list; test runners and fleet-lsp unprotected) |
+| sweep card | every capability named | present in the tool's SKILL.md | lines 19-43 of `worktree-sweep/SKILL.md` (kinds lsp, browser, mcp, process; never-touched list; test runners and fleet-lsp unprotected) |
 
 Not observed: the road held green while the game is in its game-over state (the hold is read inside `tc()` and checked through `isHolding()` only); a keyboard-only pass in a real keyboard session (every control is native); 390 px (the window floor is 500 px, so 500 and 320 were measured).
 
 ## Outcome
 
 The picker is a section of the page, the page and the game follow it, and the sweep card says what the tool does. One PR, five commits after the plan.
+
+## Implementation review
+
+- approve-with-changes, then three Delta rounds to approve-with-changes on tree df2d059 with every finding resolved; about 115k tokens and 6 min in all.
+- Fixed: blocked storage broke the page; one override re-derived Phosphor; tests that could not fail; per-row counts, the Background badge, `aria-describedby`; the road rebuilt on focus; a refusal erased on blur (core and Advanced rows); the sweep card overstating what it stops.
+- deliberate: raw px in the panel, with the artboard's `data-duro` map as the component table (Decision log).
+
+## Interface review
+
+- 15 findings (1 high, 10 medium, 4 low), advisory. Fixed: a non-colour cue on the pressed preset; the error live region kept in the tree; the status line written only on change; a refusal kept with its reason; 4.5:1 for colours used as small text; the section hidden without JS; 16 px fields on touch; labels on their own row below 640 px; plainer sweep card; warnings that name the fix; one name per colour control; room for the focus ring; one vocabulary for danger and error.
+- deliberate: the picker's chrome uses the colours it edits, as Decision 4 says ("flagged, never blocked"), and the presets keep fixed swatches with Reset one click away.
+- deliberate: the sweep card's terminal block stays the tool's real audit output, as the plan requires a real run.
+- deliberate: no info icon on the callout; the page has no icon set.
 
 <!-- panel: repos=gh-site-import adds=ui reviewers=backend,game-ux,react,ui-design,ux-research,codex body-sha=0613a7e8692d -->
