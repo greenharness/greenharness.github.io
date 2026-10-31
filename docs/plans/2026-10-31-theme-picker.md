@@ -198,12 +198,17 @@ separate change in your dotfiles; I will not touch it without you.
 - Carried notes settled in implementation: `active*` are derived and exported but not Advanced rows (the 27 rows only); a preset click keeps the last custom state behind a "Custom" button; a hex field is applied at six digits and checked on blur or Enter; the hue test skips Mono, whose accent has no hue.
 - The sweep card's earlier terminal block was typed, not a real run. It is replaced by the tool's real audit output, with the names shortened.
 - Phosphor's CSS tints (`color-mix()` of the card and inset tokens in place of the old `rgba()` values) differ by at most 3/255 from today's; every token, the game's colours and its two tint worlds are exact.
+- Accent, danger and warning on bg are held to 4.5:1, not the 3:1 of Decision 4: all three are used as small text (a pressed preset, the error and warning lines, the bug sprite). Every shipped preset passes.
+- The panel CSS keeps raw px, as the rest of this page does: the site is not a duro-stack repository. The component map Decision 1 asked for is the artboard's `data-duro` attributes, shown beside the screenshot in the PR's `## Mockup` section, so a separate table would only repeat it.
+- The section and its nav link stay hidden until the panel script runs. The design card's "change them" link then points at a hidden section without JS; the page has no colours without JS anyway, since every colour comes from `theme.js`.
+- Each core row counts the derived pairs it breaks. A pair with text on it is blamed on the text colour; a pair whose foreground comes from no core colour (warning, info) is blamed on the background.
+- A refused hex entry keeps its text and its reason when the field loses focus, until a valid colour is applied or a preset or Reset replaces it.
 
-## Verification (observed 2026-10-31, tree 5c3c030, Chrome via the agent's browser on a local server)
+## Verification (observed 2026-10-31, tree 9a5a3aa, Chrome via the agent's browser on a local server)
 
 | Check | Input | Expected | Actual |
 |---|---|---|---|
-| unit tests | `node --test tests/theme.test.mjs` | all pass | 21 pass |
+| unit tests | `node --test tests/theme.test.mjs` | all pass | 24 pass |
 | no colour literal | the same file's grep test | 0 hex in `index.html`, one `rgb(` builder | 0 and 1 |
 | first load | open the page | Phosphor, no console error | `--glow` #39ff7a, only the favicon 404 |
 | preset | click Amber | `--glow` #ff9f1a, whole canvas amber, nav "Theme · Amber", stored | all of it; screenshot checked |
@@ -211,7 +216,10 @@ separate change in your dotfiles; I will not touch it without you.
 | Reset | click Reset | the 27 tokens equal `theme.json`; tint endpoints and car colour exact | 0 mismatches; (40,255,110), (255,60,70), #dcffe6 |
 | bad hex | `zzz`, change | invalid, last valid colour kept, says why | `aria-invalid`, accent unchanged |
 | light background | `#ffffff` | refused with a line | refused, background unchanged |
-| low contrast | text `#3a3a3a` | applied, flagged | badge "1.8:1 · below 4.5:1", warning line lists 6 pairs |
+| low contrast | text `#3a3a3a` | applied, flagged on the row that caused it | Text badge "1.8:1 · 6 pairs too low", Background "all pairs pass", the warning line names each pair and the fix |
+| background pair | background `#666666` | counted on the Background row | "1 pair too low" (warning on bg 4.04:1) |
+| refusal kept | `zzz`, then Tab out | the text and its reason stay | `zzz`, `aria-invalid`, error kept, accent unchanged; cleared by a valid colour or Reset |
+| blocked storage | `localStorage` getter throws (node vm test) | the page still themes | `ghTheme` loads, variables set |
 | close colours | danger `#3fff7f` | warning | "accent and danger are too close" |
 | Custom | custom, then Amber, then Custom | the custom state comes back | danger #3fff7f restored |
 | Advanced | open, edit `textMuted`, then accent | 27 rows; override survives a core edit | 27 rows, `over` class, override kept, accent mirrored |
