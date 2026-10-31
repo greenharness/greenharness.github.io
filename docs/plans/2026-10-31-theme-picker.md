@@ -191,4 +191,41 @@ separate change in your dotfiles; I will not touch it without you.
 - After merge: the Pages build of the merge commit, then the live URL checked
   the same way.
 
+## Decision log
+
+- 2026-10-31, the person: "I don't want presets in a split panel but in a section". Option (b) of Decision 6: the picker is a `#theme` section in the page flow, docked as the mockup drew it. Everything that belonged to the drawer fell away with it: the modal `<dialog>`, its inert background, the in-dialog "Close theme" button, the transparent backdrop. The drawer-state artboard commit was reverted before the push, so the artboard stays the one that was picked.
+- The green-road hold stays, hung on focus: working anywhere in the section holds the road in its green look, and leaving it releases it (`focusin` and `focusout` on `#theme`).
+- Carried notes settled in implementation: `active*` are derived and exported but not Advanced rows (the 27 rows only); a preset click keeps the last custom state behind a "Custom" button; a hex field is applied at six digits and checked on blur or Enter; the hue test skips Mono, whose accent has no hue.
+- The sweep card's earlier terminal block was typed, not a real run. It is replaced by the tool's real audit output, with the names shortened.
+- Phosphor's CSS tints (`color-mix()` of the card and inset tokens in place of the old `rgba()` values) differ by at most 3/255 from today's; every token, the game's colours and its two tint worlds are exact.
+
+## Verification (observed 2026-10-31, tree 5c3c030, Chrome via the agent's browser on a local server)
+
+| Check | Input | Expected | Actual |
+|---|---|---|---|
+| unit tests | `node --test tests/theme.test.mjs` | all pass | 21 pass |
+| no colour literal | the same file's grep test | 0 hex in `index.html`, one `rgb(` builder | 0 and 1 |
+| first load | open the page | Phosphor, no console error | `--glow` #39ff7a, only the favicon 404 |
+| preset | click Amber | `--glow` #ff9f1a, whole canvas amber, nav "Theme · Amber", stored | all of it; screenshot checked |
+| reload | reload with Amber | still Amber | Amber, nav label, pressed button |
+| Reset | click Reset | the 27 tokens equal `theme.json`; tint endpoints and car colour exact | 0 mismatches; (40,255,110), (255,60,70), #dcffe6 |
+| bad hex | `zzz`, change | invalid, last valid colour kept, says why | `aria-invalid`, accent unchanged |
+| light background | `#ffffff` | refused with a line | refused, background unchanged |
+| low contrast | text `#3a3a3a` | applied, flagged | badge "1.8:1 · below 4.5:1", warning line lists 6 pairs |
+| close colours | danger `#3fff7f` | warning | "accent and danger are too close" |
+| Custom | custom, then Amber, then Custom | the custom state comes back | danger #3fff7f restored |
+| Advanced | open, edit `textMuted`, then accent | 27 rows; override survives a core edit | 27 rows, `over` class, override kept, accent mirrored |
+| override and reload | reload | override still there and marked | kept, row marked "edited" |
+| export | Copy theme.json | parses, 27 colours plus 4 `active*`, override kept | 31 keys, override kept, "Copied theme.json." |
+| hold | focus inside the section, then out | holding true, then false | true, false |
+| corrupt storage | `{"v":1,"preset":"neon",...}`, reload | Phosphor, no error | Phosphor, no new console error |
+| narrow, touch | 320 px, touch, Advanced open | no horizontal scroll, nothing clipped, 44 px targets, Copy reachable | all true |
+| sweep card | every capability named | present in the tool's SKILL.md | lines 19-36 of `worktree-sweep/SKILL.md` (kinds lsp, browser, mcp, process; never-touched list; test runners and fleet-lsp unprotected) |
+
+Not observed: the road held green while the game is in its game-over state (the hold is read inside `tc()` and checked through `isHolding()` only); a keyboard-only pass in a real keyboard session (every control is native); 390 px (the window floor is 500 px, so 500 and 320 were measured).
+
+## Outcome
+
+The picker is a section of the page, the page and the game follow it, and the sweep card says what the tool does. One PR, five commits after the plan.
+
 <!-- panel: repos=gh-site-import adds=ui reviewers=backend,game-ux,react,ui-design,ux-research,codex body-sha=0613a7e8692d -->
