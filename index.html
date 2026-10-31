@@ -376,6 +376,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
   function say(text, warn) { var c = "theme-msg" + (warn ? " warn" : ""); if (msg.textContent !== text) msg.textContent = text; if (msg.className !== c) msg.className = c; }
   function commit(next, note) { state = next; G.set(next); if (note) say(note, false); }
+  function clearErrors() { [coreRows, advRows].forEach(function (rows) { for (var k in rows) accept(rows[k]); }); }
 
   function refuse(row, text) { row.err.textContent = text; row.hex.setAttribute("aria-invalid", "true"); }
   function accept(row) { row.err.textContent = ""; row.hex.removeAttribute("aria-invalid"); }
@@ -431,12 +432,12 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       a.style.background = p.core.accent; g.style.background = p.core.bg;
       dots.appendChild(a); dots.appendChild(g);
       b.appendChild(dots); b.appendChild(document.createTextNode(p.label));
-      b.addEventListener("click", function () { commit(G.selectPreset(state, name), "Preset: " + p.label + "."); });
+      b.addEventListener("click", function () { clearErrors(); commit(G.selectPreset(state, name), "Preset: " + p.label + "."); });
       presetsEl.appendChild(b); presetBtns[name] = b;
     });
     customBtn = h("button", { type: "button", "class": "preset", "aria-pressed": "false" }, "Custom");
     customBtn.hidden = true;
-    customBtn.addEventListener("click", function () { if (!G.current().custom && state.lastCustom) commit(G.restoreCustom(state)); sync(); });
+    customBtn.addEventListener("click", function () { if (!G.current().custom && state.lastCustom) { clearErrors(); commit(G.restoreCustom(state)); sync(); } });
     presetsEl.appendChild(customBtn);
     G.CORE_KEYS.forEach(function (key) {
       var row = makeRow("core-" + key, LABEL[key], applyCore(key));
@@ -461,9 +462,9 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     G.CORE_KEYS.forEach(function (key) {
       var row = coreRows[key], v = state.core[key];
       row.col.value = v;
-      if (document.activeElement !== row.hex) { row.hex.value = v; accept(row); } // a restored valid value clears the error
+      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v; // a refused entry stays, with its reason, until it is fixed
       // Each core row counts the derived pairs it breaks, so a low derived pair points back to the colour that caused it.
-      var broken = rows.filter(function (x) { return !x.ok && (CAUSE[x.fg] === key || CAUSE[x.bg] === key); }).length;
+      var broken = rows.filter(function (x) { return !x.ok && (CAUSE[x.fg] || "bg") === key; }).length;
       var bar = BAR[key], own = "";
       if (bar) own = G.contrast(t[bar[0]], t[bar[1]]).toFixed(1) + ":1";
       row.badge.textContent = (own ? own : "") + (broken ? (own ? " · " : "") + broken + (broken === 1 ? " pair" : " pairs") + " too low" : own ? "" : "all pairs pass");
@@ -484,7 +485,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (notes.length) say(notes.join(". ") + ".", true); else say(HELP, false);
   }
 
-  $("themeReset").addEventListener("click", function () { commit(G.reset(state), "Back to Phosphor."); });
+  $("themeReset").addEventListener("click", function () { clearErrors(); commit(G.reset(state), "Back to Phosphor."); });
   advBtn.addEventListener("click", function () {
     var open = advEl.hidden;
     if (open && !advBuilt) { buildAdvanced(); sync(); }
