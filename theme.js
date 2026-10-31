@@ -128,6 +128,22 @@
     };
   }
 
+  function derivePage(tokens, game) {
+    return {
+      head: mix(tokens.text, WHITE, 0.55),
+      cmdBg: mix(tokens.bg, tokens.accent, 0.05),
+      partOpt: mix(tokens.bg, tokens.accent, 0.02),
+      g1: tokens.accent,
+      g2: mix(tokens.accent, tokens.bg, 0.42),
+      g3: tokens.text,
+      r1: mix(tokens.error, "#ff0000", 0.35),
+      r2: mix(tokens.error, BLACK, 0.45),
+      r3: mix(tokens.error, WHITE, 0.57),
+      white: game.white,
+      slop: game.slop
+    };
+  }
+
   /* ---------- presets ---------- */
   /* Phosphor is today's site, exactly: the 27 values of theme.json, the game colours and the two
    * tint endpoints of the game's green and red worlds. The others are a core four plus warning and
@@ -146,6 +162,14 @@
     bug: "#ff4d4d", boost: "#7ff7ff", brake: "#ff8080", hud: "#5d6b62"
   };
   var PHOSPHOR_TINT = { green: [40, 255, 110], red: [255, 60, 70] };
+  /* Colours only the page uses, each with a rule; Phosphor keeps today's exact value. */
+  var PHOSPHOR_PAGE = {
+    head: "#e6ffec", cmdBg: "#03140a", partOpt: "#030d07", g1: "#39ff7a", g2: "#1d8f45", g3: "#b9f5c8",
+    r1: "#ff3030", r2: "#8f1d1d", r3: "#ffb3b3", white: "#eafff0", slop: "#ffb020"
+  };
+  var PAGE_KEYS = ["head", "cmdBg", "partOpt", "g1", "g2", "g3", "r1", "r2", "r3", "white", "slop"];
+  /* The traffic-light lamps and the GREEN message never follow the theme: red and green keep their meaning. */
+  var LAMP = { green: "#39ff7a", red: "#ff3030", off: "#3a1414" };
 
   var PRESETS = {
     phosphor: {
@@ -197,7 +221,8 @@
       green: [parseHex(tokens.accent).r, parseHex(tokens.accent).g, parseHex(tokens.accent).b],
       red: [parseHex(tokens.error).r, parseHex(tokens.error).g, parseHex(tokens.error).b]
     };
-    return { tokens: tokens, active: deriveActive(tokens), game: game, tint: tint, custom: isCustom(state) };
+    var page = pristine && p.exact ? copy(PHOSPHOR_PAGE) : derivePage(tokens, game);
+    return { tokens: tokens, active: deriveActive(tokens), game: game, tint: tint, page: page, custom: isCustom(state) };
   }
   function setCore(state, key, hex) {
     var n = norm(hex), s = clone(state);
@@ -286,7 +311,13 @@
   function darkOnly(bg) { var n = norm(bg); return !!n && luminance(n) <= 0.15; }
 
   /* ---------- export ---------- */
+  /* The non-colour tokens of theme.json: exported with the colours so the file drops in as is. */
+  var BASE = {
+    typography: { fontFamily: "'JetBrains Mono', ui-monospace, Menlo, monospace", fontFamilyMono: "'JetBrains Mono', ui-monospace, Menlo, monospace" },
+    radii: { xs: "2px", sm: "4px", md: "6px", lg: "8px" }
+  };
   function exportTheme(state, base) {
+    base = base || BASE;
     var r = resolve(state), colors = {};
     TOKENS.forEach(function (k) { colors[k] = r.tokens[k]; });
     ACTIVE.forEach(function (k) { colors[k] = r.active[k]; });
@@ -304,6 +335,7 @@
     var vars = {};
     TOKENS.forEach(function (k) { vars["--duro-color-" + kebab(k)] = r.tokens[k]; });
     ACTIVE.forEach(function (k) { vars["--duro-color-" + kebab(k)] = r.active[k]; });
+    PAGE_KEYS.forEach(function (k) { vars["--gh-" + kebab(k)] = r.page[k]; });
     return vars;
   }
   function load() {
@@ -329,6 +361,7 @@
 
   var api = {
     TOKENS: TOKENS, ACTIVE: ACTIVE, CORE: CORE, CORE_KEYS: CORE_KEYS, GAME_COLORS: GAME_COLORS, PRESETS: PRESETS,
+    PAGE_KEYS: PAGE_KEYS, LAMP: LAMP, BASE: BASE, derivePage: derivePage,
     PRESET_ORDER: PRESET_ORDER, BARS: BARS,
     parseHex: parseHex, toHex: toHex, norm: norm, mix: mix, luminance: luminance, contrast: contrast,
     rgbDistance: rgbDistance, oklabDistance: oklabDistance, hue: hue, hueGap: hueGap, chroma: chroma,
@@ -339,10 +372,12 @@
     load: load, save: save, set: set, get: get, onChange: onChange, hold: hold, isHolding: isHolding, current: current_
   };
 
-  // Before first paint: apply the stored theme, or leave the page as it is (Phosphor).
-  if (root.document && root.localStorage) {
-    var stored = load();
-    if (stored) { current = stored; paint(); }
+  // Before first paint: apply the stored theme, or Phosphor. The page reads only these variables,
+  // so they are always set, even with nothing stored.
+  if (root.document) {
+    var stored = root.localStorage ? load() : null;
+    if (stored) current = stored;
+    paint();
   }
   return api;
 });

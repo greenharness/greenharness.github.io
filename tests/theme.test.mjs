@@ -83,6 +83,8 @@ test("export has the 27 keys plus the derived active* keys, and passes typograph
   assert.equal(out.colors.active, theme.colors.accent);
   assert.deepEqual(out.typography, theme.typography);
   assert.deepEqual(out.radii, theme.radii);
+  assert.deepEqual(T.BASE, { typography: theme.typography, radii: theme.radii }); // the built-in copy tracks theme.json
+  assert.deepEqual(T.exportTheme(fresh()), out);
 });
 
 test("an Advanced override, then a core edit, then a reload, then an export: the override is unchanged", () => {
@@ -154,5 +156,29 @@ test("the CSS variables carry the --duro-color-* names, with active* derived fro
   assert.equal(vars["--duro-color-bg-card"], theme.colors.bgCard);
   assert.equal(vars["--duro-color-accent-contrast"], theme.colors.accentContrast);
   assert.equal(vars["--duro-color-active"], theme.colors.accent);
-  assert.equal(Object.keys(vars).length, 31);
+  assert.equal(vars["--gh-head"], "#e6ffec");
+  assert.equal(Object.keys(vars).length, 31 + T.PAGE_KEYS.length);
+});
+
+test("the page-only colours derive within 16/255 of Phosphor's exact ones, and Phosphor ships them exactly", () => {
+  const r = T.resolve(fresh()), d = T.derivePage(r.tokens, r.game);
+  for (const k of T.PAGE_KEYS) {
+    const want = channels(r.page[k]), got = channels(d[k]);
+    for (let i = 0; i < 3; i++) assert.ok(Math.abs(want[i] - got[i]) <= 16, `page.${k} channel ${i}: ${d[k]} vs ${r.page[k]}`);
+  }
+  assert.deepEqual(r.page, { head: "#e6ffec", cmdBg: "#03140a", partOpt: "#030d07", g1: "#39ff7a", g2: "#1d8f45", g3: "#b9f5c8", r1: "#ff3030", r2: "#8f1d1d", r3: "#ffb3b3", white: "#eafff0", slop: "#ffb020" });
+});
+
+test("index.html carries no colour literal: every colour comes from theme.js", () => {
+  const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.deepEqual(html.match(/#[0-9a-fA-F]{3,8}\b/g) || [], [], "hex literals in index.html");
+  assert.deepEqual((html.match(/rgba?\(/g) || []).length, 1, "only the tc() string builder may build an rgb() colour");
+  assert.match(html, /<script src="theme\.js"><\/script>/);
+});
+
+test("a custom accent moves the page colours; the traffic-light lamps never move", () => {
+  const r = T.resolve(T.setCore(fresh(), "accent", "#ff8800"));
+  assert.equal(r.page.g1, "#ff8800");
+  assert.notEqual(r.page.g2, "#1d8f45");
+  assert.deepEqual(T.LAMP, { green: "#39ff7a", red: "#ff3030", off: "#3a1414" });
 });
