@@ -851,10 +851,15 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       term: '<span class="p">$</span> grh router run "fix the flaky retry test"\n→ small model · low effort\n<span class="v">✓</span> checks green · accepted' },
     { name: "Open a worktree", sec: 2, check: null, skills: ["worktree-task"], agents: [], you: null,
       what: "Every task starts in its own worktree, cut from the latest main, so the checkout you work in is never touched. The approved plan is the first commit, and dependencies are installed before the first edit.",
-      term: '<span class="p">$</span> git worktree add ../app-wt-retry -b fix/retry origin/main\n<span class="v">✓</span> plan committed · deps installed · ready' },
+      term: '<span class="p">$</span> git worktree add ../wt-retry -b retry origin/main\n→ plan committed · deps installed · ready' },
+    { name: "Navigate the code", sec: 2, check: null, skills: [], agents: [], you: null,
+      plugin: "fleet-lsp, a Claude Code plugin. It installs on its own, not through grh.",
+      what: "The agent finds definitions and references through a language server instead of reading whole files and grepping. The session is told to use it, and a whole-file read or a symbol grep is advised against.",
+      vs: "Stock servers run whatever version is on PATH, answer empty while they load, and follow the agent's current directory. fleet-lsp runs the version the repository's lockfile pins, answers only once the server has loaded, and routes each request by file to its own repository, worktrees included.",
+      term: '<span class="p">$</span> fleet-lsp doctor\ntypescript  <span class="v">verified</span> 5.9.3\n  pin: pnpm-lock.yaml typescript 5.9.3\n  server: node_modules/.bin/typescript-language-server' },
     { name: "Code", sec: 2, check: "guardrails", skills: ["diagnosing-bugs"], agents: [], you: null,
       design: "The agent builds from the component catalog, served over MCP, with the ui, colors and typography skills.",
-      what: "Work happens in an isolated worktree. Every command the agent runs is read first, and known mistakes are refused with the reason. A bug with an unknown cause starts from a failing check, not a guess.",
+      what: "Every command the agent runs is read first, and known mistakes are refused with the reason. A bug with an unknown cause starts from a failing check, not a guess.",
       term: '<span class="p">$</span> git push 2>&1 | tail -5\n<span class="x">✗ guardrails</span> · pipe-to-tail · denied' },
     { name: "Commit", sec: 2, check: "gate", skills: [], agents: [], you: null,
       design: "Design-system lint rules run too: no raw colors or sizes, no raw HTML elements.",
@@ -874,7 +879,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       you: "Asked only for what the plan left open, or anything destructive.",
       what: "With green checks and an approved review, the agent merges and releases the plan you approved. Auto-merge and pushes straight to main are refused. A tag is cut only after the commit landed, and never force-pushed." },
     { name: "Sweep the worktrees", sec: 3, check: null, skills: ["worktree-sweep"], agents: [], you: null,
-      what: "Once a task is merged and released, its worktree is removed. A worktree with work that is not pushed, merged and released is kept and reported. The language servers and dev servers still running in a deleted checkout are stopped with it.",
+      what: "Once a task is merged and released, its worktree is removed. A worktree with uncommitted work, or work not yet pushed, merged and released, is kept and reported. The language servers still running in a deleted checkout are stopped too.",
       term: '<span class="p">$</span> worktree-sweep --apply\n<span class="v">removed</span> 2 · kept 1 (never pushed)\nstopped 4 language servers of deleted checkouts' },
     { name: "Deploy", sec: 3, check: null, idle: true, skills: [], agents: [], you: null,
       what: "Nothing. Deploying is your platform's job." },
@@ -884,7 +889,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   ];
 
   var road = document.getElementById("road"), bar = document.getElementById("sectorBar");
-  var LEFT = 7; // stops that happen on your machine, up to and including Push
+  var LEFT = 8; // stops that happen on your machine, up to and including Push
   var path, car, samples = [], cards = [], built = 0, H = 0;
   function mk(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
   function chips(l) { return l.length ? l.map(function (s) { return '<span class="chip">' + s + '</span>'; }).join("") : '<span class="none">—</span>'; }
@@ -895,6 +900,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       '<div><dt>check</dt><dd>' + (s.check ? '<span class="chip check">' + s.check + '</span>' : '<span class="none">' + (s.idle ? 'nothing to do here' : '—') + '</span>') + '</dd></div>' +
       '<div><dt>skills</dt><dd>' + chips(s.skills) + '</dd></div>' +
       '<div><dt>agents</dt><dd>' + chips(s.agents) + '</dd></div>' +
+      (s.plugin ? '<div><dt>plugin</dt><dd>' + s.plugin + '</dd></div>' : '') +
+      (s.vs ? '<div><dt>vs stock</dt><dd>' + s.vs + '</dd></div>' : '') +
       (s.design ? '<div class="dz"><dt>design</dt><dd>' + s.design + ' <span class="optional-inline">optional</span></dd></div>' : '') +
       (s.you ? '<div class="you"><dt>● you</dt><dd>' + s.you + '</dd></div>' : '<div><dt>you</dt><dd><span class="none">the agent drives</span></dd></div>') +
       '</dl>' + (s.term ? '<pre class="term">' + s.term + '</pre>' : '');
