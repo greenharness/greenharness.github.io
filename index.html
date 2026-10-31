@@ -329,7 +329,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     </ol>
     <div class="notes">
       <div><b>The router learns on every task</b><span>It records which model and effort got each kind of task accepted, so the next one starts cheaper.</span></div>
-      <div><b>The track stays clean</b><span><code>worktree-sweep</code> removes finished worktrees and stops the language servers left running in them, so old work never leaks into the next lap.</span></div>
+      <div><b>The track stays clean</b><span><code>worktree-sweep</code> removes finished worktrees and stops whatever is still running in them, so old work never leaks into the next lap.</span></div>
     </div>
   </section>
 
@@ -1099,8 +1099,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       you: "Asked only for what the plan left open, or anything destructive.",
       what: "With green checks and an approved review, the agent merges and releases the plan you approved. Auto-merge and pushes straight to main are refused. A tag is cut only after the commit landed, and never force-pushed." },
     { name: "Sweep the worktrees", sec: 3, check: null, skills: ["worktree-sweep"], agents: [], you: null,
-      what: "Once a task is merged and released, its worktree is removed. A worktree with uncommitted work, or work not yet pushed, merged and released, is kept and reported. The language servers still running in a deleted checkout are stopped too.",
-      term: '<span class="p">$</span> worktree-sweep --apply\n<span class="v">removed</span> 2 · kept 1 (never pushed)\nstopped 4 language servers of deleted checkouts' },
+      what: "Once a task is merged and released, its worktree is removed. A worktree with uncommitted work, or work not yet pushed, merged and released, is kept and reported. Whatever still runs in a deleted worktree is stopped with it: language servers, test browsers, dev servers, shells and orphaned chrome-devtools-mcp servers. The sweep and what is above it, live Claude sessions and what is above them, and the chrome-devtools-mcp chains of a live session are never touched. Test runners and fleet-lsp are not protected just because a session is live.",
+      term: '<span class="p">$</span> worktree-sweep --repo app\nhold    app-wt-theme    484K  no remote ref and no pull request -- never pushed\nNothing to sweep.' },
     { name: "Deploy", sec: 3, check: null, idle: true, skills: [], agents: [], you: null,
       what: "Nothing. Deploying is your platform's job." },
     { name: "Learn", sec: 3, check: null, skills: ["retro"], agents: [],
