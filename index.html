@@ -473,7 +473,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (advBuilt) G.TOKENS.forEach(function (token) {
       var row = advRows[token], v = t[token];
       row.col.value = v;
-      if (document.activeElement !== row.hex) row.hex.value = v;
+      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v;
       row.fs.className = "trow" + (state.overrides[token] ? " over" : "");
       var bad = rows.filter(function (x) { return !x.ok && (x.fg === token || x.bg === token); })[0];
       row.badge.textContent = bad ? ratioText(bad) + " · below " + bad.bar + ":1" : "";
