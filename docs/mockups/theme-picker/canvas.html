@@ -596,32 +596,25 @@ body {
 .row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--duro-spacing-sm); padding-block: var(--duro-spacing-xs); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); font-size: var(--duro-typography-font-size-sm); }
 .row label { color: var(--duro-color-text); }
 .hex { font-family: var(--duro-typography-font-family-mono); font-size: var(--duro-typography-font-size-xs); color: var(--duro-color-text-muted); background: var(--duro-color-bg-inset); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-xs); padding: var(--duro-spacing-xs) var(--duro-spacing-sm); }
-.tabs { display: flex; gap: var(--duro-spacing-xs); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); }
-.tab { padding: var(--duro-spacing-xs) var(--duro-spacing-sm); font-size: var(--duro-typography-font-size-sm); color: var(--duro-color-text-subtle); border-bottom: var(--duro-border-strong) solid transparent; }
-.tab.on { color: var(--duro-color-accent); border-bottom-color: var(--duro-color-accent); }
 .actions { display: flex; gap: var(--duro-spacing-sm); margin-top: auto; }
 .ghost { background: transparent; color: var(--duro-color-text); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font: inherit; font-size: var(--duro-typography-font-size-sm); }
 .badge { font-size: var(--duro-typography-font-size-xs); border-radius: var(--duro-radius-xs); padding: var(--duro-spacing-xs) var(--duro-spacing-sm); background: var(--duro-color-success-bg); color: var(--duro-color-success-text); border: var(--duro-border-hairline) solid var(--duro-color-success-border); }
 .note { margin: 0; color: var(--duro-color-text-subtle); font-size: var(--duro-typography-font-size-xs); }
 
-.stage { position: relative; display: block; height: 100%; }
-.scrim { position: absolute; inset: 0; background: var(--duro-color-scrim); border-radius: var(--duro-radius-md); }
-.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: var(--duro-size-panel-md); display: flex; flex-direction: column; background: var(--duro-color-bg-elevated); border-left: var(--duro-border-hairline) solid var(--duro-color-border-strong); box-shadow: var(--duro-shadow-lg); }
-.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--duro-spacing-md); padding: var(--duro-spacing-md); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); }
-.drawer-head h2 { margin: 0; font-size: var(--duro-typography-font-size-lg); color: var(--duro-color-text); }
-.drawer-body { flex: 1; overflow: hidden; display: grid; gap: var(--duro-spacing-md); padding: var(--duro-spacing-md); align-content: start; }
-.drawer-foot { display: flex; gap: var(--duro-spacing-sm); padding: var(--duro-spacing-md); border-top: var(--duro-border-hairline) solid var(--duro-color-border); }
-.presets-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--duro-spacing-sm); }
+.col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--duro-spacing-md); }
+.bar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--duro-spacing-md); }
 .preset { display: flex; align-items: center; gap: var(--duro-spacing-sm); background: var(--duro-color-bg-card); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font-size: var(--duro-typography-font-size-sm); }
 .preset.on { border-color: var(--duro-color-accent); background: var(--duro-color-success-bg); color: var(--duro-color-accent); }
 .callout { border-left: var(--duro-border-accent) solid var(--duro-color-info); background: var(--duro-color-bg-card); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font-size: var(--duro-typography-font-size-xs); color: var(--duro-color-text-muted); }
-.row { grid-template-columns: auto 1fr auto auto; }
-.custom { margin: 0; color: var(--duro-color-text-subtle); font-size: var(--duro-typography-font-size-xs); }
+.presets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--duro-spacing-sm); }
+.core { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--duro-spacing-sm) var(--duro-spacing-lg); }
+.core .row { border-bottom: 0; }
+.dock { display: grid; gap: var(--duro-spacing-md); }
   &lt;/style&gt;
 &lt;/helmet&gt;
 &lt;div class=&quot;artboard&quot;&gt;
-  &lt;!-- Presets, option (a): a modal drawer over the dimmed page, with Close theme in the fixed header (Drawer, ToggleGroup, Fieldset, Callout). --&gt;
-&lt;div class=&quot;stage&quot;&gt;
+  &lt;!-- Presets: presets first, four core colours, the rest derived (ToggleGroup, Fieldset, Callout in a Panel).. --&gt;
+&lt;div class=&quot;col&quot;&gt;
 &lt;div class=&quot;page&quot; data-duro=&quot;PageShell&quot;&gt;
   &lt;div class=&quot;topbar&quot;&gt;&lt;span class=&quot;logo&quot;&gt;Green Harness&lt;/span&gt;
     &lt;nav class=&quot;nav&quot;&gt;&lt;a data-duro=&quot;TextLink&quot; href=&quot;#&quot;&gt;road&lt;/a&gt;&lt;a data-duro=&quot;TextLink&quot; href=&quot;#&quot;&gt;parts&lt;/a&gt;&lt;a data-duro=&quot;TextLink&quot; href=&quot;#&quot;&gt;skills&lt;/a&gt;&lt;/nav&gt;&lt;/div&gt;
@@ -634,26 +627,23 @@ body {
     &lt;div class=&quot;card&quot; data-duro=&quot;Card&quot;&gt;&lt;b&gt;router&lt;/b&gt;&lt;span&gt;The right model per task.&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
   &lt;div class=&quot;status&quot;&gt;&lt;span class=&quot;ok&quot;&gt;&amp;#10003; gate&lt;/span&gt;&lt;span class=&quot;warn&quot;&gt;! review&lt;/span&gt;&lt;span class=&quot;bad&quot;&gt;&amp;#10007; denied&lt;/span&gt;&lt;span class=&quot;inf&quot;&gt;&amp;#8505; hint&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
-  &lt;div class=&quot;scrim&quot;&gt;&lt;/div&gt;
-  &lt;aside class=&quot;drawer&quot; data-duro=&quot;Drawer.Root&quot; aria-label=&quot;Theme&quot;&gt;
-    &lt;div class=&quot;drawer-head&quot; data-duro=&quot;Drawer.Header&quot;&gt;&lt;div&gt;&lt;h2 data-duro=&quot;Drawer.Title&quot;&gt;Theme&lt;/h2&gt;&lt;p class=&quot;sub&quot;&gt;Start from a preset, then change only the four colours that define it.&lt;/p&gt;&lt;/div&gt;&lt;button class=&quot;ghost&quot; data-duro=&quot;Drawer.Close&quot;&gt;Close theme&lt;/button&gt;&lt;/div&gt;
-    &lt;div class=&quot;drawer-body&quot; data-duro=&quot;Drawer.Body&quot;&gt;
-      &lt;div class=&quot;presets-grid&quot; data-duro=&quot;ToggleGroup&quot;&gt;
-        &lt;span class=&quot;preset on&quot; data-duro=&quot;Toggle pressed&quot;&gt;&lt;span class=&quot;sw s-accent&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Phosphor&lt;/span&gt;
-        &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-cat-orange&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Amber&lt;/span&gt;
-        &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-info&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Cyan&lt;/span&gt;
-        &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-muted&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Mono&lt;/span&gt;
-      &lt;/div&gt;
-      &lt;div data-duro=&quot;Fieldset.Root&quot;&gt;
-        &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-accent&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;accent colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Accent&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#39ff7a&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;15.2:1&lt;/span&gt;&lt;/div&gt;
-        &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-bg&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;background colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Background&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#020803&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;
-        &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-text&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;text colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Text&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#b9f5c8&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;16.3:1&lt;/span&gt;&lt;/div&gt;
-        &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-error&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;danger colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Danger&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#ff4d4d&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;6.2:1&lt;/span&gt;&lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;callout&quot; data-duro=&quot;Callout variant=info icon=info-circle&quot;&gt;The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.&lt;/div&gt;
+  &lt;div class=&quot;panel dock&quot; data-duro=&quot;Panel.Root&quot;&gt;
+    &lt;div data-duro=&quot;Panel.Header&quot;&gt;&lt;h2&gt;Theme&lt;/h2&gt;&lt;p class=&quot;sub&quot;&gt;Start from a preset, then change only the four colours that define it.&lt;/p&gt;&lt;/div&gt;
+    &lt;div class=&quot;presets-grid&quot; data-duro=&quot;ToggleGroup&quot;&gt;
+      &lt;span class=&quot;preset on&quot; data-duro=&quot;Toggle pressed&quot;&gt;&lt;span class=&quot;sw s-accent&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Phosphor&lt;/span&gt;
+      &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-cat-orange&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Amber&lt;/span&gt;
+      &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-info&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Cyan&lt;/span&gt;
+      &lt;span class=&quot;preset&quot; data-duro=&quot;Toggle&quot;&gt;&lt;span class=&quot;sw s-muted&quot;&gt;&lt;/span&gt;&lt;span class=&quot;sw s-bg&quot;&gt;&lt;/span&gt;Mono&lt;/span&gt;
     &lt;/div&gt;
-    &lt;div class=&quot;drawer-foot&quot; data-duro=&quot;Drawer.Footer&quot;&gt;&lt;button class=&quot;ghost&quot; data-duro=&quot;Button variant=ghost&quot;&gt;Reset&lt;/button&gt;&lt;button class=&quot;ghost&quot; data-duro=&quot;Button variant=secondary&quot;&gt;Advanced: 27 colour tokens&lt;/button&gt;&lt;button class=&quot;btn&quot; data-duro=&quot;Button variant=primary&quot;&gt;Copy theme.json&lt;/button&gt;&lt;/div&gt;
-  &lt;/aside&gt;
+    &lt;div class=&quot;core&quot; data-duro=&quot;Fieldset.Root&quot;&gt;
+      &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-accent&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;accent colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Accent&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#39ff7a&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;15.2:1&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-bg&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;background colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Background&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#020803&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-text&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;text colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Text&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#b9f5c8&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;16.3:1&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot; data-duro=&quot;Field.Root&quot;&gt;&lt;span class=&quot;sw s-error&quot; data-duro=&quot;ColorInput&quot; role=&quot;img&quot; aria-label=&quot;danger colour&quot;&gt;&lt;/span&gt;&lt;label data-duro=&quot;Field.Label&quot;&gt;Danger&lt;/label&gt;&lt;span class=&quot;hex&quot; data-duro=&quot;Input&quot;&gt;#ff4d4d&lt;/span&gt;&lt;span class=&quot;badge&quot; data-duro=&quot;Badge variant=success&quot;&gt;6.2:1&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;callout&quot; data-duro=&quot;Callout variant=info icon=info-circle&quot;&gt;The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.&lt;/div&gt;
+    &lt;div class=&quot;actions&quot; data-duro=&quot;Panel.Footer&quot;&gt;&lt;button class=&quot;ghost&quot; data-duro=&quot;Button variant=ghost&quot;&gt;Reset&lt;/button&gt;&lt;button class=&quot;ghost&quot; data-duro=&quot;Button variant=secondary&quot;&gt;Advanced: 27 colour tokens&lt;/button&gt;&lt;button class=&quot;btn&quot; data-duro=&quot;Button variant=primary&quot;&gt;Copy theme.json&lt;/button&gt;&lt;/div&gt;
+  &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/x-dc&gt;

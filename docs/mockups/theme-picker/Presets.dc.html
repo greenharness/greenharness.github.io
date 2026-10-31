@@ -569,32 +569,25 @@ body {
 .row { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: var(--duro-spacing-sm); padding-block: var(--duro-spacing-xs); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); font-size: var(--duro-typography-font-size-sm); }
 .row label { color: var(--duro-color-text); }
 .hex { font-family: var(--duro-typography-font-family-mono); font-size: var(--duro-typography-font-size-xs); color: var(--duro-color-text-muted); background: var(--duro-color-bg-inset); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-xs); padding: var(--duro-spacing-xs) var(--duro-spacing-sm); }
-.tabs { display: flex; gap: var(--duro-spacing-xs); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); }
-.tab { padding: var(--duro-spacing-xs) var(--duro-spacing-sm); font-size: var(--duro-typography-font-size-sm); color: var(--duro-color-text-subtle); border-bottom: var(--duro-border-strong) solid transparent; }
-.tab.on { color: var(--duro-color-accent); border-bottom-color: var(--duro-color-accent); }
 .actions { display: flex; gap: var(--duro-spacing-sm); margin-top: auto; }
 .ghost { background: transparent; color: var(--duro-color-text); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font: inherit; font-size: var(--duro-typography-font-size-sm); }
 .badge { font-size: var(--duro-typography-font-size-xs); border-radius: var(--duro-radius-xs); padding: var(--duro-spacing-xs) var(--duro-spacing-sm); background: var(--duro-color-success-bg); color: var(--duro-color-success-text); border: var(--duro-border-hairline) solid var(--duro-color-success-border); }
 .note { margin: 0; color: var(--duro-color-text-subtle); font-size: var(--duro-typography-font-size-xs); }
 
-.stage { position: relative; display: block; height: 100%; }
-.scrim { position: absolute; inset: 0; background: var(--duro-color-scrim); border-radius: var(--duro-radius-md); }
-.drawer { position: absolute; top: 0; right: 0; bottom: 0; width: var(--duro-size-panel-md); display: flex; flex-direction: column; background: var(--duro-color-bg-elevated); border-left: var(--duro-border-hairline) solid var(--duro-color-border-strong); box-shadow: var(--duro-shadow-lg); }
-.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--duro-spacing-md); padding: var(--duro-spacing-md); border-bottom: var(--duro-border-hairline) solid var(--duro-color-border); }
-.drawer-head h2 { margin: 0; font-size: var(--duro-typography-font-size-lg); color: var(--duro-color-text); }
-.drawer-body { flex: 1; overflow: hidden; display: grid; gap: var(--duro-spacing-md); padding: var(--duro-spacing-md); align-content: start; }
-.drawer-foot { display: flex; gap: var(--duro-spacing-sm); padding: var(--duro-spacing-md); border-top: var(--duro-border-hairline) solid var(--duro-color-border); }
-.presets-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--duro-spacing-sm); }
+.col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--duro-spacing-md); }
+.bar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--duro-spacing-md); }
 .preset { display: flex; align-items: center; gap: var(--duro-spacing-sm); background: var(--duro-color-bg-card); border: var(--duro-border-hairline) solid var(--duro-color-border-strong); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font-size: var(--duro-typography-font-size-sm); }
 .preset.on { border-color: var(--duro-color-accent); background: var(--duro-color-success-bg); color: var(--duro-color-accent); }
 .callout { border-left: var(--duro-border-accent) solid var(--duro-color-info); background: var(--duro-color-bg-card); border-radius: var(--duro-radius-sm); padding: var(--duro-spacing-sm) var(--duro-spacing-md); font-size: var(--duro-typography-font-size-xs); color: var(--duro-color-text-muted); }
-.row { grid-template-columns: auto 1fr auto auto; }
-.custom { margin: 0; color: var(--duro-color-text-subtle); font-size: var(--duro-typography-font-size-xs); }
+.presets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--duro-spacing-sm); }
+.core { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--duro-spacing-sm) var(--duro-spacing-lg); }
+.core .row { border-bottom: 0; }
+.dock { display: grid; gap: var(--duro-spacing-md); }
   </style>
 </helmet>
 <div class="artboard">
-  <!-- Presets, option (a): a modal drawer over the dimmed page, with Close theme in the fixed header (Drawer, ToggleGroup, Fieldset, Callout). -->
-<div class="stage">
+  <!-- Presets: presets first, four core colours, the rest derived (ToggleGroup, Fieldset, Callout in a Panel).. -->
+<div class="col">
 <div class="page" data-duro="PageShell">
   <div class="topbar"><span class="logo">Green Harness</span>
     <nav class="nav"><a data-duro="TextLink" href="#">road</a><a data-duro="TextLink" href="#">parts</a><a data-duro="TextLink" href="#">skills</a></nav></div>
@@ -607,26 +600,23 @@ body {
     <div class="card" data-duro="Card"><b>router</b><span>The right model per task.</span></div></div>
   <div class="status"><span class="ok">&#10003; gate</span><span class="warn">! review</span><span class="bad">&#10007; denied</span><span class="inf">&#8505; hint</span></div>
 </div>
-  <div class="scrim"></div>
-  <aside class="drawer" data-duro="Drawer.Root" aria-label="Theme">
-    <div class="drawer-head" data-duro="Drawer.Header"><div><h2 data-duro="Drawer.Title">Theme</h2><p class="sub">Start from a preset, then change only the four colours that define it.</p></div><button class="ghost" data-duro="Drawer.Close">Close theme</button></div>
-    <div class="drawer-body" data-duro="Drawer.Body">
-      <div class="presets-grid" data-duro="ToggleGroup">
-        <span class="preset on" data-duro="Toggle pressed"><span class="sw s-accent"></span><span class="sw s-bg"></span>Phosphor</span>
-        <span class="preset" data-duro="Toggle"><span class="sw s-cat-orange"></span><span class="sw s-bg"></span>Amber</span>
-        <span class="preset" data-duro="Toggle"><span class="sw s-info"></span><span class="sw s-bg"></span>Cyan</span>
-        <span class="preset" data-duro="Toggle"><span class="sw s-muted"></span><span class="sw s-bg"></span>Mono</span>
-      </div>
-      <div data-duro="Fieldset.Root">
-        <div class="row" data-duro="Field.Root"><span class="sw s-accent" data-duro="ColorInput" role="img" aria-label="accent colour"></span><label data-duro="Field.Label">Accent</label><span class="hex" data-duro="Input">#39ff7a</span><span class="badge" data-duro="Badge variant=success">15.2:1</span></div>
-        <div class="row" data-duro="Field.Root"><span class="sw s-bg" data-duro="ColorInput" role="img" aria-label="background colour"></span><label data-duro="Field.Label">Background</label><span class="hex" data-duro="Input">#020803</span><span></span></div>
-        <div class="row" data-duro="Field.Root"><span class="sw s-text" data-duro="ColorInput" role="img" aria-label="text colour"></span><label data-duro="Field.Label">Text</label><span class="hex" data-duro="Input">#b9f5c8</span><span class="badge" data-duro="Badge variant=success">16.3:1</span></div>
-        <div class="row" data-duro="Field.Root"><span class="sw s-error" data-duro="ColorInput" role="img" aria-label="danger colour"></span><label data-duro="Field.Label">Danger</label><span class="hex" data-duro="Input">#ff4d4d</span><span class="badge" data-duro="Badge variant=success">6.2:1</span></div>
-      </div>
-      <div class="callout" data-duro="Callout variant=info icon=info-circle">The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.</div>
+  <div class="panel dock" data-duro="Panel.Root">
+    <div data-duro="Panel.Header"><h2>Theme</h2><p class="sub">Start from a preset, then change only the four colours that define it.</p></div>
+    <div class="presets-grid" data-duro="ToggleGroup">
+      <span class="preset on" data-duro="Toggle pressed"><span class="sw s-accent"></span><span class="sw s-bg"></span>Phosphor</span>
+      <span class="preset" data-duro="Toggle"><span class="sw s-cat-orange"></span><span class="sw s-bg"></span>Amber</span>
+      <span class="preset" data-duro="Toggle"><span class="sw s-info"></span><span class="sw s-bg"></span>Cyan</span>
+      <span class="preset" data-duro="Toggle"><span class="sw s-muted"></span><span class="sw s-bg"></span>Mono</span>
     </div>
-    <div class="drawer-foot" data-duro="Drawer.Footer"><button class="ghost" data-duro="Button variant=ghost">Reset</button><button class="ghost" data-duro="Button variant=secondary">Advanced: 27 colour tokens</button><button class="btn" data-duro="Button variant=primary">Copy theme.json</button></div>
-  </aside>
+    <div class="core" data-duro="Fieldset.Root">
+      <div class="row" data-duro="Field.Root"><span class="sw s-accent" data-duro="ColorInput" role="img" aria-label="accent colour"></span><label data-duro="Field.Label">Accent</label><span class="hex" data-duro="Input">#39ff7a</span><span class="badge" data-duro="Badge variant=success">15.2:1</span></div>
+      <div class="row" data-duro="Field.Root"><span class="sw s-bg" data-duro="ColorInput" role="img" aria-label="background colour"></span><label data-duro="Field.Label">Background</label><span class="hex" data-duro="Input">#020803</span><span></span></div>
+      <div class="row" data-duro="Field.Root"><span class="sw s-text" data-duro="ColorInput" role="img" aria-label="text colour"></span><label data-duro="Field.Label">Text</label><span class="hex" data-duro="Input">#b9f5c8</span><span class="badge" data-duro="Badge variant=success">16.3:1</span></div>
+      <div class="row" data-duro="Field.Root"><span class="sw s-error" data-duro="ColorInput" role="img" aria-label="danger colour"></span><label data-duro="Field.Label">Danger</label><span class="hex" data-duro="Input">#ff4d4d</span><span class="badge" data-duro="Badge variant=success">6.2:1</span></div>
+    </div>
+    <div class="callout" data-duro="Callout variant=info icon=info-circle">The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.</div>
+    <div class="actions" data-duro="Panel.Footer"><button class="ghost" data-duro="Button variant=ghost">Reset</button><button class="ghost" data-duro="Button variant=secondary">Advanced: 27 colour tokens</button><button class="btn" data-duro="Button variant=primary">Copy theme.json</button></div>
+  </div>
 </div>
 </div>
 </x-dc>
