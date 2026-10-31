@@ -274,7 +274,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     </ol>
     <div class="notes">
       <div><b>The router learns on every task</b><span>It records which model and effort got each kind of task accepted, so the next one starts cheaper.</span></div>
-      <div><b>The track stays clean</b><span><code>worktree-sweep</code> removes finished worktrees, so old work never leaks into the next lap.</span></div>
+      <div><b>The track stays clean</b><span><code>worktree-sweep</code> removes finished worktrees and stops the language servers left running in them, so old work never leaks into the next lap.</span></div>
     </div>
   </section>
 
@@ -849,7 +849,10 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       you: "You trust a repository once, the first time.",
       what: "Each bounded task goes to the cheapest model that can do it, runs in its own worktree, and is checked before it is accepted. When it falls short, it escalates.",
       term: '<span class="p">$</span> grh router run "fix the flaky retry test"\n→ small model · low effort\n<span class="v">✓</span> checks green · accepted' },
-    { name: "Code", sec: 2, check: "guardrails", skills: ["worktree-task", "diagnosing-bugs"], agents: [], you: null,
+    { name: "Open a worktree", sec: 2, check: null, skills: ["worktree-task"], agents: [], you: null,
+      what: "Every task starts in its own worktree, cut from the latest main, so the checkout you work in is never touched. The approved plan is the first commit, and dependencies are installed before the first edit.",
+      term: '<span class="p">$</span> git worktree add ../app-wt-retry -b fix/retry origin/main\n<span class="v">✓</span> plan committed · deps installed · ready' },
+    { name: "Code", sec: 2, check: "guardrails", skills: ["diagnosing-bugs"], agents: [], you: null,
       design: "The agent builds from the component catalog, served over MCP, with the ui, colors and typography skills.",
       what: "Work happens in an isolated worktree. Every command the agent runs is read first, and known mistakes are refused with the reason. A bug with an unknown cause starts from a failing check, not a guess.",
       term: '<span class="p">$</span> git push 2>&1 | tail -5\n<span class="x">✗ guardrails</span> · pipe-to-tail · denied' },
@@ -870,15 +873,18 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     { name: "Merge and release", sec: 3, check: "guardrails", skills: ["merge-when-green", "tag-release"], agents: [],
       you: "Asked only for what the plan left open, or anything destructive.",
       what: "With green checks and an approved review, the agent merges and releases the plan you approved. Auto-merge and pushes straight to main are refused. A tag is cut only after the commit landed, and never force-pushed." },
+    { name: "Sweep the worktrees", sec: 3, check: null, skills: ["worktree-sweep"], agents: [], you: null,
+      what: "Once a task is merged and released, its worktree is removed. A worktree with work that is not pushed, merged and released is kept and reported. The language servers and dev servers still running in a deleted checkout are stopped with it.",
+      term: '<span class="p">$</span> worktree-sweep --apply\n<span class="v">removed</span> 2 · kept 1 (never pushed)\nstopped 4 language servers of deleted checkouts' },
     { name: "Deploy", sec: 3, check: null, idle: true, skills: [], agents: [], you: null,
       what: "Nothing. Deploying is your platform's job." },
-    { name: "Learn", sec: 3, check: null, skills: ["retro", "worktree-sweep"], agents: [],
+    { name: "Learn", sec: 3, check: null, skills: ["retro"], agents: [],
       you: "You approve each change to the harness.",
       what: "A retro reads the sessions, finds where time was lost or a mistake got through, and proposes the change that stops it. The pit lane below shows how." }
   ];
 
   var road = document.getElementById("road"), bar = document.getElementById("sectorBar");
-  var LEFT = 6; // stops that happen on your machine, up to and including Push
+  var LEFT = 7; // stops that happen on your machine, up to and including Push
   var path, car, samples = [], cards = [], built = 0, H = 0;
   function mk(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
   function chips(l) { return l.length ? l.map(function (s) { return '<span class="chip">' + s + '</span>'; }).join("") : '<span class="none">—</span>'; }
