@@ -1,0 +1,8 @@
+# generated
+theme-pane.js
+theme-pane.css
+pnpm-lock.yaml
+# the page is one hand-written file with long inline lines; it was never prettier-formatted
+index.html
+theme.js
+tests/theme.test.mjs

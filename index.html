@@ -177,36 +177,12 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 
 /* ---------- theme picker ---------- */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
-.theme-box { display: grid; gap: 16px; margin-top: 18px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px }
-.theme-box [hidden] { display: none }
-.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px }
-.preset { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); color: var(--ink); border: 1px solid var(--dim); border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; text-align: left }
-.preset[aria-pressed="true"] { border: 2px solid var(--glow); color: var(--glow); font-weight: 600; background: color-mix(in srgb, var(--glow) 8%, var(--panel)) }
-.preset[aria-pressed="true"]::after { content: "✓"; margin-left: auto }
-.preset .dots { display: inline-flex; gap: 3px; flex: none }
-.preset .dot { width: 16px; height: 16px; border-radius: 2px; border: 1px solid var(--dim) }
-.core, .adv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 28px; min-width: 0 }
-.adv { max-height: 440px; overflow: auto; padding: 10px 4px 2px; border-top: 1px solid var(--line) }
-.trow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 4px 10px; margin: 0; padding: 5px 0; border: 0; border-bottom: 1px solid var(--line); min-width: 0 }
-.trow label { color: var(--ink); font-size: 13px; overflow-wrap: anywhere }
-.trow.over label::after { content: " · edited"; color: var(--you); font-size: 11.5px }
-.trow input[type="color"] { width: 28px; height: 28px; padding: 0; border: 1px solid var(--dim); border-radius: 3px; background: none; cursor: pointer }
-.hex { width: 8.6em; font: inherit; font-size: 12.5px; padding: 5px 8px; background: var(--duro-color-bg-inset); color: var(--ink); border: 1px solid var(--dim); border-radius: 3px }
-.hex[aria-invalid="true"] { border-color: var(--you); color: var(--you) }
-.badge { font-size: 11.5px; padding: 1px 6px; border: 1px solid var(--duro-color-success-border); color: var(--duro-color-success-text); background: var(--duro-color-success-bg); border-radius: 2px; white-space: nowrap }
-.badge:empty { display: none }
-.badge.bad { border-color: var(--duro-color-warning-border); color: var(--duro-color-warning-text); background: var(--duro-color-warning-bg) }
-.err { grid-column: 1 / -1; color: var(--you); font-size: 12px }
-.callout { margin: 0; padding: 8px 12px; border-left: 3px solid var(--boost); background: var(--duro-color-bg-inset); color: var(--dim); font-size: 12.5px }
-.theme-msg { margin: 0; min-height: 1.4em; font-size: 12.5px; color: var(--dim) }
-.theme-msg.warn { color: var(--you) }
-.theme-actions { display: flex; flex-wrap: wrap; gap: 8px }
 .tbtn { font: inherit; font-size: 13px; padding: 8px 14px; background: transparent; color: var(--ink); border: 1px solid var(--dim); border-radius: 4px; cursor: pointer }
 .tbtn.primary { background: var(--glow); color: var(--duro-color-accent-contrast); border-color: var(--glow); font-weight: 600 }
-.preset:focus-visible, .tbtn:focus-visible, .theme-box input:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
-.theme-out { width: 100%; min-height: 170px; font: inherit; font-size: 12px; background: var(--duro-color-bg-inset); color: var(--ink); border: 1px solid var(--dim); border-radius: 3px; padding: 8px }
-@media (max-width: 640px) { .core, .adv { grid-template-columns: minmax(0, 1fr) } .trow { grid-template-columns: auto minmax(0, 1fr) } .trow label { grid-column: 1 / -1; overflow-wrap: normal } .trow .badge { grid-column: 1 / -1; justify-self: start } }
-@media (pointer: coarse) { .trow input[type="color"] { width: 44px; height: 44px } .hex, .tbtn, .preset { min-height: 44px } .hex, .theme-out { font-size: 16px } }
+.tbtn:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
+.theme-msg { margin: 10px 0 0; min-height: 1.4em; font-size: 12.5px; color: var(--dim) }
+.theme-msg.warn { color: var(--you) }
+@media (pointer: coarse) { .tbtn { min-height: 44px } }
 </style>
 
 <header class="top pad">
@@ -242,19 +218,8 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
       <h2 id="themeTitle">Theme</h2>
       <p>Start from a preset, then change only the four colours that define it. The page and the game follow as you go, and your choice stays in this browser.</p>
     </div>
-    <div class="theme-box">
-      <div class="presets" role="group" aria-label="Presets" id="themePresets"></div>
-      <div class="core" id="themeCore"></div>
-      <p class="callout">The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.</p>
-      <p class="theme-msg" id="themeMsg" role="status" aria-live="polite">Each colour is checked against the contrast it needs: a low one is flagged, never blocked.</p>
-      <div class="theme-actions">
-        <button type="button" class="tbtn" id="themeReset">Reset</button>
-        <button type="button" class="tbtn" id="themeAdv" aria-expanded="false" aria-controls="themeAdvanced">Advanced: 27 colour tokens</button>
-        <button type="button" class="tbtn primary" id="themeCopy">Copy theme.json</button>
-      </div>
-      <div class="adv" id="themeAdvanced" hidden></div>
-      <textarea class="theme-out" id="themeOut" aria-label="theme.json" readonly hidden></textarea>
-    </div>
+    <div id="themePane"><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div>
+    <p class="theme-msg" id="themeMsg" role="status" aria-live="polite"></p>
   </section>
 
   <section class="legend" id="parts">
@@ -358,155 +323,34 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   var G = window.ghTheme;
   if (!G) return;
   var $ = function (id) { return document.getElementById(id); };
-  var presetsEl = $("themePresets"), coreEl = $("themeCore"), advEl = $("themeAdvanced"), msg = $("themeMsg"),
-      out = $("themeOut"), link = $("themeLink"), section = $("theme"), advBtn = $("themeAdv"), HELP = msg.textContent;
-  var LABEL = { accent: "Accent", bg: "Background", text: "Text", danger: "Danger" };
-  var BAR = { accent: ["accent", "bg", 4.5], text: ["text", "bg", 4.5], danger: ["error", "bg", 4.5] };
-  // Which core colour each token comes from, for the per-row count. warning and info come from the preset.
-  // A pair with text on it is blamed on the text colour, so a dark text does not also flag the background.
-  var CAUSE = { accent: "accent", accentContrast: "accent", text: "text", textMuted: "text", textSubtle: "text",
-    error: "danger", errorText: "danger" };
-  var state = G.get(), coreRows = {}, advRows = {}, presetBtns = {}, customBtn = null, advBuilt = false;
-
-  function h(tag, attrs, text) {
-    var e = document.createElement(tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function say(text, warn) { var c = "theme-msg" + (warn ? " warn" : ""); if (msg.textContent !== text) msg.textContent = text; if (msg.className !== c) msg.className = c; }
-  function commit(next, note) { state = next; G.set(next); if (note) say(note, false); }
-  function clearErrors() { [coreRows, advRows].forEach(function (rows) { for (var k in rows) accept(rows[k]); }); }
-
-  function refuse(row, text) { row.err.textContent = text; row.hex.setAttribute("aria-invalid", "true"); }
-  function accept(row) { row.err.textContent = ""; row.hex.removeAttribute("aria-invalid"); }
-
-  // One colour row: a native swatch, a label, a hex field and a contrast badge. A group named by a legend.
-  function makeRow(id, label, apply) {
-    var fs = h("fieldset", { "class": "trow" }), row = { fs: fs };
-    fs.appendChild(h("legend", { "class": "sr" }, label + " colour"));
-    row.col = h("input", { type: "color", id: id + "-c", "aria-label": label + " colour" });
-    fs.appendChild(row.col);
-    fs.appendChild(h("label", { "for": id + "-h" }, label));
-    row.hex = h("input", { type: "text", id: id + "-h", "class": "hex", maxlength: "7", spellcheck: "false", autocomplete: "off", "aria-describedby": id + "-b " + id + "-e" });
-    fs.appendChild(row.hex);
-    row.badge = h("span", { "class": "badge", id: id + "-b" });
-    fs.appendChild(row.badge);
-    row.err = h("span", { "class": "err", id: id + "-e", "aria-live": "polite" });
-    fs.appendChild(row.err);
-    row.col.addEventListener("input", function () { apply(row.col.value, row); });
-    // A hex field is checked when it is complete (six digits, blur or Enter), never while it is half typed.
-    row.hex.addEventListener("input", function () {
-      var v = row.hex.value.trim();
-      if (/^#[0-9a-f]{6}$/i.test(v)) apply(v, row);
-    });
-    function finish() {
-      var v = row.hex.value.trim();
-      if (/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(v)) v = "#" + v;
-      var n = G.norm(v);
-      if (!n) { refuse(row, "Enter a colour as #rrggbb or #rgb. The last valid colour stays applied."); return; }
-      apply(n, row);
-    }
-    row.hex.addEventListener("change", finish);
-    row.hex.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); finish(); } });
-    row.hex.addEventListener("blur", function () { sync(); });
-    return row;
-  }
-  function applyCore(key) {
-    return function (hex, row) {
-      if (key === "bg" && !G.darkOnly(hex)) { refuse(row, "Too light: this page is dark on purpose. Pick a darker background."); return; }
-      accept(row); commit(G.setCore(state, key, hex));
+  var section = $("theme"), link = $("themeLink"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false;
+  // The panel is Duro's Pane, bundled with React: about 180 KB gzipped, so it loads on the first press, not with the page.
+  function load() {
+    if (loading) return;
+    loading = true;
+    btn.disabled = true; btn.textContent = "Loading the panel…";
+    var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "theme-pane.css";
+    var js = document.createElement("script"); js.src = "theme-pane.js";
+    js.onerror = function () {
+      loading = false; btn.disabled = false; btn.textContent = "Open the theme panel";
+      msg.className = "theme-msg warn"; msg.textContent = "The theme panel did not load. Check your connection and press again.";
     };
+    document.head.appendChild(css); document.head.appendChild(js);
   }
-  function applyToken(token) {
-    return function (hex, row) {
-      if (token === "bg" && !G.darkOnly(hex)) { refuse(row, "Too light: this page is dark on purpose. Pick a darker background."); return; }
-      accept(row); commit(G.setToken(state, token, hex));
-    };
-  }
-
-  function build() {
-    G.PRESET_ORDER.forEach(function (name) {
-      var p = G.PRESETS[name], b = h("button", { type: "button", "class": "preset", "aria-pressed": "false" });
-      var dots = h("span", { "class": "dots", "aria-hidden": "true" }), a = h("span", { "class": "dot" }), g = h("span", { "class": "dot" });
-      a.style.background = p.core.accent; g.style.background = p.core.bg;
-      dots.appendChild(a); dots.appendChild(g);
-      b.appendChild(dots); b.appendChild(document.createTextNode(p.label));
-      b.addEventListener("click", function () { clearErrors(); commit(G.selectPreset(state, name), "Preset: " + p.label + "."); });
-      presetsEl.appendChild(b); presetBtns[name] = b;
-    });
-    customBtn = h("button", { type: "button", "class": "preset", "aria-pressed": "false" }, "Custom");
-    customBtn.hidden = true;
-    customBtn.addEventListener("click", function () { if (!G.current().custom && state.lastCustom) { clearErrors(); commit(G.restoreCustom(state)); sync(); } });
-    presetsEl.appendChild(customBtn);
-    G.CORE_KEYS.forEach(function (key) {
-      var row = makeRow("core-" + key, LABEL[key], applyCore(key));
-      coreRows[key] = row; coreEl.appendChild(row.fs);
+  btn.addEventListener("click", load);
+  // A hover or a focus on the way to the button fetches the files early; only a press opens the panel.
+  function prefetch() {
+    [["theme-pane.js", "script"], ["theme-pane.css", "style"]].forEach(function (a) {
+      var l = document.createElement("link"); l.rel = "preload"; l.href = a[0]; l.as = a[1]; document.head.appendChild(l);
     });
   }
-  function buildAdvanced() {
-    G.TOKENS.forEach(function (token) {
-      var row = makeRow("adv-" + token, token === "error" ? "error (Danger)" : token, applyToken(token));
-      advRows[token] = row; advEl.appendChild(row.fs);
-    });
-    advBuilt = true;
+  btn.addEventListener("pointerenter", prefetch, { once: true });
+  btn.addEventListener("focus", prefetch, { once: true });
+  function label() {
+    var r = G.current(), s = G.get();
+    link.textContent = r.custom ? "Theme · Custom" : s.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[s.preset].label;
   }
-
-  function ratioText(r) { return r.ratio.toFixed(1) + ":1"; }
-  function sync() {
-    state = G.get();
-    var r = G.current(), t = r.tokens, rows = G.report(t);
-    G.PRESET_ORDER.forEach(function (name) { presetBtns[name].setAttribute("aria-pressed", String(!r.custom && state.preset === name)); });
-    customBtn.hidden = !(r.custom || state.lastCustom);
-    customBtn.setAttribute("aria-pressed", String(r.custom));
-    G.CORE_KEYS.forEach(function (key) {
-      var row = coreRows[key], v = state.core[key];
-      row.col.value = v;
-      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v; // a refused entry stays, with its reason, until it is fixed
-      // Each core row counts the derived pairs it breaks, so a low derived pair points back to the colour that caused it.
-      var broken = rows.filter(function (x) { return !x.ok && (CAUSE[x.fg] || "bg") === key; }).length;
-      var bar = BAR[key], own = "";
-      if (bar) own = G.contrast(t[bar[0]], t[bar[1]]).toFixed(1) + ":1";
-      row.badge.textContent = (own ? own : "") + (broken ? (own ? " · " : "") + broken + (broken === 1 ? " pair" : " pairs") + " too low" : own ? "" : "all pairs pass");
-      row.badge.className = "badge" + (broken ? " bad" : "");
-    });
-    if (advBuilt) G.TOKENS.forEach(function (token) {
-      var row = advRows[token], v = t[token];
-      row.col.value = v;
-      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v;
-      row.fs.className = "trow" + (state.overrides[token] ? " over" : "");
-      var bad = rows.filter(function (x) { return !x.ok && (x.fg === token || x.bg === token); })[0];
-      row.badge.textContent = bad ? ratioText(bad) + " · below " + bad.bar + ":1" : "";
-      row.badge.className = "badge" + (bad ? " bad" : "");
-    });
-    link.textContent = r.custom ? "Theme · Custom" : state.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[state.preset].label;
-    var low = rows.filter(function (x) { return !x.ok; }), notes = G.warnings(t);
-    if (low.length) notes.push(low.map(function (x) { return x.id + " is " + ratioText(x) + ", below " + x.bar + ":1"; }).join("; ") + ". Lighten the text or darken the background, or press Reset");
-    if (notes.length) say(notes.join(". ") + ".", true); else say(HELP, false);
-  }
-
-  $("themeReset").addEventListener("click", function () { clearErrors(); commit(G.reset(state), "Back to Phosphor."); });
-  advBtn.addEventListener("click", function () {
-    var open = advEl.hidden;
-    if (open && !advBuilt) { buildAdvanced(); sync(); }
-    advEl.hidden = !open;
-    advBtn.setAttribute("aria-expanded", String(open));
-  });
-  $("themeCopy").addEventListener("click", function () {
-    var txt = JSON.stringify(G.exportTheme(state), null, 2) + "\n";
-    out.value = txt;
-    function fallback() { out.hidden = false; out.focus(); out.select(); say("Copy failed: the text is selected, press Ctrl or Cmd + C.", true); }
-    try {
-      navigator.clipboard.writeText(txt).then(function () { out.hidden = true; say("Copied theme.json."); }, fallback);
-    } catch (e) { fallback(); }
-  });
-  // Working in the picker keeps the road in its green look, so a change to the accent is always visible.
-  section.addEventListener("focusin", function () { G.hold(true); });
-  section.addEventListener("focusout", function (e) { if (!section.contains(e.relatedTarget)) G.hold(false); });
-
-  build();
-  G.onChange(sync);
-  sync();
+  G.onChange(label); label();
   section.hidden = false; $("themeNav").hidden = false;
 })();
 </script>
