@@ -14,9 +14,7 @@ await build({
   loader: {'.css': 'css'},
   legalComments: 'none',
 })
-for (const f of ['theme-pane.js', 'theme-pane.css']) {
-  try {
-    const b = readFileSync(f)
-    console.log(f, b.length, 'bytes,', gzipSync(b).length, 'gzipped')
-  } catch {}
+for (const file of ['theme-pane.js', 'theme-pane.css']) {
+  const bytes = readFileSync(file)
+  console.log(file, bytes.length, 'bytes,', gzipSync(bytes).length, 'gzipped')
 }

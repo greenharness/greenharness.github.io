@@ -16,6 +16,9 @@ pnpm typecheck
 pnpm test         # theme.js, the bundle budget, and the panel in headless Chromium
 ```
 
+`typescript` and the two `@types` packages serve `pnpm typecheck` only; `playwright` runs the panel
+in headless Chromium for the tests. Neither ends up in the bundle.
+
 The built files are committed, because Pages serves the branch as it is. CI rebuilds them and
 fails when the committed ones differ. To move to a newer Duro: change the version in
 `package.json`, `pnpm install`, `pnpm build`, and commit all three.

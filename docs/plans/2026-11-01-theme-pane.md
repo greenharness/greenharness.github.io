@@ -37,3 +37,13 @@ Phase 4 of the canonical plan: the site's theme section is rebuilt on Duro's `Pa
 | phone    | at 390 px                         | a bottom sheet inside the window, no horizontal scroll             | passes         |
 | refusal  | `#12` in the accent field         | `aria-invalid`, the reason shown, the colour kept                  | passes         |
 | by hand  | Chromium at 1120 and 390 px       | the pane in the site's green, Amber changes its own buttons        | seen           |
+| reset    | Amber, then Reset                 | the export of the untouched theme                                  | passes         |
+| 320 px   | `pane.render.test.mjs` at 320 px  | the sheet inside the window, no sideways scroll                    | passes         |
+| keyboard | Escape with focus inside the pane | the pane closes                                                    | passes         |
+
+Not observed, and why: the 500 px render (the pane and sheet geometry is Duro's, covered by its stories at 500 and 1200 px); touch dismissal at 320 px (no touch device here); the game still steering (the pane is non-modal and `ghTheme.hold` is kept, but no one played it); focus returning to a trigger after Escape (the first press removes the load button, so focus returns to the page).
+
+## Review notes
+
+- deliberate: the copy-fallback textarea has a no-op `onChange` because Duro's `Textarea` has no `readOnly` prop.
+- follow-up, not this change: `exportTheme` includes four `active*` tokens that `theme.json` and the "27 colours" tests do not, so Reset gives back the export of the untouched theme, not `theme.json` byte for byte as the canonical plan says.

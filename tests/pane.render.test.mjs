@@ -85,3 +85,48 @@ test('an entry that is not a colour is refused with a reason and the colour stay
   assert.equal(await page.evaluate(() => window.ghTheme.get().core.accent), '#39ff7a')
   await context.close()
 })
+
+test('Reset gives back the export of the untouched theme', async () => {
+  const {page, context} = await open(1120, 760)
+  const exported = () => page.evaluate(() => window.ghTheme.exportTheme(window.ghTheme.get()))
+  const untouched = await exported()
+  await page.getByRole('button', {name: 'Amber', pressed: false}).click()
+  assert.notDeepEqual(await exported(), untouched)
+  await page.getByRole('button', {name: 'Reset'}).click()
+  assert.deepEqual(await exported(), untouched)
+  await context.close()
+})
+
+test('at 320 px the sheet fits and the page does not scroll sideways', async () => {
+  const {page, context} = await open(320, 640)
+  const box = await page.locator('[role="dialog"]').boundingBox()
+  assert.ok(box.x >= 0 && box.x + box.width <= 320, JSON.stringify(box))
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 320), true)
+  await context.close()
+})
+
+test('Escape closes the pane and gives focus back to its trigger', async () => {
+  const {page, context} = await open(1120, 760)
+  const dialog = page.locator('[role="dialog"]')
+  await page.waitForFunction(() =>
+    document.querySelector('[role="dialog"]')?.contains(document.activeElement),
+  )
+  await page.keyboard.press('Escape')
+  await dialog.waitFor({state: 'detached'})
+  await page.waitForFunction(
+    () => document.activeElement?.textContent?.trim() === 'Open the theme panel',
+  )
+  await context.close()
+})
+
+test('tabbing through a hex field without editing it changes nothing', async () => {
+  const {page, context} = await open(1120, 760)
+  await page.getByRole('button', {name: 'Advanced', exact: false}).click()
+  const before = await page.evaluate(() => JSON.stringify(window.ghTheme.get()))
+  const field = page.getByRole('textbox', {name: 'accentHover', exact: true})
+  await field.focus()
+  await field.blur()
+  assert.equal(await page.evaluate(() => JSON.stringify(window.ghTheme.get())), before)
+  assert.equal(await page.evaluate(() => window.ghTheme.current().custom), false)
+  await context.close()
+})

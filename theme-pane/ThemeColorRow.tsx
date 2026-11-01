@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react'
-import {Badge, ColorInput, Field, Inline, Input} from '@duro-app/ui'
+import {ColorInput, Field, Inline, Input, Text} from '@duro-app/ui'
 
 interface ThemeColorRowProps {
   id: string
@@ -59,6 +59,12 @@ export function ThemeColorRow({
       setError(NOT_A_COLOUR)
       return
     }
+    // Leaving a field you did not change is not an edit: it must not mark the token as edited.
+    if (normalised.toLowerCase() === value.toLowerCase()) {
+      setError('')
+      setDraft(null)
+      return
+    }
     apply(normalised)
   }
 
@@ -82,7 +88,9 @@ export function ThemeColorRow({
           onChange={(event) => {
             const text = event.target.value
             setDraft(text)
-            if (COMPLETE_HEX.test(text.trim())) apply(text.trim())
+            const typed = text.trim()
+            if (COMPLETE_HEX.test(typed) && typed.toLowerCase() !== value.toLowerCase())
+              apply(typed)
           }}
           onBlur={() => finish(field.current?.value ?? '')}
           onKeyDown={(event) => {
@@ -92,9 +100,15 @@ export function ThemeColorRow({
             }
           }}
         />
+        {badge && (
+          <Field.Description>
+            <Text variant="caption" color={bad ? 'warning' : 'muted'}>
+              {badge}
+            </Text>
+          </Field.Description>
+        )}
         <Field.Error>{error}</Field.Error>
       </Field.Root>
-      {badge && <Badge variant={bad ? 'error' : 'default'}>{badge}</Badge>}
     </Inline>
   )
 }

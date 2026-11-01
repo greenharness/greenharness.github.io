@@ -331,10 +331,14 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     btn.disabled = true; btn.textContent = "Loading the panel…";
     var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "theme-pane.css";
     var js = document.createElement("script"); js.src = "theme-pane.js";
-    js.onerror = function () {
+    function failed() {
+      // Take both files out, so a retry starts clean and never stacks a second pair.
+      css.remove(); js.remove();
       loading = false; btn.disabled = false; btn.textContent = "Open the theme panel";
       msg.className = "theme-msg warn"; msg.textContent = "The theme panel did not load. Check your connection and press again.";
-    };
+    }
+    js.onerror = failed; css.onerror = failed;
+    js.onload = function () { msg.className = "theme-msg"; msg.textContent = ""; };
     document.head.appendChild(css); document.head.appendChild(js);
   }
   btn.addEventListener("click", load);
