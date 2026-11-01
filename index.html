@@ -69,7 +69,6 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .part.wide { grid-column: 1 / -1; grid-template-columns: auto minmax(0, 1fr); column-gap: 24px; align-items: start }
 .part.wide pre { grid-row: 1 / span 4 }
 @media (max-width: 480px) { .part.wide { grid-template-columns: minmax(0, 1fr) } .part.wide pre { grid-row: auto } }
-.part .optional { justify-self: start; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--you); border: 1px solid var(--duro-color-warning-border); padding: 0 6px }
 .swatch .g1 { color: var(--gh-g1) } .swatch .g2 { color: var(--gh-g2) } .swatch .g3 { color: var(--gh-g3) } .swatch .r1 { color: var(--gh-r1) } .swatch .r2 { color: var(--gh-r2) } .swatch .r3 { color: var(--gh-r3) }
 .part pre { margin: 0; font: inherit; font-size: 12px; line-height: 1.25; color: var(--glow); min-height: 4.2em; overflow-x: auto }
 .part pre.bug { color: var(--bug) }
@@ -107,7 +106,6 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .none { color: var(--faint) }
 .lanes .you dt, .lanes .you dd { color: var(--you) }
 .lanes .dz dd { display: block; color: var(--ink) }
-.lanes .dz .optional-inline { margin-left: 4px }
 .term { margin: 0; font: inherit; font-size: 12px; line-height: 1.5; background: var(--panel); border-left: 2px solid var(--sc); padding: 8px 10px; overflow-x: auto; white-space: pre; color: var(--ink) }
 .term .x { color: var(--bug) } .term .v { color: var(--glow) } .term .p { color: var(--dim) }
 .road-end { position: absolute; bottom: 6px; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; width: max-content; max-width: 100%; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim) }
@@ -150,7 +148,6 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .ship td { padding: 10px 14px; border-top: 1px solid var(--line); vertical-align: top }
 .ship td:first-child { color: var(--gh-head); font-weight: 600; white-space: nowrap }
 .ship td span { display: inline-block; margin: 0 6px 4px 0 }
-.optional-inline { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--you); font-weight: 400; margin-left: 6px }
 
 @media (max-width: 900px) {
   .yous { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) }
@@ -177,41 +174,18 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 
 /* ---------- theme picker ---------- */
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
-.theme-box { display: grid; gap: 16px; margin-top: 18px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px }
-.theme-box [hidden] { display: none }
-.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px }
-.preset { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--panel); color: var(--ink); border: 1px solid var(--dim); border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; text-align: left }
-.preset[aria-pressed="true"] { border: 2px solid var(--glow); color: var(--glow); font-weight: 600; background: color-mix(in srgb, var(--glow) 8%, var(--panel)) }
-.preset[aria-pressed="true"]::after { content: "✓"; margin-left: auto }
-.preset .dots { display: inline-flex; gap: 3px; flex: none }
-.preset .dot { width: 16px; height: 16px; border-radius: 2px; border: 1px solid var(--dim) }
-.core, .adv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 28px; min-width: 0 }
-.adv { max-height: 440px; overflow: auto; padding: 10px 4px 2px; border-top: 1px solid var(--line) }
-.trow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 4px 10px; margin: 0; padding: 5px 0; border: 0; border-bottom: 1px solid var(--line); min-width: 0 }
-.trow label { color: var(--ink); font-size: 13px; overflow-wrap: anywhere }
-.trow.over label::after { content: " · edited"; color: var(--you); font-size: 11.5px }
-.trow input[type="color"] { width: 28px; height: 28px; padding: 0; border: 1px solid var(--dim); border-radius: 3px; background: none; cursor: pointer }
-.hex { width: 8.6em; font: inherit; font-size: 12.5px; padding: 5px 8px; background: var(--duro-color-bg-inset); color: var(--ink); border: 1px solid var(--dim); border-radius: 3px }
-.hex[aria-invalid="true"] { border-color: var(--you); color: var(--you) }
-.badge { font-size: 11.5px; padding: 1px 6px; border: 1px solid var(--duro-color-success-border); color: var(--duro-color-success-text); background: var(--duro-color-success-bg); border-radius: 2px; white-space: nowrap }
-.badge:empty { display: none }
-.badge.bad { border-color: var(--duro-color-warning-border); color: var(--duro-color-warning-text); background: var(--duro-color-warning-bg) }
-.err { grid-column: 1 / -1; color: var(--you); font-size: 12px }
-.callout { margin: 0; padding: 8px 12px; border-left: 3px solid var(--boost); background: var(--duro-color-bg-inset); color: var(--dim); font-size: 12.5px }
-.theme-msg { margin: 0; min-height: 1.4em; font-size: 12.5px; color: var(--dim) }
-.theme-msg.warn { color: var(--you) }
-.theme-actions { display: flex; flex-wrap: wrap; gap: 8px }
 .tbtn { font: inherit; font-size: 13px; padding: 8px 14px; background: transparent; color: var(--ink); border: 1px solid var(--dim); border-radius: 4px; cursor: pointer }
 .tbtn.primary { background: var(--glow); color: var(--duro-color-accent-contrast); border-color: var(--glow); font-weight: 600 }
-.preset:focus-visible, .tbtn:focus-visible, .theme-box input:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
-.theme-out { width: 100%; min-height: 170px; font: inherit; font-size: 12px; background: var(--duro-color-bg-inset); color: var(--ink); border: 1px solid var(--dim); border-radius: 3px; padding: 8px }
-@media (max-width: 640px) { .core, .adv { grid-template-columns: minmax(0, 1fr) } .trow { grid-template-columns: auto minmax(0, 1fr) } .trow label { grid-column: 1 / -1; overflow-wrap: normal } .trow .badge { grid-column: 1 / -1; justify-self: start } }
-@media (pointer: coarse) { .trow input[type="color"] { width: 44px; height: 44px } .hex, .tbtn, .preset { min-height: 44px } .hex, .theme-out { font-size: 16px } }
+.tbtn:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
+.part .theme-slot { justify-self: start }
+.theme-msg { margin: 10px 0 0; min-height: 1.4em; font-size: 12.5px; color: var(--dim) }
+.theme-msg.warn { color: var(--you) }
+@media (pointer: coarse) { .tbtn { min-height: 44px } }
 </style>
 
 <header class="top pad">
   <span class="logo">Green<span>/</span>Harness</span>
-  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#theme" id="themeLink">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
+  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#themeLoad" id="themeLink" role="button">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
 </header>
 
 <div class="pad">
@@ -233,27 +207,6 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
     <div style="display:grid;gap:14px;min-width:0">
       <p>Six small tools that check what a coding agent decides, runs, commits and pushes, on your machine, and let CI skip what your laptop already proved. Plus a design system themed by your tokens. Every part is optional. Take the ones you need.</p>
       <div class="cmd"><code id="cmdText"><b>$</b> curl -fsSL greenharness.dev/install | sh</code><button type="button" id="copy">copy</button></div>
-    </div>
-  </section>
-
-  <section class="theme" id="theme" aria-labelledby="themeTitle" hidden>
-    <div class="sec-head">
-      <span class="kick">your colours</span>
-      <h2 id="themeTitle">Theme</h2>
-      <p>Start from a preset, then change only the four colours that define it. The page and the game follow as you go, and your choice stays in this browser.</p>
-    </div>
-    <div class="theme-box">
-      <div class="presets" role="group" aria-label="Presets" id="themePresets"></div>
-      <div class="core" id="themeCore"></div>
-      <p class="callout">The other 23 colour tokens (hover, borders, cards, status backgrounds) are derived from these four.</p>
-      <p class="theme-msg" id="themeMsg" role="status" aria-live="polite">Each colour is checked against the contrast it needs: a low one is flagged, never blocked.</p>
-      <div class="theme-actions">
-        <button type="button" class="tbtn" id="themeReset">Reset</button>
-        <button type="button" class="tbtn" id="themeAdv" aria-expanded="false" aria-controls="themeAdvanced">Advanced: 27 colour tokens</button>
-        <button type="button" class="tbtn primary" id="themeCopy">Copy theme.json</button>
-      </div>
-      <div class="adv" id="themeAdvanced" hidden></div>
-      <textarea class="theme-out" id="themeOut" aria-label="theme.json" readonly hidden></textarea>
     </div>
   </section>
 
@@ -279,7 +232,7 @@ ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does 
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
       <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
-<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#theme">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><span class="optional">optional extension</span><small>the Duro design system</small></div>
+<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
     </div>
   </section>
 
@@ -345,7 +298,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         <tr><td>decisions</td><td><span class="chip">relais-architecture-conflict</span></td><td class="none">—</td></tr>
         <tr><td>router</td><td><span class="chip">relais</span></td><td><span class="chip">relais-implementation</span><span class="chip">relais-research</span><span class="chip">relais-review</span></td></tr>
         <tr><td>gate</td><td><span class="chip">relais-verified-push</span><span class="chip">merge-when-green</span><span class="chip">tag-release</span></td><td class="none">—</td></tr>
-        <tr><td>design <span class="optional-inline">optional</span></td><td><span class="chip">ui</span><span class="chip">colors</span><span class="chip">typography</span><span class="chip">duro-mockup</span></td><td><span class="chip">plan-review-ui-design</span><span class="chip">plan-review-react</span></td></tr>
+        <tr><td>design</td><td><span class="chip">ui</span><span class="chip">colors</span><span class="chip">typography</span><span class="chip">duro-mockup</span></td><td><span class="chip">plan-review-ui-design</span><span class="chip">plan-review-react</span></td></tr>
         <tr><td>workflow pack</td><td><span class="chip">plan-review</span><span class="chip">worktree-task</span><span class="chip">diagnosing-bugs</span><span class="chip">retro</span><span class="chip">worktree-sweep</span><span class="chip">interface-review</span></td><td><span class="chip">plan-review panel (9)</span><span class="chip">implementation-review</span><span class="chip">interface-review</span></td></tr>
       </tbody>
     </table></div>
@@ -358,156 +311,47 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   var G = window.ghTheme;
   if (!G) return;
   var $ = function (id) { return document.getElementById(id); };
-  var presetsEl = $("themePresets"), coreEl = $("themeCore"), advEl = $("themeAdvanced"), msg = $("themeMsg"),
-      out = $("themeOut"), link = $("themeLink"), section = $("theme"), advBtn = $("themeAdv"), HELP = msg.textContent;
-  var LABEL = { accent: "Accent", bg: "Background", text: "Text", danger: "Danger" };
-  var BAR = { accent: ["accent", "bg", 4.5], text: ["text", "bg", 4.5], danger: ["error", "bg", 4.5] };
-  // Which core colour each token comes from, for the per-row count. warning and info come from the preset.
-  // A pair with text on it is blamed on the text colour, so a dark text does not also flag the background.
-  var CAUSE = { accent: "accent", accentContrast: "accent", text: "text", textMuted: "text", textSubtle: "text",
-    error: "danger", errorText: "danger" };
-  var state = G.get(), coreRows = {}, advRows = {}, presetBtns = {}, customBtn = null, advBuilt = false;
-
-  function h(tag, attrs, text) {
-    var e = document.createElement(tag);
-    for (var k in attrs) e.setAttribute(k, attrs[k]);
-    if (text != null) e.textContent = text;
-    return e;
-  }
-  function say(text, warn) { var c = "theme-msg" + (warn ? " warn" : ""); if (msg.textContent !== text) msg.textContent = text; if (msg.className !== c) msg.className = c; }
-  function commit(next, note) { state = next; G.set(next); if (note) say(note, false); }
-  function clearErrors() { [coreRows, advRows].forEach(function (rows) { for (var k in rows) accept(rows[k]); }); }
-
-  function refuse(row, text) { row.err.textContent = text; row.hex.setAttribute("aria-invalid", "true"); }
-  function accept(row) { row.err.textContent = ""; row.hex.removeAttribute("aria-invalid"); }
-
-  // One colour row: a native swatch, a label, a hex field and a contrast badge. A group named by a legend.
-  function makeRow(id, label, apply) {
-    var fs = h("fieldset", { "class": "trow" }), row = { fs: fs };
-    fs.appendChild(h("legend", { "class": "sr" }, label + " colour"));
-    row.col = h("input", { type: "color", id: id + "-c", "aria-label": label + " colour" });
-    fs.appendChild(row.col);
-    fs.appendChild(h("label", { "for": id + "-h" }, label));
-    row.hex = h("input", { type: "text", id: id + "-h", "class": "hex", maxlength: "7", spellcheck: "false", autocomplete: "off", "aria-describedby": id + "-b " + id + "-e" });
-    fs.appendChild(row.hex);
-    row.badge = h("span", { "class": "badge", id: id + "-b" });
-    fs.appendChild(row.badge);
-    row.err = h("span", { "class": "err", id: id + "-e", "aria-live": "polite" });
-    fs.appendChild(row.err);
-    row.col.addEventListener("input", function () { apply(row.col.value, row); });
-    // A hex field is checked when it is complete (six digits, blur or Enter), never while it is half typed.
-    row.hex.addEventListener("input", function () {
-      var v = row.hex.value.trim();
-      if (/^#[0-9a-f]{6}$/i.test(v)) apply(v, row);
-    });
-    function finish() {
-      var v = row.hex.value.trim();
-      if (/^[0-9a-f]{3}$|^[0-9a-f]{6}$/i.test(v)) v = "#" + v;
-      var n = G.norm(v);
-      if (!n) { refuse(row, "Enter a colour as #rrggbb or #rgb. The last valid colour stays applied."); return; }
-      apply(n, row);
+  var link = $("themeLink"), inline = $("themeInline"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false, loaded = false;
+  // The panel is Duro's Pane, bundled with React: about 180 KB gzipped, so it loads on the first press, not with the page.
+  function load() {
+    // Once the panel is there, a press only asks it to open (the page's button has been replaced by its own).
+    if (loaded) { window.dispatchEvent(new Event("gh-theme-open")); return; }
+    if (loading) return;
+    loading = true;
+    btn.disabled = true; btn.textContent = "Loading the panel…";
+    var css = document.createElement("link"); css.rel = "stylesheet"; css.href = "theme-pane.css";
+    var js = document.createElement("script"); js.src = "theme-pane.js";
+    function failed() {
+      // Take both files out, so a retry starts clean and never stacks a second pair.
+      css.remove(); js.remove();
+      if (!document.getElementById("themeLoad")) { // the script ran: the panel is mounted without its styles
+        msg.className = "theme-msg warn"; msg.textContent = "The panel's styles did not load. Reload the page.";
+        return;
+      }
+      loading = false; btn.disabled = false; btn.textContent = "Open the theme panel";
+      msg.className = "theme-msg warn"; msg.textContent = "The theme panel did not load. Check your connection and press again.";
     }
-    row.hex.addEventListener("change", finish);
-    row.hex.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); finish(); } });
-    row.hex.addEventListener("blur", function () { sync(); });
-    return row;
+    js.onerror = failed; css.onerror = failed;
+    js.onload = function () { loaded = true; msg.className = "theme-msg"; msg.textContent = ""; };
+    document.head.appendChild(css); document.head.appendChild(js);
   }
-  function applyCore(key) {
-    return function (hex, row) {
-      if (key === "bg" && !G.darkOnly(hex)) { refuse(row, "Too light: this page is dark on purpose. Pick a darker background."); return; }
-      accept(row); commit(G.setCore(state, key, hex));
-    };
-  }
-  function applyToken(token) {
-    return function (hex, row) {
-      if (token === "bg" && !G.darkOnly(hex)) { refuse(row, "Too light: this page is dark on purpose. Pick a darker background."); return; }
-      accept(row); commit(G.setToken(state, token, hex));
-    };
-  }
-
-  function build() {
-    G.PRESET_ORDER.forEach(function (name) {
-      var p = G.PRESETS[name], b = h("button", { type: "button", "class": "preset", "aria-pressed": "false" });
-      var dots = h("span", { "class": "dots", "aria-hidden": "true" }), a = h("span", { "class": "dot" }), g = h("span", { "class": "dot" });
-      a.style.background = p.core.accent; g.style.background = p.core.bg;
-      dots.appendChild(a); dots.appendChild(g);
-      b.appendChild(dots); b.appendChild(document.createTextNode(p.label));
-      b.addEventListener("click", function () { clearErrors(); commit(G.selectPreset(state, name), "Preset: " + p.label + "."); });
-      presetsEl.appendChild(b); presetBtns[name] = b;
-    });
-    customBtn = h("button", { type: "button", "class": "preset", "aria-pressed": "false" }, "Custom");
-    customBtn.hidden = true;
-    customBtn.addEventListener("click", function () { if (!G.current().custom && state.lastCustom) { clearErrors(); commit(G.restoreCustom(state)); sync(); } });
-    presetsEl.appendChild(customBtn);
-    G.CORE_KEYS.forEach(function (key) {
-      var row = makeRow("core-" + key, LABEL[key], applyCore(key));
-      coreRows[key] = row; coreEl.appendChild(row.fs);
+  btn.addEventListener("click", load);
+  // The nav link and the sentence in the design card open the panel too.
+  [link, inline].forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); load(); }); });
+  // A hover or a focus on the way to the button fetches the files early; only a press opens the panel.
+  function prefetch() {
+    [["theme-pane.js", "script"], ["theme-pane.css", "style"]].forEach(function (a) {
+      var l = document.createElement("link"); l.rel = "preload"; l.href = a[0]; l.as = a[1]; document.head.appendChild(l);
     });
   }
-  function buildAdvanced() {
-    G.TOKENS.forEach(function (token) {
-      var row = makeRow("adv-" + token, token === "error" ? "error (Danger)" : token, applyToken(token));
-      advRows[token] = row; advEl.appendChild(row.fs);
-    });
-    advBuilt = true;
+  btn.addEventListener("pointerenter", prefetch, { once: true });
+  btn.addEventListener("focus", prefetch, { once: true });
+  function label() {
+    var r = G.current(), s = G.get();
+    link.textContent = r.custom ? "Theme · Custom" : s.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[s.preset].label;
   }
-
-  function ratioText(r) { return r.ratio.toFixed(1) + ":1"; }
-  function sync() {
-    state = G.get();
-    var r = G.current(), t = r.tokens, rows = G.report(t);
-    G.PRESET_ORDER.forEach(function (name) { presetBtns[name].setAttribute("aria-pressed", String(!r.custom && state.preset === name)); });
-    customBtn.hidden = !(r.custom || state.lastCustom);
-    customBtn.setAttribute("aria-pressed", String(r.custom));
-    G.CORE_KEYS.forEach(function (key) {
-      var row = coreRows[key], v = state.core[key];
-      row.col.value = v;
-      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v; // a refused entry stays, with its reason, until it is fixed
-      // Each core row counts the derived pairs it breaks, so a low derived pair points back to the colour that caused it.
-      var broken = rows.filter(function (x) { return !x.ok && (CAUSE[x.fg] || "bg") === key; }).length;
-      var bar = BAR[key], own = "";
-      if (bar) own = G.contrast(t[bar[0]], t[bar[1]]).toFixed(1) + ":1";
-      row.badge.textContent = (own ? own : "") + (broken ? (own ? " · " : "") + broken + (broken === 1 ? " pair" : " pairs") + " too low" : own ? "" : "all pairs pass");
-      row.badge.className = "badge" + (broken ? " bad" : "");
-    });
-    if (advBuilt) G.TOKENS.forEach(function (token) {
-      var row = advRows[token], v = t[token];
-      row.col.value = v;
-      if (document.activeElement !== row.hex && row.hex.getAttribute("aria-invalid") !== "true") row.hex.value = v;
-      row.fs.className = "trow" + (state.overrides[token] ? " over" : "");
-      var bad = rows.filter(function (x) { return !x.ok && (x.fg === token || x.bg === token); })[0];
-      row.badge.textContent = bad ? ratioText(bad) + " · below " + bad.bar + ":1" : "";
-      row.badge.className = "badge" + (bad ? " bad" : "");
-    });
-    link.textContent = r.custom ? "Theme · Custom" : state.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[state.preset].label;
-    var low = rows.filter(function (x) { return !x.ok; }), notes = G.warnings(t);
-    if (low.length) notes.push(low.map(function (x) { return x.id + " is " + ratioText(x) + ", below " + x.bar + ":1"; }).join("; ") + ". Lighten the text or darken the background, or press Reset");
-    if (notes.length) say(notes.join(". ") + ".", true); else say(HELP, false);
-  }
-
-  $("themeReset").addEventListener("click", function () { clearErrors(); commit(G.reset(state), "Back to Phosphor."); });
-  advBtn.addEventListener("click", function () {
-    var open = advEl.hidden;
-    if (open && !advBuilt) { buildAdvanced(); sync(); }
-    advEl.hidden = !open;
-    advBtn.setAttribute("aria-expanded", String(open));
-  });
-  $("themeCopy").addEventListener("click", function () {
-    var txt = JSON.stringify(G.exportTheme(state), null, 2) + "\n";
-    out.value = txt;
-    function fallback() { out.hidden = false; out.focus(); out.select(); say("Copy failed: the text is selected, press Ctrl or Cmd + C.", true); }
-    try {
-      navigator.clipboard.writeText(txt).then(function () { out.hidden = true; say("Copied theme.json."); }, fallback);
-    } catch (e) { fallback(); }
-  });
-  // Working in the picker keeps the road in its green look, so a change to the accent is always visible.
-  section.addEventListener("focusin", function () { G.hold(true); });
-  section.addEventListener("focusout", function (e) { if (!section.contains(e.relatedTarget)) G.hold(false); });
-
-  build();
-  G.onChange(sync);
-  sync();
-  section.hidden = false; $("themeNav").hidden = false;
+  G.onChange(label); label();
+  $("themeNav").hidden = false; $("themePane").hidden = false; msg.hidden = false;
 })();
 </script>
 
@@ -1128,7 +972,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       '<div><dt>agents</dt><dd>' + chips(s.agents) + '</dd></div>' +
       (s.plugin ? '<div><dt>plugin</dt><dd>' + s.plugin + '</dd></div>' : '') +
       (s.vs ? '<div><dt>vs stock</dt><dd>' + s.vs + '</dd></div>' : '') +
-      (s.design ? '<div class="dz"><dt>design</dt><dd>' + s.design + ' <span class="optional-inline">optional</span></dd></div>' : '') +
+      (s.design ? '<div class="dz"><dt>design</dt><dd>' + s.design + '</dd></div>' : '') +
       (s.you ? '<div class="you"><dt>● you</dt><dd>' + s.you + '</dd></div>' : '<div><dt>you</dt><dd><span class="none">the agent drives</span></dd></div>') +
       '</dl>' + (s.term ? '<pre class="term">' + s.term + '</pre>' : '');
   }

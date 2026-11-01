@@ -1,0 +1,8 @@
+{
+  "overrides": [
+    {
+      "files": ["theme-pane/**", "tests/pane.*.mjs"],
+      "options": {"singleQuote": true, "semi": false, "bracketSpacing": false, "printWidth": 100}
+    }
+  ]
+}
