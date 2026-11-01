@@ -180,6 +180,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .tbtn { font: inherit; font-size: 13px; padding: 8px 14px; background: transparent; color: var(--ink); border: 1px solid var(--dim); border-radius: 4px; cursor: pointer }
 .tbtn.primary { background: var(--glow); color: var(--duro-color-accent-contrast); border-color: var(--glow); font-weight: 600 }
 .tbtn:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px }
+.part .theme-slot { justify-self: start }
 .theme-msg { margin: 10px 0 0; min-height: 1.4em; font-size: 12.5px; color: var(--dim) }
 .theme-msg.warn { color: var(--you) }
 @media (pointer: coarse) { .tbtn { min-height: 44px } }
@@ -187,7 +188,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 
 <header class="top pad">
   <span class="logo">Green<span>/</span>Harness</span>
-  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#theme" id="themeLink">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
+  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#themeLoad" id="themeLink">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
 </header>
 
 <div class="pad">
@@ -212,16 +213,6 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
     </div>
   </section>
 
-  <section class="theme" id="theme" aria-labelledby="themeTitle" hidden>
-    <div class="sec-head">
-      <span class="kick">your colours</span>
-      <h2 id="themeTitle">Theme</h2>
-      <p>Start from a preset, then change only the four colours that define it. The page and the game follow as you go, and your choice stays in this browser.</p>
-    </div>
-    <div id="themePane"><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div>
-    <p class="theme-msg" id="themeMsg" role="status" aria-live="polite"></p>
-  </section>
-
   <section class="legend" id="parts">
     <h2>What you just drove through</h2>
     <div class="parts">
@@ -244,7 +235,7 @@ ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does 
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
       <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
-<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#theme">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><span class="optional">optional extension</span><small>the Duro design system</small></div>
+<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><div id="themePane" class="theme-slot"><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite"></p></div>
     </div>
   </section>
 
@@ -323,7 +314,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   var G = window.ghTheme;
   if (!G) return;
   var $ = function (id) { return document.getElementById(id); };
-  var section = $("theme"), link = $("themeLink"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false;
+  var link = $("themeLink"), inline = $("themeInline"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false;
   // The panel is Duro's Pane, bundled with React: about 180 KB gzipped, so it loads on the first press, not with the page.
   function load() {
     if (loading) return;
@@ -342,6 +333,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     document.head.appendChild(css); document.head.appendChild(js);
   }
   btn.addEventListener("click", load);
+  // The nav link and the sentence in the design card open the panel too.
+  [link, inline].forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); load(); }); });
   // A hover or a focus on the way to the button fetches the files early; only a press opens the panel.
   function prefetch() {
     [["theme-pane.js", "script"], ["theme-pane.css", "style"]].forEach(function (a) {
@@ -355,7 +348,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     link.textContent = r.custom ? "Theme · Custom" : s.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[s.preset].label;
   }
   G.onChange(label); label();
-  section.hidden = false; $("themeNav").hidden = false;
+  $("themeNav").hidden = false;
 })();
 </script>
 

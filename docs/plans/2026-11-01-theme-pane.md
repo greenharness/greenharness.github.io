@@ -26,6 +26,8 @@ Phase 4 of the canonical plan: the site's theme section is rebuilt on Duro's `Pa
 - **The pane wears the theme it edits** (`ThemeProvider overrides`), and is a bottom sheet under
   640 px, a side pane above.
 
+- **No Theme section** (the person's review of the preview, 2026-11-01). The "your colours" section, its heading and its sentence are gone. The "Open the theme panel" button sits on the design card, where the tag "optional extension" and the line "the Duro design system" were: every part of the harness is an extension, so the tag said nothing. The card's "change them" link and the nav's "Theme" link open the panel too. The "optional" labels in the lifecycle table and the lane list are not touched.
+
 ## Verification (observed 2026-11-01)
 
 | Check           | Input                                    | Expected                                                               | Actual         |
