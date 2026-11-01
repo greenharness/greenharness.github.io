@@ -62,3 +62,5 @@ Delta (97k tokens, 38 s): all seven resolved. One new low finding kept as `delib
 Delta on the design-card change (103k tokens, 42 s): the page's own links stopped working after the first load (`loading` stayed true and their jump target was gone): fixed, they ask the loaded panel to open through a `gh-theme-open` event, with a test that closes the pane and reopens it from both links. Also fixed: the button and message stay hidden until theme.js has run, the two links have `role="button"`, and a stylesheet that fails after the script ran now says to reload the page (the earlier finding 8, no longer kept).
 
 Last delta (109k tokens, 24 s): approve, all four resolved. One race the reviewer did not reproduce and that is kept: a stylesheet failing before the script has finished loading takes the reset branch, and a script already inserted may still mount the panel unstyled and without a warning.
+
+Delta on the removal of the orange "optional" labels (113k tokens, 26 s): approve, nothing points at the removed classes, table and lanes keep their shape. Seen at 390 px: the design card holds the button under its description.
