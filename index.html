@@ -188,7 +188,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 
 <header class="top pad">
   <span class="logo">Green<span>/</span>Harness</span>
-  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#themeLoad" id="themeLink">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
+  <ul><li><a href="#parts">Parts</a></li><li id="themeNav" hidden><a href="#themeLoad" id="themeLink" role="button">Theme</a></li><li><a href="#install">Install</a></li><li><a href="https://github.com/greenharness">GitHub</a></li></ul>
 </header>
 
 <div class="pad">
@@ -235,7 +235,7 @@ ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does 
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
       <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
-<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><div id="themePane" class="theme-slot"><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite"></p></div>
+<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
     </div>
   </section>
 
@@ -314,9 +314,11 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   var G = window.ghTheme;
   if (!G) return;
   var $ = function (id) { return document.getElementById(id); };
-  var link = $("themeLink"), inline = $("themeInline"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false;
+  var link = $("themeLink"), inline = $("themeInline"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false, loaded = false;
   // The panel is Duro's Pane, bundled with React: about 180 KB gzipped, so it loads on the first press, not with the page.
   function load() {
+    // Once the panel is there, a press only asks it to open (the page's button has been replaced by its own).
+    if (loaded) { window.dispatchEvent(new Event("gh-theme-open")); return; }
     if (loading) return;
     loading = true;
     btn.disabled = true; btn.textContent = "Loading the panel…";
@@ -325,11 +327,15 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     function failed() {
       // Take both files out, so a retry starts clean and never stacks a second pair.
       css.remove(); js.remove();
+      if (!document.getElementById("themeLoad")) { // the script ran: the panel is mounted without its styles
+        msg.className = "theme-msg warn"; msg.textContent = "The panel's styles did not load. Reload the page.";
+        return;
+      }
       loading = false; btn.disabled = false; btn.textContent = "Open the theme panel";
       msg.className = "theme-msg warn"; msg.textContent = "The theme panel did not load. Check your connection and press again.";
     }
     js.onerror = failed; css.onerror = failed;
-    js.onload = function () { msg.className = "theme-msg"; msg.textContent = ""; };
+    js.onload = function () { loaded = true; msg.className = "theme-msg"; msg.textContent = ""; };
     document.head.appendChild(css); document.head.appendChild(js);
   }
   btn.addEventListener("click", load);
@@ -348,7 +354,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     link.textContent = r.custom ? "Theme · Custom" : s.preset === "phosphor" ? "Theme" : "Theme · " + G.PRESETS[s.preset].label;
   }
   G.onChange(label); label();
-  $("themeNav").hidden = false;
+  $("themeNav").hidden = false; $("themePane").hidden = false; msg.hidden = false;
 })();
 </script>
 

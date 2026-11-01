@@ -288,6 +288,12 @@ function App() {
     const frame = requestAnimationFrame(() => setOpen(true))
     return () => cancelAnimationFrame(frame)
   }, [])
+  // The page's links ask for the panel once it is loaded.
+  useEffect(() => {
+    const ask = () => setOpen(true)
+    window.addEventListener('gh-theme-open', ask)
+    return () => window.removeEventListener('gh-theme-open', ask)
+  }, [])
   // Working in the panel keeps the road in its green look, so a change to the accent is always visible.
   useEffect(() => {
     ghTheme.hold(open)
