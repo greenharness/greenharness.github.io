@@ -49,7 +49,7 @@ Not observed, and why: the 500 px render (the pane and sheet geometry is Duro's,
 ## Review notes
 
 - deliberate: the copy-fallback textarea has a no-op `onChange` because Duro's `Textarea` has no `readOnly` prop.
-- follow-up, not this change: `exportTheme` includes four `active*` tokens that `theme.json` and the "27 colours" tests do not, so Reset gives back the export of the untouched theme, not `theme.json` byte for byte as the canonical plan says.
+- resolved (2026-11-02): `theme.json` now carries the four `active*` tokens that `exportTheme` derives from the accent, so Copy and the shipped file are the same bytes for Phosphor. The "27 colour tokens" in the panel still counts the editable ones; the four are derived and not editable.
 
 ## Reviews
 
