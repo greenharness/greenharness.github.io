@@ -64,3 +64,9 @@ Delta on the design-card change (103k tokens, 42 s): the page's own links stoppe
 Last delta (109k tokens, 24 s): approve, all four resolved. One race the reviewer did not reproduce and that is kept: a stylesheet failing before the script has finished loading takes the reset branch, and a script already inserted may still mount the panel unstyled and without a warning.
 
 Delta on the removal of the orange "optional" labels (113k tokens, 26 s): approve, nothing points at the removed classes, table and lanes keep their shape. Seen at 390 px: the design card holds the button under its description.
+
+## Follow-up (2026-11-02): Duro 5.43.0
+
+- `@duro-app/ui` 5.43.0: the desktop pane is `movable`, with `Pane.Move` in its header. Drag the header to move it (it never leaves the window entirely), double-click to put it back, or use the Move menu or the arrow keys. The phone's bottom sheet does not move.
+- Escape now closes the pane from the open Advanced button (fixed in Duro 5.43.0; the earlier review's "kept" item).
+- Render tests: a mouse drag moves the desktop pane and keeps a fifth of it in view; Escape from the open Advanced button closes the pane.

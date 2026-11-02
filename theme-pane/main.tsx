@@ -302,9 +302,11 @@ function App() {
 
   return (
     <ThemeProvider overrides={resolved.tokens}>
+      {/* On a desktop the pane can be dragged out of the page's way; a phone's bottom sheet stays put. */}
       <Pane.Root
         open={open}
         onOpenChange={setOpen}
+        movable
         {...(narrow ? {anchor: 'bottom'} : {anchor: 'right'})}
       >
         <Pane.Trigger>
@@ -315,6 +317,7 @@ function App() {
         <Pane.Portal>
           <Pane.Header>
             <Pane.Title>Theme</Pane.Title>
+            <Pane.Move />
             <Pane.Expand />
             <Pane.Close />
           </Pane.Header>

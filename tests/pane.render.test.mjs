@@ -144,3 +144,31 @@ test('the nav link and the card link open the pane again after it was closed', a
   await dialog.waitFor()
   await context.close()
 })
+
+test('on a desktop the pane is dragged by its header and never leaves the window', async () => {
+  const {page, context} = await open(1120, 760)
+  const dialog = page.locator('[role="dialog"]')
+  const home = (await dialog.boundingBox()).x
+  const title = await page.getByRole('heading', {name: 'Theme'}).boundingBox()
+  await page.mouse.move(title.x + 10, title.y + title.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(title.x - 5000, title.y + title.height / 2, {steps: 8})
+  await page.mouse.up()
+  const moved = await dialog.boundingBox()
+  assert.ok(moved.x < home - 200, `dragged left: ${moved.x} from ${home}`)
+  // A fifth of its width stays in view, so it can be grabbed back.
+  assert.ok(moved.x + moved.width >= 0.2 * moved.width - 2, JSON.stringify(moved))
+  assert.equal(await dialog.count(), 1, 'a drag does not dismiss the pane')
+  await context.close()
+})
+
+test('Escape closes the pane from the open Advanced button', async () => {
+  const {page, context} = await open(1120, 760)
+  const advanced = page.getByRole('button', {name: 'Advanced', exact: false})
+  await advanced.click()
+  assert.equal(await advanced.getAttribute('aria-expanded'), 'true')
+  await advanced.focus()
+  await page.keyboard.press('Escape')
+  await page.locator('[role="dialog"]').waitFor({state: 'detached'})
+  await context.close()
+})
