@@ -70,6 +70,8 @@ test('the panel is a bottom sheet on a phone and never wider than the window', a
   const box = await page.locator('[role="dialog"]').boundingBox()
   assert.ok(box.y > 200, `a sheet rests low, not full height: ${JSON.stringify(box)}`)
   assert.ok(box.x >= 0 && box.x + box.width <= 390)
+  // A bottom sheet does not move, so it has no Move control in its header.
+  assert.equal(await page.getByRole('button', {name: 'Move panel'}).count(), 0)
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true)
   assert.deepEqual(errors, [])
   await context.close()

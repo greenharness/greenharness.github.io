@@ -14,7 +14,7 @@ adrs:
 # The theme panel on Duro's Pane (this repo's slice of the non-modal panes plan)
 
 Phase 4 of the canonical plan: the site's theme section is rebuilt on Duro's `Pane`
-(`@duro-app/ui@5.41.0`), bundled with React and loaded on the first press.
+(`@duro-app/ui@5.41.0` (5.43.0 since the 2026-11-02 follow-up)), bundled with React and loaded on the first press.
 
 ## What changed from the plan, and why
 
@@ -70,3 +70,12 @@ Delta on the removal of the orange "optional" labels (113k tokens, 26 s): approv
 - `@duro-app/ui` 5.43.0: the desktop pane is `movable`, with `Pane.Move` in its header. Drag the header to move it (it never leaves the window entirely), double-click to put it back, or use the Move menu or the arrow keys. The phone's bottom sheet does not move.
 - Escape now closes the pane from the open Advanced button (fixed in Duro 5.43.0; the earlier review's "kept" item).
 - Render tests: a mouse drag moves the desktop pane and keeps a fifth of it in view; Escape from the open Advanced button closes the pane.
+
+### Verification (observed 2026-11-02)
+
+| Check              | Input                                                   | Expected                                                                                  | Actual                |
+| ------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------- |
+| export             | Phosphor, no edits, what Copy writes                    | the bytes of theme.json (31 colour keys, the 27 tokens and the 4 active\*)                | passes, byte for byte |
+| drag               | a real mouse drag of the header to x - 5000, at 1120 px | the pane moves left by more than 200 px, a fifth of it stays in view, it is not dismissed | passes                |
+| Escape on Advanced | Advanced expanded, focus on it, Escape                  | the pane closes                                                                           | passes                |
+| phone              | the bottom sheet at 390 px                              | no Move control, inside the window                                                        | passes                |

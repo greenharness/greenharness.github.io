@@ -30,6 +30,9 @@ test("the tokens are exactly the 27 colours of theme.json, plus the four active*
 
 test("Phosphor with no edits exports theme.json, byte for byte", () => {
   assert.deepEqual(T.exportTheme(fresh(), theme).colors, theme.colors);
+  // What Copy writes: the same text, key order, indentation and final newline included.
+  const shipped = readFileSync(new URL("../theme.json", import.meta.url), "utf8");
+  assert.equal(JSON.stringify(T.exportTheme(fresh()), null, 2) + "\n", shipped);
 });
 
 test("derive(Phosphor core) stays within 16/255 per channel of theme.json", () => {
