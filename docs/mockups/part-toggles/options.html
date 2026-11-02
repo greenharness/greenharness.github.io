@@ -1,0 +1,1419 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Part toggles</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, viewport-fit=cover"
+/>
+<script src="../../../theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap"
+/>
+<!-- Duro 5.37: index.css defines the token variables (layered, so this page's own rules win), vars.css gives them their stable --duro-* names. -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/@duro-app/ui@5.37.0/dist/index.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/@duro-app/tokens@5.37.0/dist/vars.css"
+/>
+<style>
+  /* Layout: the hero is the game, a full-width ASCII canvas; a short legend below maps each thing on the road to a part. One dark world on purpose. */
+  :root {
+    --void: var(--duro-color-bg);
+    --ink: var(--duro-color-text);
+    --dim: var(--duro-color-text-subtle);
+    --glow: var(--duro-color-accent);
+    --line: var(--duro-color-border);
+    --bug: var(--duro-color-error);
+    --slop: var(--gh-slop);
+    --boost: var(--duro-color-info);
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    background: var(--void);
+    color: var(--ink);
+  }
+  body {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .pad {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-block: 14px;
+    max-width: 1240px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: var(--glow);
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+  .logo span {
+    color: var(--ink);
+  }
+  .top ul {
+    display: flex;
+    gap: 22px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12.5px;
+    color: var(--dim);
+    flex-wrap: wrap;
+  }
+  .top a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .top a:hover {
+    color: var(--glow);
+  }
+
+  .stage {
+    position: relative;
+    max-width: 1240px;
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--duro-color-bg-inset);
+  }
+  /* Hero height from the published Duro size tokens: never under the playable minimum, leaves room for the headline and the install command, capped on tall screens. svh stays put when a phone's URL bar collapses. */
+  #game {
+    display: block;
+    width: 100%;
+    height: clamp(
+      var(--duro-size-hero-min-h),
+      calc(100svh - var(--duro-size-hero-reserve)),
+      var(--duro-size-hero-max-h)
+    );
+    outline: none;
+    cursor: pointer;
+    touch-action: none;
+  }
+  /* Below heroMinH + heroReserve of viewport height the game would push the headline out of view: a poster stands in, and a tap opens the game at full height. */
+  .poster {
+    display: none;
+    width: 100%;
+    min-height: var(--duro-size-editor-min-h);
+    place-items: center;
+    align-content: center;
+    gap: 6px;
+    padding: 24px 16px;
+    background: var(--duro-color-bg-inset);
+    color: var(--glow);
+    border: 0;
+    font: 600 16px var(--mono);
+    cursor: pointer;
+    text-align: center;
+  }
+  .poster small {
+    display: block;
+    color: var(--dim);
+    font-weight: 400;
+    font-size: 12px;
+  }
+  .poster:focus-visible {
+    outline: 2px solid var(--glow);
+    outline-offset: -4px;
+  }
+  .stage.is-poster #game,
+  .stage.is-poster .pads {
+    display: none;
+  }
+  .stage.is-poster .poster {
+    display: grid;
+  }
+  .stage.is-open #game {
+    height: 100svh;
+  }
+  .close {
+    display: none;
+    position: absolute;
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    right: calc(8px + env(safe-area-inset-right, 0px));
+    z-index: 2;
+    padding: 6px 12px;
+    background: color-mix(in srgb, var(--duro-color-bg-card) 80%, transparent);
+    color: var(--glow);
+    border: 1px solid var(--glow);
+    font: 600 12px var(--mono);
+    cursor: pointer;
+  }
+  .stage.is-open .close {
+    display: block;
+  }
+  .hint {
+    display: none;
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    font-size: 12px;
+    color: var(--dim);
+    pointer-events: none;
+  }
+  #game:focus ~ .hint {
+    display: block;
+  }
+  @media (pointer: coarse) {
+    #game:focus ~ .hint {
+      display: none;
+    }
+  }
+  #game:focus {
+    outline: 2px solid var(--glow);
+    outline-offset: -2px;
+  }
+  .pads {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: none;
+    justify-content: space-between;
+    padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    pointer-events: none;
+  }
+  .pads button {
+    pointer-events: auto;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--glow) 45%, transparent);
+    background: color-mix(in srgb, var(--duro-color-bg-card) 55%, transparent);
+    color: var(--glow);
+    font: 600 26px var(--mono);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .pads button.on {
+    background: color-mix(in srgb, var(--glow) 22%, transparent);
+  }
+  @media (pointer: coarse) {
+    .pads {
+      display: flex;
+    }
+  }
+
+  .under {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-block: 40px 72px;
+    display: grid;
+    gap: 40px;
+  }
+  .under > * {
+    min-width: 0;
+  }
+  .skip {
+    position: absolute;
+    left: max(16px, env(safe-area-inset-left, 0px));
+    top: 8px;
+    z-index: 10;
+    padding: 6px 12px;
+    background: var(--glow);
+    color: var(--duro-color-accent-contrast);
+    font-weight: 600;
+    text-decoration: none;
+    transform: translateY(-400%);
+  }
+  .skip:focus {
+    transform: none;
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  .pitch {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: end;
+  }
+  .pitch h1 {
+    margin: 0;
+    font-size: clamp(26px, 3.6vw, 42px);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--gh-head);
+    font-weight: 800;
+    text-wrap: balance;
+  }
+  .pitch h1 em {
+    font-style: normal;
+    color: var(--glow);
+  }
+  .pitch p {
+    margin: 0;
+    color: var(--dim);
+    max-width: 52ch;
+  }
+  .cmd {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--line);
+    background: var(--gh-cmd-bg);
+    padding: 12px 14px;
+    border-radius: 4px;
+    min-width: 0;
+  }
+  .cmd code {
+    overflow-x: auto;
+    white-space: nowrap;
+    min-width: 0;
+    color: var(--ink);
+  }
+  .cmd code b {
+    color: var(--glow);
+    font-weight: 400;
+  }
+  .cmd button {
+    font: inherit;
+    font-size: 12px;
+    background: transparent;
+    color: var(--glow);
+    border: 1px solid var(--line);
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    flex: none;
+  }
+  .cmd button:focus-visible,
+  .top a:focus-visible {
+    outline: 2px solid var(--glow);
+    outline-offset: 2px;
+  }
+
+  .legend h2 {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    font-weight: 600;
+    margin: 0 0 14px;
+  }
+  .parts {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .part {
+    padding: 16px;
+    background: var(--void);
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    min-width: 0;
+  }
+  .part.opt {
+    background: var(--gh-part-opt);
+  }
+  .part.wide {
+    grid-column: 1 / -1;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .part.wide pre {
+    grid-row: 1 / span 4;
+  }
+  @media (max-width: 480px) {
+    .part.wide {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .part.wide pre {
+      grid-row: auto;
+    }
+  }
+  .swatch .g1 {
+    color: var(--gh-g1);
+  }
+  .swatch .g2 {
+    color: var(--gh-g2);
+  }
+  .swatch .g3 {
+    color: var(--gh-g3);
+  }
+  .swatch .r1 {
+    color: var(--gh-r1);
+  }
+  .swatch .r2 {
+    color: var(--gh-r2);
+  }
+  .swatch .r3 {
+    color: var(--gh-r3);
+  }
+  .part pre {
+    margin: 0;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.25;
+    color: var(--glow);
+    min-height: 4.2em;
+    overflow-x: auto;
+  }
+  .part pre.bug {
+    color: var(--bug);
+  }
+  .part b {
+    color: var(--gh-head);
+    font-size: 15px;
+  }
+  .part span {
+    color: var(--dim);
+    font-size: 13px;
+  }
+  .part small {
+    color: var(--ink);
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  /* ---------- lifecycle road ---------- */
+  :root {
+    --s1: var(--duro-color-info);
+    --s2: var(--duro-color-accent);
+    --s3: var(--gh-white);
+    --you: var(--duro-color-warning);
+    --panel: var(--duro-color-bg-card);
+    --faint: var(--duro-color-border-strong);
+  }
+  .sec-head {
+    display: grid;
+    gap: 10px;
+    max-width: 72ch;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font-size: clamp(22px, 2.8vw, 30px);
+    color: var(--gh-head);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  .sec-head p {
+    margin: 0;
+    color: var(--dim);
+  }
+  .kick {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .sector-bar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    display: flex;
+    gap: 6px 18px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 0;
+    background: var(--void);
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    margin-top: 18px;
+  }
+  .sector-bar span {
+    color: var(--dim);
+    transition: color 0.2s;
+  }
+  .sector-bar span::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+    background: var(--c);
+    opacity: 0.5;
+  }
+  .sector-bar span.on {
+    color: var(--c);
+  }
+  .sector-bar span.on::before {
+    opacity: 1;
+  }
+  .sector-bar .you-key {
+    margin-left: auto;
+    color: var(--you);
+  }
+  .sector-bar .you-key::before {
+    display: none;
+  }
+  .road {
+    position: relative;
+  }
+  .road > svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    pointer-events: none;
+  }
+  .road-end svg {
+    display: block;
+  }
+  .stop {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    padding: 16px 18px;
+    background: color-mix(in srgb, var(--duro-color-bg-card) 94%, transparent);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--sc);
+  }
+  .stop.on {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--sc) 35%, transparent),
+      0 0 28px -8px var(--sc);
+  }
+  .stop.idle {
+    background: color-mix(in srgb, var(--duro-color-bg-inset) 90%, transparent);
+    border-style: dashed;
+    border-left-style: solid;
+  }
+  .stop .k {
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sc);
+  }
+  .stop h3 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--gh-head);
+  }
+  .stop p {
+    margin: 0;
+    font-size: 13.5px;
+  }
+  .lanes {
+    margin: 0;
+    display: grid;
+    gap: 6px;
+    font-size: 12.5px;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+  }
+  .lanes div {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+  }
+  .lanes dt {
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 10.5px;
+  }
+  .lanes dd {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    min-width: 0;
+  }
+  .chip {
+    border: 1px solid var(--faint);
+    padding: 0 6px;
+    border-radius: 2px;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .chip.check {
+    border-color: var(--glow);
+    color: var(--glow);
+  }
+  .none {
+    color: var(--faint);
+  }
+  .lanes .you dt,
+  .lanes .you dd {
+    color: var(--you);
+  }
+  .lanes .dz dd {
+    display: block;
+    color: var(--ink);
+  }
+  .term {
+    margin: 0;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    background: var(--panel);
+    border-left: 2px solid var(--sc);
+    padding: 8px 10px;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--ink);
+  }
+  .term .x {
+    color: var(--bug);
+  }
+  .term .v {
+    color: var(--glow);
+  }
+  .term .p {
+    color: var(--dim);
+  }
+  .road-end {
+    position: absolute;
+    bottom: 6px;
+    transform: translateX(-50%);
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    width: max-content;
+    max-width: 100%;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .road .stop {
+    position: absolute;
+  }
+  .road .stop.ops:not(.on) {
+    opacity: 0.82;
+  }
+  .border-line {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(620px, 100%);
+    display: grid;
+    gap: 6px;
+    text-align: center;
+    padding: 14px 16px;
+    background: var(--void);
+    border-top: 1px dashed var(--glow);
+    border-bottom: 1px dashed var(--faint);
+    z-index: 1;
+  }
+  .border-line b {
+    color: var(--glow);
+    letter-spacing: 0.04em;
+    font-size: 14px;
+  }
+  .border-line .dev {
+    color: var(--s2);
+    font-size: 12.5px;
+  }
+  .border-line .ops {
+    color: var(--s3);
+    font-size: 12.5px;
+    opacity: 0.8;
+  }
+  .border-line small {
+    color: var(--dim);
+    font-size: 12px;
+    text-wrap: balance;
+  }
+
+  /* ---------- you ---------- */
+  .yous {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    border: 1px solid var(--duro-color-warning-border);
+    margin-top: 18px;
+  }
+  .yous div {
+    padding: 14px 16px;
+    border-left: 1px solid var(--duro-color-warning-border);
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    min-width: 0;
+  }
+  .yous div:first-child {
+    border-left: 0;
+  }
+  .yous b {
+    color: var(--you);
+    font-size: 14.5px;
+  }
+  .yous span {
+    color: var(--dim);
+    font-size: 13px;
+  }
+  .yous small {
+    color: var(--you);
+    opacity: 0.75;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- pit lane ---------- */
+  .pit {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0;
+    counter-reset: pit;
+  }
+  .pit li {
+    position: relative;
+    padding: 38px 14px 0 0;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    min-width: 0;
+    counter-increment: pit;
+  }
+  .pit li::before {
+    content: counter(pit);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--glow);
+    color: var(--glow);
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    background: var(--void);
+    z-index: 1;
+  }
+  .pit li::after {
+    content: "";
+    position: absolute;
+    top: 13px;
+    left: 26px;
+    right: 0;
+    border-top: 1px dashed var(--faint);
+  }
+  .pit li:last-child::after {
+    content: "↺";
+    border: 0;
+    color: var(--glow);
+    left: 34px;
+    top: 2px;
+  }
+  .pit li.you::before {
+    border-color: var(--you);
+    color: var(--you);
+  }
+  .pit b {
+    color: var(--gh-head);
+    font-size: 14px;
+  }
+  .pit li.you b {
+    color: var(--you);
+  }
+  .pit span {
+    color: var(--dim);
+    font-size: 13px;
+  }
+  .pit code {
+    color: var(--ink);
+  }
+  .notes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+  }
+  .notes div {
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    display: grid;
+    gap: 6px;
+    font-size: 13.5px;
+    color: var(--dim);
+  }
+  .notes b {
+    color: var(--ink);
+  }
+  .notes div {
+    align-content: start;
+  }
+  .notes .span {
+    grid-column: 1 / -1;
+  }
+  .notes code,
+  .sec-head code {
+    color: var(--ink);
+  }
+  .notes .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+  }
+  .chip.exp {
+    border-color: var(--faint);
+    color: var(--dim);
+    vertical-align: middle;
+    font-weight: 400;
+  }
+  .sec-head h2 .chip.exp,
+  .part b .chip.exp,
+  .notes b .chip.exp {
+    font-size: 12px;
+  }
+  .sec-head a,
+  .notes a,
+  .part span a,
+  .stop p a {
+    color: var(--glow);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ---------- how the agents work together ---------- */
+  .agents {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 22px;
+    align-items: start;
+  }
+  .agents .notes {
+    margin-top: 0;
+  }
+  .flow {
+    margin: 0;
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+  }
+  .flow pre {
+    margin: 0;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--dim);
+  }
+  .flow .f1 {
+    color: var(--s1);
+  }
+  .flow .f2 {
+    color: var(--s2);
+  }
+  .flow .f3 {
+    color: var(--s3);
+  }
+  .flow .fy {
+    color: var(--you);
+  }
+  .flow figcaption {
+    font-size: 12.5px;
+    color: var(--dim);
+    max-width: 34ch;
+  }
+
+  /* ---------- skills & agents ---------- */
+  .ship {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    margin-top: 18px;
+  }
+  .ship table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 680px;
+    font: inherit;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  .ship th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .ship td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .ship td:first-child {
+    color: var(--gh-head);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ship td span {
+    display: inline-block;
+    margin: 0 6px 4px 0;
+  }
+
+  @media (max-width: 900px) {
+    .yous {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .yous div {
+      border-top: 1px solid var(--duro-color-warning-border);
+    }
+    .yous div:nth-child(odd) {
+      border-left: 0;
+    }
+    .yous div:nth-child(-n + 2) {
+      border-top: 0;
+    }
+    .pit {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+      row-gap: 24px;
+    }
+    .notes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .agents {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 560px) {
+    .yous,
+    .pit {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .yous div {
+      border-left: 0 !important;
+      border-top: 1px solid var(--duro-color-warning-border) !important;
+    }
+    .yous div:first-child {
+      border-top: 0 !important;
+    }
+    .pit li::after {
+      display: none;
+    }
+    .sector-bar .you-key {
+      margin-left: 0;
+    }
+  }
+  @media (max-width: 900px) {
+    .pitch {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .parts {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 480px) {
+    .parts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ---------- theme picker ---------- */
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .tbtn {
+    font: inherit;
+    font-size: 13px;
+    padding: 8px 14px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--dim);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .tbtn.primary {
+    background: var(--glow);
+    color: var(--duro-color-accent-contrast);
+    border-color: var(--glow);
+    font-weight: 600;
+  }
+  .tbtn:focus-visible {
+    outline: 2px solid var(--glow);
+    outline-offset: 2px;
+  }
+  .part .theme-slot {
+    justify-self: start;
+  }
+  .theme-msg {
+    margin: 10px 0 0;
+    min-height: 1.4em;
+    font-size: 12.5px;
+    color: var(--dim);
+  }
+  .theme-msg.warn {
+    color: var(--you);
+  }
+  @media (pointer: coarse) {
+    .tbtn {
+      min-height: 44px;
+    }
+  }
+
+  /* ---------- mockup only: the three toggle placements ---------- */
+  .mock {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding-block: 32px 72px;
+    display: grid;
+    gap: 48px;
+  }
+  .mock > header h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    color: var(--gh-head);
+  }
+  .mock > header p {
+    margin: 0;
+    color: var(--dim);
+    max-width: 80ch;
+  }
+  .opt-head {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+  .opt-head h2 {
+    margin: 0;
+    font-size: 15px;
+    color: var(--glow);
+  }
+  .opt-head p {
+    margin: 0;
+    color: var(--dim);
+    font-size: 13px;
+    max-width: 90ch;
+  }
+  .part.off pre {
+    color: var(--faint);
+  }
+  .part.off pre {
+    text-decoration: line-through;
+    text-decoration-color: var(--bug);
+  }
+  .part .cost {
+    color: var(--bug);
+    font-size: 12px;
+    opacity: 1 !important;
+  }
+  .part .needs {
+    color: var(--you);
+    font-size: 12px;
+  }
+
+  /* Picked: C (the whole card is the toggle) with B's switch in place of the bare ON text.
+   The switch's label is stretched over the card (::after), so a click anywhere toggles; links sit above it. */
+  .parts .part {
+    position: relative;
+    cursor: pointer;
+  }
+  .parts .part:hover {
+    outline: 1px solid var(--glow);
+    outline-offset: -1px;
+  }
+  .parts .part:has(input:disabled) {
+    cursor: default;
+    outline: none;
+  }
+  .parts .part:has(input:focus-visible) {
+    outline: 2px solid var(--glow);
+    outline-offset: -2px;
+  }
+  .pt {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 11px;
+    color: var(--glow);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+  .part.off .pt {
+    color: var(--bug);
+  }
+  .pt::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .part:has(input:disabled) .pt {
+    color: var(--you);
+    cursor: default;
+  }
+  .pt input {
+    appearance: none;
+    width: 30px;
+    height: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--duro-color-bg-inset);
+    position: relative;
+    margin: 0;
+    cursor: inherit;
+    flex: none;
+  }
+  .pt input::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: left 0.12s;
+  }
+  .pt input:checked {
+    border-color: var(--glow);
+  }
+  .pt input:checked::after {
+    left: 16px;
+    background: var(--glow);
+  }
+  .pt input:focus-visible {
+    outline: none;
+  }
+  .part span a {
+    position: relative;
+    z-index: 1;
+  }
+  @media (pointer: coarse) {
+    .pt {
+      min-height: 44px;
+    }
+  }
+
+  .hud {
+    margin: 0;
+    border: 1px solid var(--line);
+    background: var(--duro-color-bg-inset);
+    padding: 14px 16px;
+    font: inherit;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--dim);
+    overflow-x: auto;
+  }
+  .hud b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .hud .x {
+    color: var(--bug);
+  }
+  .hud .g {
+    color: var(--glow);
+  }
+  .cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .cost-table th,
+  .cost-table td {
+    text-align: left;
+    padding: 8px 12px;
+    border-top: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .cost-table th {
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .cost-table td:first-child {
+    color: var(--gh-head);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+  }
+</style>
+
+<main class="mock pad">
+  <header>
+    <h1>Part toggles: the whole card is the switch</h1>
+    <p>
+      The picked design: C, the whole card is the toggle, with B's switch where
+      C had a bare "ON". Click anywhere on a card, or Tab to its switch and
+      press Space. The router card's "How it works" link stays a link and does
+      not flip the part. Unchecking a part dims its art and states what the road
+      loses; the game reads the switches when a run starts, never mid-race.
+      attest needs gate.
+    </p>
+  </header>
+
+  <section>
+    <div class="opt-head">
+      <h2>C + B's switch (picked 2026-11-02)</h2>
+      <p>
+        A screen reader says "gate, switch, on". Card text cannot be selected
+        through the card-wide hit area: accepted for six short cards.
+      </p>
+    </div>
+    <div class="parts" data-variant="CB"></div>
+  </section>
+
+  <section>
+    <div class="opt-head">
+      <h2>What the game shows</h2>
+      <p>
+        The red-light screen and the HUD say which parts are off; the end screen
+        compares the run with the full harness.
+      </p>
+    </div>
+    <pre class="hud" id="hud"></pre>
+  </section>
+
+  <section>
+    <div class="opt-head">
+      <h2>What each part costs when it is off</h2>
+      <p>
+        Each one changes how the game plays, not only how it looks. Proposed
+        numbers, tuned in the build.
+      </p>
+    </div>
+    <div class="wrap">
+      <table class="cost-table">
+        <thead>
+          <tr>
+            <th>part off</th>
+            <th>on the road</th>
+            <th>why it is harder</th>
+          </tr>
+        </thead>
+        <tbody id="costs"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var PARTS = [
+      {
+        id: "guardrails",
+        art: "║░        ░║\n║▓  road  ▓║\n║░        ░║",
+        text: "The road edges. Every command the agent runs is read first; the ones that go off the road are refused.",
+        was: "was amont-agent",
+        cost: "No rails: you can leave the road",
+        road: "The rails are gone. Past the kerb the car runs off the road: it slows to a crawl, loses 4 s, and is put back in the middle.",
+        why: "A wide line no longer bounces you back for free.",
+      },
+      {
+        id: "gate",
+        art: "█══ GATE ══█\n█          █\n█          █",
+        text: "The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.",
+        was: "was amont",
+        cost: "No arches: no time back",
+        road: "No arches on the road, so the clock never refills. The run lasts the 40 s you start with.",
+        why: "Time only goes down.",
+      },
+      {
+        id: "decisions",
+        art: "┌─────────┐\n│decided: │\n│curve ←  │",
+        text: "The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.",
+        was: "was aval",
+        cost: "No signs: curves come unannounced",
+        road: "No signs, and the far road is in fog: a curve, and what is on it, shows only in the nearest two-thirds of the road.",
+        why: "Less time to read the road.",
+      },
+      {
+        id: "router",
+        art: "  ▶▶\nROUTER",
+        text: "The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed.",
+        was: "was relais",
+        exp: true,
+        link: "How it works",
+        cost: "No boosts",
+        road: "No ▶▶ pickups: their place on the road goes to bugs, and the top speed stays at 245 km/h.",
+        why: "More bugs, and nothing to catch up with.",
+      },
+      {
+        id: "conform",
+        art: "    │\n    ¦\n    │",
+        text: "The lane markings. Code is checked against the rules your team decided, so review starts at the right line.",
+        was: "was adr-lint",
+        cost: "No lane line: more slop",
+        road: "No centre line, and slop rises from a third to almost half of what is on the road. With nothing to catch it, a slop hit costs what a bug does (−3 s, hard braking) and scrambles the screen for 2.4 s, not 1.6 s.",
+        why: "Nothing catches the slop before it reaches you.",
+      },
+      {
+        id: "attest",
+        art: "✓ gate ─┐\n  signed │\nCI ◀─────┘ skip",
+        text: "The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again.",
+        was: "signatures come from gate",
+        cost: "Unsigned: CI runs it again",
+        road: "An arch gives +5 s, not +12 s, and the car slows through it: CI runs every check again.",
+        why: "Each arch buys less time.",
+      },
+    ];
+    var on = {};
+    PARTS.forEach(function (p) {
+      on[p.id] = true;
+    });
+    function esc(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    }
+    function name(p) {
+      return (
+        esc(p.id) + (p.exp ? ' <span class="chip exp">experimental</span>' : "")
+      );
+    }
+    function note(p) {
+      if (p.id === "attest" && !on.gate)
+        return '<small class="needs">needs gate: nothing to sign</small>';
+      return on[p.id]
+        ? "<small>" + esc(p.was) + "</small>"
+        : '<small class="cost">✗ ' + esc(p.cost) + "</small>";
+    }
+    function box(p) {
+      return (
+        '<input type="checkbox" data-part="' +
+        p.id +
+        '"' +
+        (on[p.id] ? " checked" : "") +
+        (p.id === "attest" && !on.gate ? " disabled" : "") +
+        ">"
+      );
+    }
+    function card(v, p) {
+      var dis = p.id === "attest" && !on.gate,
+        off = !on[p.id] || dis;
+      var input =
+        '<input type="checkbox" role="switch" aria-label="' +
+        p.id +
+        '" aria-describedby="' +
+        p.id +
+        '-note" data-part="' +
+        p.id +
+        '"' +
+        (on[p.id] && !dis ? " checked" : "") +
+        (dis ? " disabled" : "") +
+        ">";
+      var text =
+        esc(p.text) + (p.link ? ' <a href="#">' + esc(p.link) + "</a>" : "");
+      return (
+        '<div class="part' +
+        (off ? " off" : "") +
+        '"><label class="pt">' +
+        input +
+        (dis ? "needs gate" : off ? "off" : "on") +
+        "</label><pre>" +
+        esc(p.art) +
+        "</pre><b>" +
+        name(p) +
+        "</b><span>" +
+        text +
+        "</span>" +
+        note(p).replace("<small", '<small id="' + p.id + '-note"') +
+        "</div>"
+      );
+    }
+    function hud() {
+      var offs = PARTS.filter(function (p) {
+        return !on[p.id] || (p.id === "attest" && !on.gate);
+      }).map(function (p) {
+        return p.id;
+      });
+      var ons = PARTS.filter(function (p) {
+        return offs.indexOf(p.id) < 0;
+      }).map(function (p) {
+        return p.id;
+      });
+      var n = ons.length;
+      document.getElementById("hud").innerHTML =
+        "<b>red light</b>\n  &gt; $ grh install " +
+        esc(ons.join(" ")) +
+        (n ? " " : "") +
+        "design\n" +
+        (offs.length
+          ? '  <span class="x">harness ' +
+            n +
+            "/6 · off: " +
+            esc(offs.join(", ")) +
+            "</span>\n"
+          : '  <span class="g">harness 6/6</span>\n') +
+        "\n<b>HUD, top left</b>\n  TIME   31.4\n  SPEED  198 km/h\n  DIST   1.42 km\n" +
+        (offs.length ? '  <span class="x">HARNESS ' + n + "/6</span>\n" : "") +
+        "\n<b>end screen</b>\n  T I M E\n  1.42 km   ·   best " +
+        n +
+        "/6 parts: 1.42 km   ·   best 6/6: 3.10 km\n  bugs dodged 18 · bugs hit 4\n" +
+        (offs.length
+          ? '  <span class="x">off: ' +
+            esc(offs.join(", ")) +
+            "</span>\n  [ H ]  put the whole harness back on\n"
+          : "") +
+        "  [ SPACE / ENTER ]  drive again\n  [ I ]  install the harness ↓";
+    }
+    function costs() {
+      document.getElementById("costs").innerHTML = PARTS.map(function (p) {
+        return (
+          "<tr><td>" +
+          esc(p.id) +
+          "</td><td>" +
+          esc(p.road) +
+          "</td><td>" +
+          esc(p.why) +
+          "</td></tr>"
+        );
+      }).join("");
+    }
+    function render() {
+      document.querySelectorAll(".parts[data-variant]").forEach(function (el) {
+        var v = el.getAttribute("data-variant");
+        el.innerHTML = PARTS.map(function (p) {
+          return card(v, p);
+        }).join("");
+      });
+      hud();
+    }
+    document.addEventListener("change", function (e) {
+      var id = e.target.getAttribute && e.target.getAttribute("data-part");
+      if (!id) return;
+      on[id] = e.target.checked;
+      var sel =
+        '[data-variant="' +
+        e.target.closest(".parts").getAttribute("data-variant") +
+        '"] [data-part="' +
+        id +
+        '"]';
+      render();
+      var again = document.querySelector(sel);
+      if (again) again.focus();
+    });
+    render();
+    costs();
+  })();
+</script>
