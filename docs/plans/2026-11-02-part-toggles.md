@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 branch: feat/part-toggles
 repos: [greenharness.github.io]
 adrs: [design-system.every-measure-is-a-token (ADR-0027)]
@@ -133,7 +133,7 @@ object (pure, no state) so a test can check each cost without driving. `window.g
       `data-parts-off="conform"`; toggling mid-race leaves it unchanged; (5) `H` on the end screen
       re-checks all six; (6) no console errors; (7) gate and decisions off, hold ↑ until `pos > 350`: snapshot `ents.gate === 0`, `ents.sign === 0`, page still responds; (8) guardrails off, under `page.clock`, hold ← for 3 s of race: snapshot `offroads` is 1 to 3 and `time` equals 40 − `rt` − 4 × `offroads` within 0.1 s, so one −4 s per trip, never per frame. Test (4) reads `ghGameSnapshot().partsOff`. A content test: the six cards each hold one
       `input[type=checkbox][role=switch][data-part]`, and `design` holds none.
-- [ ] Phase 3: browser check at 1280, 390 and 320 px (agent's Playwright), keyboard only
+- [x] Phase 3: browser check at 1280, 390 and 320 px (agent's Playwright), keyboard only
       (Tab to a checkbox, Space, Tab to the canvas, Enter), then the guided preview for the
       person (F7).
 
@@ -204,6 +204,10 @@ results follow it.
 | keyboard    | from the copy button, Tab reached the guardrails then the gate switch; Space turned gate off, card outline 2px solid on focus-visible, live region: "gate off: no time back. Applies to the next run."                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | balance     | `scripts/balance.mjs` (then outside the repo) on `page.clock`, paired seeds 1000–1019, acting only on `ghGameSnapshot().visible`. First run, mean paired loss: gate 63.6 %, attest 48.0 %, decisions 40.7 %, conform 28.2 %, router 11.6 %, guardrails 7.9 % (miss). Retuned guardrails (Decision log); re-measured: 38.0 %, worse on 20/20 seeds. Gate 63.6 % ≤ 4 × 48.0 %. Per seed: [2026-11-02-part-toggles.balance.md](2026-11-02-part-toggles.balance.md); re-run with `node scripts/balance.mjs <url>`.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | prettier    | `pnpm exec prettier --check tests/game.parts.test.mjs tests/content.test.mjs scripts/balance.mjs` on 7f4faac: clean                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+## Outcome
+
+Shipped in PR #11. The person approved the guided preview (aa7ad80, `[preview aa7ad80ae8ea6b]`) on 2026-11-02.
 
 ## Implementation review
 
