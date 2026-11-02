@@ -144,10 +144,9 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .notes .span { grid-column: 1 / -1 }
 .notes code, .sec-head code { color: var(--ink) }
 .notes .chips { display: flex; flex-wrap: wrap; gap: 4px 6px }
-.chip.exp { border-color: var(--faint); color: var(--dim); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; vertical-align: middle; font-weight: 400 }
-.sec-head h2 .chip.exp { margin-left: 10px; font-size: 12px }
-.part b .chip.exp { margin-left: 6px }
-.sec-head a, .notes a, .part span a, .stop p a { color: var(--glow) }
+.chip.exp { border-color: var(--faint); color: var(--dim); vertical-align: middle; font-weight: 400 }
+.sec-head h2 .chip.exp, .part b .chip.exp, .notes b .chip.exp { font-size: 12px }
+.sec-head a, .notes a, .part span a, .stop p a { color: var(--glow); text-decoration: underline; text-underline-offset: 2px }
 
 /* ---------- how the agents work together ---------- */
 .agents { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; margin-top: 22px; align-items: start }
@@ -240,14 +239,14 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 │decided: │
 │curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small>was aval</small></div>
       <div class="part"><pre>  ▶▶
-ROUTER</pre><b>router<span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small>was relais</small></div>
+ROUTER</pre><b>router <span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small>was relais</small></div>
       <div class="part"><pre>    │
     ¦
     │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small>was adr-lint</small></div>
       <div class="part"><pre>✓ gate ─┐
   signed │
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
-      <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
+      <div class="part opt wide" id="designCard"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
 <span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query. <a href="#design">What it gives your agent</a></span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
     </div>
@@ -357,9 +356,9 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       <p>The design part is an optional extension. The harness owns how it plugs in: hooks, skills, a catalog server, lint rules. A design system supplies the content. Duro is the first one, and the part works with it today.</p>
     </div>
     <div class="notes">
-      <div><b>Tokens and a theme</b><span>One file of tokens (colours, fonts, radii, sizes) themes every component. This page is themed that way: change a colour in the theme panel on the <a href="#parts">design card</a> and the whole page follows.</span></div>
+      <div><b>Tokens and a theme</b><span>One file of tokens (colors, fonts, radii, sizes) themes every component. This page is themed that way: change a color in the theme panel on the <a href="#designCard">design card</a> and the whole page follows.</span></div>
       <div><b>A catalog the agent queries, over MCP</b><span><code>duro_ds_list</code>, <code>duro_ds_lookup</code> and <code>duro_ds_manifest</code> tell the agent which component to use and which props it takes. <code>duro_ds_mockup_canvas</code> and <code>duro_ds_mockup_check</code> build a mockup and check it before any code. A session-start hook puts the catalog in front of the agent, and a prompt hook suggests plan mode for a new screen.</span></div>
-      <div><b>Lint rules</b><span>No raw colours or sizes, no raw HTML elements, design-system components instead. The eight rules run at the commit, through gate:</span><span class="chips"><span class="chip">no-raw-design-values</span><span class="chip">no-raw-html-element</span><span class="chip">no-raw-breakpoint-query</span><span class="chip">no-raw-layer-values</span><span class="chip">prefer-ds-form-components</span><span class="chip">no-tokens-barrel-import</span><span class="chip">no-flex-grow-web</span><span class="chip">no-deprecated-table-parts</span></span></div>
+      <div><b>Lint rules</b><span>No raw colors or sizes, no raw HTML elements, design-system components instead. The eight rules run at the commit, through gate:</span><span class="chips"><span class="chip">no-raw-design-values</span><span class="chip">no-raw-html-element</span><span class="chip">no-raw-breakpoint-query</span><span class="chip">no-raw-layer-values</span><span class="chip">prefer-ds-form-components</span><span class="chip">no-tokens-barrel-import</span><span class="chip">no-flex-grow-web</span><span class="chip">no-deprecated-table-parts</span></span></div>
       <div><b>Skills and checks</b><span>The <code>ui</code>, <code>colors</code> and <code>typography</code> skills teach the agent the system. <code>duro doctor</code> checks how an app wires the design system into its build, and <code>duro hook install --check</code> keeps every repository's hooks identical.</span></div>
     </div>
   </section>
@@ -1029,7 +1028,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       design: "Design-system lint rules run too: no raw colors or sizes, no raw HTML elements.",
       what: "The git pre-commit hook checks the message, conflict markers and secrets, plus the linters of the languages your repository uses.",
       term: '<span class="p">$</span> git commit -m "fix: retry on 503"\n<span class="v">✓ gate</span> · message · secrets · markers · clippy' },
-    { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "code-review-*", "interface-review"], you: null,
+    { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "code-review profiles (7)", "interface-review"], you: null,
       what: "Before the push, a reviewer agent reads the diff against the plan, and so does each code-review profile the plan named. The push is refused if any of those reviews did not run on that tree. <a href=\"#agents\">How the agents hand work over</a>. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
     { name: "Review", sec: 3, check: "conform", skills: ["interface-review"], agents: [],
       design: "duro doctor checks how the app wires the design system into its build.",

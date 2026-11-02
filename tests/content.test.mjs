@@ -25,12 +25,16 @@ function tableChips() {
   );
 }
 
+// Reads the road's `var STOPS = [ … ];` block by its layout (closing `  ];` on its own line), and
+// each `skills: [...]` / `agents: [...]` list; a label holding `]` would need a real parser.
 function stopChips() {
   const stops = html.match(/var STOPS = \[([\s\S]*?)\n {2}\];/);
   assert.ok(stops, "the road data is found");
-  return [...stops[1].matchAll(/(?:skills|agents): \[([^\]]*)\]/g)].flatMap(
-    (m) => [...m[1].matchAll(/"([^"]+)"/g)].map((q) => q[1]),
-  );
+  const names = [
+    ...stops[1].matchAll(/(?:skills|agents): \[([^\]]*)\]/g),
+  ].flatMap((m) => [...m[1].matchAll(/"([^"]+)"/g)].map((q) => q[1]));
+  assert.ok(names.length > 0, "the road names some skills and agents");
+  return names;
 }
 
 test("the page explains the design part, the router and how the agents work together", () => {

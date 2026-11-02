@@ -12,7 +12,10 @@ import { resolve } from "node:path";
 const root = resolve(import.meta.dirname, "..");
 const arg = (flag, fallback) => {
   const i = process.argv.indexOf(flag);
-  return resolve(root, i > 0 ? process.argv[i + 1] : fallback);
+  if (i === -1) return resolve(root, fallback);
+  if (process.argv[i + 1] === undefined)
+    throw new Error(`${flag} needs a directory`);
+  return resolve(root, process.argv[i + 1]);
 };
 const dirs = {
   skills: arg("--skills", "../greenharness-skills"),
@@ -96,7 +99,6 @@ const fixture = {
     "plan-review panel (9)",
     "code-review profiles (7)",
     "plan-review panel: architect, backend, language, platform, product, UX research…",
-    "code-review-*",
   ],
   sources,
 };

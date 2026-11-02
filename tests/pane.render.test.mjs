@@ -38,14 +38,7 @@ after(async () => {
 })
 
 async function open(width, height) {
-  const context = await browser.newContext({viewport: {width, height}})
-  const page = await context.newPage()
-  const errors = []
-  page.on('pageerror', (error) => errors.push(error.message))
-  page.on('console', (m) => {
-    if (m.type() === 'error' && !m.text().includes('404')) errors.push(m.text())
-  })
-  await page.goto(base)
+  const {page, errors, context} = await plain(width, height)
   await page.click('#themeLoad')
   await page.waitForSelector('[role="dialog"]')
   return {page, errors, context}
@@ -175,11 +168,15 @@ test('Escape closes the pane from the open Advanced button', async () => {
   await context.close()
 })
 
+// The page as a visitor opens it: errors and console errors (404s aside) are collected.
 async function plain(width, height) {
   const context = await browser.newContext({viewport: {width, height}})
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', (error) => errors.push(error.message))
+  page.on('console', (m) => {
+    if (m.type() === 'error' && !m.text().includes('404')) errors.push(m.text())
+  })
   await page.goto(base)
   return {page, errors, context}
 }
@@ -192,7 +189,10 @@ for (const width of [390, 320]) {
       assert.ok(box && box.width <= width, `#${id} fits: ${JSON.stringify(box)}`)
     }
     const flow = await page.locator('#agents .flow').boundingBox()
-    assert.ok(flow.x >= 0 && flow.x + flow.width <= width, `figure fits: ${JSON.stringify(flow)}`)
+    assert.ok(
+      flow && flow.x >= 0 && flow.x + flow.width <= width,
+      `figure: ${JSON.stringify(flow)}`,
+    )
     assert.equal(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
       true,
@@ -215,12 +215,18 @@ test('the experimental badge is on the router card and heading, readable in ever
         .slice(0, 3)
         .map((n) => (+n).toString(16).padStart(2, '0'))
         .join('')
-    const badge = document.querySelector('#router h2 .chip.exp')
-    return G.PRESET_ORDER.map((name) => {
+    // Each badge against the background it sits on: the page for the heading, its card for the card.
+    const pairs = [
+      [document.querySelector('#router h2 .chip.exp'), document.body],
+      [document.querySelector('#parts .part b .chip.exp'), document.querySelector('#parts .part')],
+    ]
+    return G.PRESET_ORDER.flatMap((name) => {
       G.set(G.selectPreset(G.get(), name))
-      const fg = hex(getComputedStyle(badge).color)
-      const bg = hex(getComputedStyle(document.body).backgroundColor)
-      return {name, fg, ratio: G.contrast(fg, bg)}
+      return pairs.map(([badge, under], i) => {
+        const fg = hex(getComputedStyle(badge).color)
+        const bg = hex(getComputedStyle(under).backgroundColor)
+        return {name: `${name} #${i}`, fg, ratio: G.contrast(fg, bg)}
+      })
     })
   })
   for (const {name, ratio} of ratios) assert.ok(ratio >= 4.5, `${name}: ${ratio.toFixed(2)}:1`)
