@@ -1,5 +1,5 @@
 ---
-status: active
+status: done
 branch: feat/workflow-copy
 repos: [greenharness.github.io]
 adrs:
@@ -134,7 +134,7 @@ The ASCII figure fits at 320 px with no scroll box (WCAG 1.4.10).
 
 ## Phases
 
-- [ ] Phase 1: sections `#design`, `#router` and `#agents`, the badge, the card links, the road
+- [x] Phase 1: sections `#design`, `#router` and `#agents`, the badge, the card links, the road
       strings and the table, in one commit, plus a test that the page carries the three section
       ids and that every chip in `#skills` and in the `STOPS` skills/agents arrays exists in a
       fixture of shipped names; each fixture entry records its source tree path and commit SHA,
@@ -147,7 +147,7 @@ The ASCII figure fits at 320 px with no scroll box (WCAG 1.4.10).
       file names the one command that regenerates it. The
       table gains a `<caption>`, and the test finds it by that caption, not by class. The test must
       fail on main before the table fix.
-- [ ] Phase 2: browser check at 1280, 390 and 320 px (Playwright, the agent's own), then the guided
+- [x] Phase 2: browser check at 1280, 390 and 320 px (Playwright, the agent's own), then the guided
       preview for the person (F7).
 
 ## Decision log
@@ -159,25 +159,55 @@ The ASCII figure fits at 320 px with no scroll box (WCAG 1.4.10).
   what the harness ships. Claude Code's SendMessage is not ours to advertise.
 - 2026-11-02: no in-flight branch touches `index.html` (`fix/theme-export` touches theme.json and
   tests; `feat/theme-panel-mockups` touches docs/mockups), so nothing has to be sequenced.
+- 2026-11-02: the design row of the skills table lost `duro-mockup` (it lives only in
+  duro-design-system/.claude/skills, a repo-local skill) and `plan-review-ui-design` /
+  `plan-review-react` (no shipped tree holds them), because the table must name only what a part
+  ships. The router row gained `programme`, and the workflow row gained the five interface skills
+  and the code-review profiles.
+- 2026-11-02: #8 (movable theme panel) landed on main during the work; the rebase conflicted only in
+  `tests/pane.render.test.mjs`, where both sides appended tests, so both were kept.
+- 2026-11-02 (implementation review): the badge sets one size of its own, 12px, the page's existing
+  `.kick` size, instead of "colour only": inside a 30px heading an inherited size would be a second
+  heading. The road's Push chip says "code-review profiles (7)", like the table, instead of the
+  wildcard `code-review-*`. Links in the new copy are underlined, so they are not told apart by
+  colour alone.
 
 ## Verification
 
-- `pnpm test`: the new content test passes on the branch, and fails when a chip `not-shipped` is
-  added to the table (checked once by hand, then reverted). The existing tests pass unchanged.
-- `pnpm typecheck` passes (CI runs it). index.html is in .prettierignore, so prettier is not a gate for this change.
-- New cases in `tests/pane.render.test.mjs` (run by `pnpm test` in CI): at 390 and 320 px the three ids exist and `scrollWidth <= innerWidth`; `.chip.exp` is visible in the router card and the `#router`
-  heading; for every preset, its text measures at least 4.5:1 against its background (WCAG 1.4.3),
-  read from computed styles.
-- Playwright at 1280 / 390 / 320 px: `#design`, `#router` and `#agents` render; the badge is
-  visible next to "router" in the card and in the heading; `document.documentElement.scrollWidth <= innerWidth` at 320 px; no console errors. Screenshots go to
-  `~/.claude/amont-agent/attestations/<sha>/`.
-- The theme panel still opens, and the badge follows the preset (it uses tokens only).
-- Each factual line is backed by a source named in Behaviour. Lines checked against those sources
-  at F2 are listed in the Outcome.
-- The person approves the preview (F7).
+Observed 2026-11-02 on the rebased tree (base ecdfb94, #8), after `pnpm install --frozen-lockfile`
+for #8's `@duro-app/ui` 5.43.0.
+
+| Check           | Input                                                                          | Expected                                                                                    | Actual                                                                                 |
+| --------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| typecheck       | `pnpm typecheck` (in a host slot)                                              | exit 0                                                                                      | exit 0                                                                                 |
+| suite           | `pnpm test` (in a host slot)                                                   | every test passes                                                                           | 43/43 pass                                                                             |
+| content test    | `node --test tests/content.test.mjs`                                           | 4 pass                                                                                      | 4 pass                                                                                 |
+| can fail: road  | `PAGE=` copy with `"not-shipped"` added to a STOPS skills list                 | the road test fails naming it                                                               | fails, `actual: [ 'not-shipped' ]`                                                     |
+| can fail: table | `PAGE=` copy with a `not-shipped` chip in the table                            | the table test fails naming it                                                              | fails, `actual: [ 'not-shipped' ]`                                                     |
+| main            | `PAGE=` main's index.html                                                      | fails                                                                                       | fails: `section #design`, table caption missing                                        |
+| phone layout    | pane.render cases at 390 and 320 px                                            | sections and figure fit, `scrollWidth <= innerWidth`, no errors                             | pass                                                                                   |
+| badge           | pane.render case at 1280 px                                                    | visible in card and heading; ≥ 4.5:1 in all 4 presets, on page and card; follows the preset | pass                                                                                   |
+| screenshots     | Playwright 1280 / 390 / 320 px, sections parts, agents, design, router, skills | no console errors, no sideways scroll                                                       | none; 1280/1280, 390/390, 320/320 (`attestations/b93a05d/`, before shots in `before/`) |
+| theme panel     | the existing pane cases                                                        | unchanged behaviour                                                                         | pass (included in 43/43)                                                               |
+
+Facts checked against sources at F2: the Duro MCP tool names (`packages/cli/src/commands/mcp.ts`),
+the eight lint rules (`packages/eslint-plugin/src/rules`), the two Duro hooks
+(`packages/cli/src/hook-script.ts`), the router's status, trust renewal and session routing
+(`relais/README.md` lines 8, 176–198, 279–289), the advisory agents (`install/mod.rs` 226/254/285),
+holdouts (ADR-0045), the board and the overlap rule (ADR-0051), code-review profiles (ADR-0052).
 
 ## Outcome
 
-Filled at close.
+Shipped: the `#agents`, `#design` and `#router` sections; the experimental badge; links into
+them from the cards, the "you" section and two road stops; the road and table corrected to what
+each part ships; a content test against a regenerable fixture (`scripts/shipped-names.mjs`); three
+browser cases. Surprise: the commit gate's prettier is the npx-cached 3.9.10, not either local
+prettier, which cost several commit attempts.
+
+## Implementation review
+
+- implementation-review: approve-with-changes, round 1 + Delta (48k + 61k, 59 s + 32 s). Fixed: badge measures, Decision-log entry, recorded proofs. deliberate: card-contrast pair uses the first `.part` (all cards share `--void`); Behaviour 6 / Phase 1 still say `code-review-*` (reviewed body frozen; the Decision log records the change).
+- ui-design (interface-review): approve after Delta (80k + 88k, 100 s + 20 s). Fixed: underlined links, badge spacing, one spelling of colors, `#designCard` link, one code-review label.
+- lang:typescript: approve after Delta (39k + 46k, 30 s + 15 s). Fixed: console errors in `plain()`, null guards, flag check, road-layout guard. deliberate: same first-`.part` contrast pair as above.
 
 <!-- panel: repos=gh-site-import reviewers=backend,lang:typescript,react,ui-design,ux-research,game-ux,codex body-sha=dd400cd465c4 -->
