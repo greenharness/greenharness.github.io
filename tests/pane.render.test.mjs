@@ -174,3 +174,56 @@ test('Escape closes the pane from the open Advanced button', async () => {
   await page.locator('[role="dialog"]').waitFor({state: 'detached'})
   await context.close()
 })
+
+async function plain(width, height) {
+  const context = await browser.newContext({viewport: {width, height}})
+  const page = await context.newPage()
+  const errors = []
+  page.on('pageerror', (error) => errors.push(error.message))
+  await page.goto(base)
+  return {page, errors, context}
+}
+
+for (const width of [390, 320]) {
+  test(`at ${width} px the design, router and agents sections fit, with no sideways scroll`, async () => {
+    const {page, errors, context} = await plain(width, 800)
+    for (const id of ['design', 'router', 'agents']) {
+      const box = await page.locator(`#${id}`).boundingBox()
+      assert.ok(box && box.width <= width, `#${id} fits: ${JSON.stringify(box)}`)
+    }
+    const flow = await page.locator('#agents .flow').boundingBox()
+    assert.ok(flow.x >= 0 && flow.x + flow.width <= width, `figure fits: ${JSON.stringify(flow)}`)
+    assert.equal(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+      true,
+    )
+    assert.deepEqual(errors, [])
+    await context.close()
+  })
+}
+
+test('the experimental badge is on the router card and heading, readable in every preset', async () => {
+  const {page, context} = await plain(1280, 900)
+  assert.equal(await page.locator('#parts .part b .chip.exp').isVisible(), true)
+  assert.equal(await page.locator('#router h2 .chip.exp').isVisible(), true)
+  const ratios = await page.evaluate(() => {
+    const G = window.ghTheme
+    const hex = (rgb) =>
+      '#' +
+      rgb
+        .match(/\d+/g)
+        .slice(0, 3)
+        .map((n) => (+n).toString(16).padStart(2, '0'))
+        .join('')
+    const badge = document.querySelector('#router h2 .chip.exp')
+    return G.PRESET_ORDER.map((name) => {
+      G.set(G.selectPreset(G.get(), name))
+      const fg = hex(getComputedStyle(badge).color)
+      const bg = hex(getComputedStyle(document.body).backgroundColor)
+      return {name, fg, ratio: G.contrast(fg, bg)}
+    })
+  })
+  for (const {name, ratio} of ratios) assert.ok(ratio >= 4.5, `${name}: ${ratio.toFixed(2)}:1`)
+  assert.ok(new Set(ratios.map((r) => r.fg)).size > 1, 'the badge follows the preset')
+  await context.close()
+})

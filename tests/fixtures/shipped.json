@@ -1,0 +1,74 @@
+{
+  "regenerate": "node scripts/shipped-names.mjs",
+  "labels": [
+    "plan-review panel (9)",
+    "code-review profiles (7)",
+    "plan-review panel: architect, backend, language, platform, product, UX research…",
+    "code-review-*"
+  ],
+  "sources": [
+    {
+      "repo": "greenharness/skills",
+      "path": "parts/*/skills, parts/*/agents",
+      "sha": "0c9a2f84b393b23df653a93cc318ecd61c581fdd",
+      "skills": [
+        "accessibility",
+        "diagnosing-bugs",
+        "interface",
+        "interface-review",
+        "layout",
+        "merge-when-green",
+        "motion-design",
+        "plan-review",
+        "relais-architecture-conflict",
+        "relais-verified-push",
+        "retro",
+        "tag-release",
+        "worktree-sweep",
+        "worktree-task",
+        "writing"
+      ],
+      "agents": [
+        "code-review-architect",
+        "code-review-backend",
+        "code-review-language",
+        "code-review-platform",
+        "code-review-react",
+        "code-review-tui",
+        "code-review-unix",
+        "implementation-review",
+        "interface-review",
+        "plan-review-architect",
+        "plan-review-backend",
+        "plan-review-game-ux",
+        "plan-review-language",
+        "plan-review-platform",
+        "plan-review-po",
+        "plan-review-tui",
+        "plan-review-unix",
+        "plan-review-ux-research"
+      ]
+    },
+    {
+      "repo": "relais",
+      "path": "claude-plugin/skills",
+      "sha": "ce29fb36438fa9c82feb52ef80a845985bbebd37",
+      "skills": ["programme", "relais"],
+      "agents": []
+    },
+    {
+      "repo": "relais",
+      "path": "crates/relais/src/install/mod.rs",
+      "sha": "ce29fb36438fa9c82feb52ef80a845985bbebd37",
+      "skills": [],
+      "agents": ["relais-implementation", "relais-research", "relais-review"]
+    },
+    {
+      "repo": "duro-design-system",
+      "path": "packages/cli/skills",
+      "sha": "07c674d60072499469cbfa9691aca49d9ef2e210",
+      "skills": ["colors", "typography", "ui"],
+      "agents": []
+    }
+  ]
+}

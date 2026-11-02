@@ -140,6 +140,22 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .notes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 22px }
 .notes div { border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 6px; font-size: 13.5px; color: var(--dim) }
 .notes b { color: var(--ink) }
+.notes div { align-content: start }
+.notes .span { grid-column: 1 / -1 }
+.notes code, .sec-head code { color: var(--ink) }
+.notes .chips { display: flex; flex-wrap: wrap; gap: 4px 6px }
+.chip.exp { border-color: var(--faint); color: var(--dim); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; vertical-align: middle; font-weight: 400 }
+.sec-head h2 .chip.exp { margin-left: 10px; font-size: 12px }
+.part b .chip.exp { margin-left: 6px }
+.sec-head a, .notes a, .part span a, .stop p a { color: var(--glow) }
+
+/* ---------- how the agents work together ---------- */
+.agents { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 24px; margin-top: 22px; align-items: start }
+.agents .notes { margin-top: 0 }
+.flow { margin: 0; border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 10px; justify-items: start }
+.flow pre { margin: 0; font: inherit; font-size: 12px; line-height: 1.35; color: var(--dim) }
+.flow .f1 { color: var(--s1) } .flow .f2 { color: var(--s2) } .flow .f3 { color: var(--s3) } .flow .fy { color: var(--you) }
+.flow figcaption { font-size: 12.5px; color: var(--dim); max-width: 34ch }
 
 /* ---------- skills & agents ---------- */
 .ship { overflow-x: auto; border: 1px solid var(--line); margin-top: 18px }
@@ -156,6 +172,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
   .yous div:nth-child(-n+2) { border-top: 0 }
   .pit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); row-gap: 24px }
   .notes { grid-template-columns: minmax(0, 1fr) }
+  .agents { grid-template-columns: minmax(0, 1fr) }
 }
 @media (max-width: 560px) {
   .yous, .pit { grid-template-columns: minmax(0, 1fr) }
@@ -223,7 +240,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 │decided: │
 │curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small>was aval</small></div>
       <div class="part"><pre>  ▶▶
-ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed.</span><small>was relais</small></div>
+ROUTER</pre><b>router<span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small>was relais</small></div>
       <div class="part"><pre>    │
     ¦
     │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small>was adr-lint</small></div>
@@ -232,7 +249,7 @@ ROUTER</pre><b>router</b><span>The boost. Each task goes to the model that does 
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
       <div class="part opt wide"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
-<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query.</span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
+<span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query. <a href="#design">What it gives your agent</a></span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
     </div>
   </section>
 
@@ -255,14 +272,61 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     <div class="sec-head">
       <span class="kick">human in the loop</span>
       <h2>Where you are in the loop</h2>
-      <p>The agent drives between these points without asking. At these points it stops for you.</p>
+      <p>The agent drives between these points without asking. At these points it stops for you. Between them, the agents hand work to each other: <a href="#agents">how the agents work together</a>.</p>
     </div>
     <div class="yous">
       <div><small>S1 · decide</small><b>You decide</b><span>You write and accept the ADRs. The harness only reads them, and stops when two of them disagree.</span></div>
       <div><small>S1 · plan</small><b>You approve the plan</b><span>Reviewer agents read it first. Nothing is built until you say yes.</span></div>
-      <div><small>S1 · first task</small><b>You trust a repo once</b><span>The first task in a new repository asks you before the router works in it.</span></div>
+      <div><small>S1 · first task</small><b>You approve the router's checks</b><span>The first task in a new repository asks you before the router works in it, and asks again whenever those checks change.</span></div>
       <div><small>S3 · review, merge</small><b>You look, and you answer</b><span>UI changes open in your browser. The agent asks only what the plan left open, or anything destructive.</span></div>
       <div><small>S3 · learn</small><b>You approve harness changes</b><span>A new rule or skill goes in only when you accept it.</span></div>
+    </div>
+  </section>
+
+  <section id="agents">
+    <div class="sec-head">
+      <span class="kick">agents together</span>
+      <h2>How the agents work together</h2>
+      <p>The agents don't chat. They hand work over through files, and hooks check each handover: a plan, a task contract, a reviewed tree. The one message is for an overlap: when two sessions reach the same work, the second one settles it with the first, or with you.</p>
+    </div>
+    <div class="agents">
+      <figure class="flow">
+        <pre aria-hidden="true"><span class="f1">session agent</span>
+  writes the plan
+        │
+        ▼
+<span class="f1">plan-review panel</span>
+  each reviewer reads, reports
+        │
+        ▼
+<span class="fy">● you</span>
+  approve the plan
+        │
+        ▼
+<span class="f2">router workers</span>
+  one task each, own worktree
+        │
+        ▼
+<span class="f2">session agent</span>
+  accepts or rejects the result
+        │
+        ▼
+<span class="f3">implementation-review</span>
+<span class="f3">+ code-review profiles</span>
+  read the committed tree
+        │
+        ▼
+<span class="f3">git push</span>
+  refused unless they all ran</pre>
+        <figcaption>The session agent writes a plan. The review panel reads it, and you approve it. Router workers each take one task in their own worktree, and the session agent accepts or rejects each result. Before the push, implementation-review and the code-review profiles read the committed tree, and the push is refused unless they all ran.</figcaption>
+      </figure>
+      <div class="notes">
+        <div><b>The plan is the contract</b><span>One agent writes it. Each reviewer on the panel reads it from its own angle and only reports; none of them edits it. The reviews are kept beside the plan, and the plan hook refuses a plan whose panel did not run on that exact text.</span></div>
+        <div><b>Handing out a task</b><span>The session agent, the orchestrator, gives the router a contract: one objective, the files it may write, and a command that proves it. A worker returns a result, and the orchestrator accepts or rejects it. The router records that decision.</span></div>
+        <div><b>Reviewers before the push</b><span>implementation-review reads the committed diff against the plan. The plan also names its code-review profiles (architect, backend, language, platform, React, TUI, Unix, and interface-review for an interface), and each one it names reads the same tree. The push is refused if any of them did not review that exact tree.</span></div>
+        <div><b>Sessions side by side</b><span>Each session leaves an activity record. <code>amont-agent board</code> shows which session works in which worktree and branch, and what just landed, and the agent reads it before it starts. When a second session touches the same work, the <code>work-overlap</code> rule warns it, and it settles the overlap with the first session or with you.</span></div>
+        <div class="span"><b>Bigger than one session</b><span>Work that needs several sessions becomes a programme map: one decision ticket per file, in the repository. <code>relais programme frontier</code> lists the tickets that can start now, so the next session picks up where the last one stopped.</span></div>
+      </div>
     </div>
   </section>
 
@@ -286,20 +350,50 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     </div>
   </section>
 
+  <section id="design">
+    <div class="sec-head">
+      <span class="kick">design part</span>
+      <h2>The paint, up close: what the design part gives your agent</h2>
+      <p>The design part is an optional extension. The harness owns how it plugs in: hooks, skills, a catalog server, lint rules. A design system supplies the content. Duro is the first one, and the part works with it today.</p>
+    </div>
+    <div class="notes">
+      <div><b>Tokens and a theme</b><span>One file of tokens (colours, fonts, radii, sizes) themes every component. This page is themed that way: change a colour in the theme panel on the <a href="#parts">design card</a> and the whole page follows.</span></div>
+      <div><b>A catalog the agent queries, over MCP</b><span><code>duro_ds_list</code>, <code>duro_ds_lookup</code> and <code>duro_ds_manifest</code> tell the agent which component to use and which props it takes. <code>duro_ds_mockup_canvas</code> and <code>duro_ds_mockup_check</code> build a mockup and check it before any code. A session-start hook puts the catalog in front of the agent, and a prompt hook suggests plan mode for a new screen.</span></div>
+      <div><b>Lint rules</b><span>No raw colours or sizes, no raw HTML elements, design-system components instead. The eight rules run at the commit, through gate:</span><span class="chips"><span class="chip">no-raw-design-values</span><span class="chip">no-raw-html-element</span><span class="chip">no-raw-breakpoint-query</span><span class="chip">no-raw-layer-values</span><span class="chip">prefer-ds-form-components</span><span class="chip">no-tokens-barrel-import</span><span class="chip">no-flex-grow-web</span><span class="chip">no-deprecated-table-parts</span></span></div>
+      <div><b>Skills and checks</b><span>The <code>ui</code>, <code>colors</code> and <code>typography</code> skills teach the agent the system. <code>duro doctor</code> checks how an app wires the design system into its build, and <code>duro hook install --check</code> keeps every repository's hooks identical.</span></div>
+    </div>
+  </section>
+
+  <section id="router">
+    <div class="sec-head">
+      <span class="kick">router</span>
+      <h2>The router <span class="chip exp">experimental</span></h2>
+      <p>The router is still in development: its commands and file formats can change between releases.</p>
+    </div>
+    <div class="notes">
+      <div><b>What it does</b><span>A bounded task (one objective, the files it may write, a command that proves it) goes to the cheapest model and effort that can pass it. It runs in its own worktree, the repository's own checks verify it, and it escalates to a stronger model when it falls short. Each outcome is recorded, so the next task of that kind starts cheaper.</span></div>
+      <div><b>What a worker cannot do</b><span>Commit, merge, push, tag, or start another agent. Choosing the model is the router's job, never the worker's.</span></div>
+      <div><b>You approve its checks</b><span>The first task in a repository asks which checks to use and whether the router may run them. Change those checks and it asks again.</span></div>
+      <div><b>Session routing <span class="chip exp">experimental</span></b><span>The router can also pick the model of your own session: cheaper for an easy task, stronger for a hard one. Installing it with <code>relais install --claude --write</code> turns this on, or <code>/relais-routing</code> does later. Without that, it runs in shadow: it decides and records, and switches nothing. <code>/relais-routing off</code> turns it off.</span></div>
+      <div class="span"><b>Holdout checks <span class="chip exp">experimental</span></b><span>Some acceptance checks are kept where the worker cannot reach them: written apart from the change, never in its worktree or its prompt. A worker cannot pass a check it cannot see by editing that check.</span></div>
+    </div>
+  </section>
+
   <section id="skills">
     <div class="sec-head">
       <span class="kick">skills and agents</span>
       <h2>Skills and agents ship with the parts</h2>
-      <p>They live in one repository, github.com/greenharness/skills. Pick a part in the installer and its skills and agents come with it, or take them alone. The design part brings its own, built around its component catalog.</p>
+      <p>The decisions, gate and workflow skills and agents live in github.com/greenharness/skills. The router's skills come with its Claude plugin, and its three agents with its installer. The design skills come with Duro's command line. Pick a part in the installer and its skills and agents come with it, or take them alone.</p>
     </div>
     <div class="ship"><table>
+      <caption class="sr">Skills and agents each part ships</caption>
       <thead><tr><th>With</th><th>Skills</th><th>Agents</th></tr></thead>
       <tbody>
         <tr><td>decisions</td><td><span class="chip">relais-architecture-conflict</span></td><td class="none">—</td></tr>
-        <tr><td>router</td><td><span class="chip">relais</span></td><td><span class="chip">relais-implementation</span><span class="chip">relais-research</span><span class="chip">relais-review</span></td></tr>
+        <tr><td>router</td><td><span class="chip">relais</span><span class="chip">programme</span></td><td><span class="chip">relais-implementation</span><span class="chip">relais-research</span><span class="chip">relais-review</span></td></tr>
         <tr><td>gate</td><td><span class="chip">relais-verified-push</span><span class="chip">merge-when-green</span><span class="chip">tag-release</span></td><td class="none">—</td></tr>
-        <tr><td>design</td><td><span class="chip">ui</span><span class="chip">colors</span><span class="chip">typography</span><span class="chip">duro-mockup</span></td><td><span class="chip">plan-review-ui-design</span><span class="chip">plan-review-react</span></td></tr>
-        <tr><td>workflow pack</td><td><span class="chip">plan-review</span><span class="chip">worktree-task</span><span class="chip">diagnosing-bugs</span><span class="chip">retro</span><span class="chip">worktree-sweep</span><span class="chip">interface-review</span></td><td><span class="chip">plan-review panel (9)</span><span class="chip">implementation-review</span><span class="chip">interface-review</span></td></tr>
+        <tr><td>design</td><td><span class="chip">ui</span><span class="chip">colors</span><span class="chip">typography</span></td><td class="none">—</td></tr>
+        <tr><td>workflow pack</td><td><span class="chip">plan-review</span><span class="chip">worktree-task</span><span class="chip">diagnosing-bugs</span><span class="chip">retro</span><span class="chip">worktree-sweep</span><span class="chip">interface-review</span><span class="chip">interface</span><span class="chip">accessibility</span><span class="chip">layout</span><span class="chip">writing</span><span class="chip">motion-design</span></td><td><span class="chip">plan-review panel (9)</span><span class="chip">code-review profiles (7)</span><span class="chip">implementation-review</span><span class="chip">interface-review</span></td></tr>
       </tbody>
     </table></div>
   </section>
@@ -911,16 +1005,16 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       you: "You write and accept the ADRs. The harness only reads them.",
       what: "Before planning, the agent asks what your team already decided. If two records disagree, it stops and asks you instead of picking a side.",
       term: '<span class="p">$</span> grh decisions resolve auth.session\n<span class="v">decided</span> · ADR-0031 · exit 0' },
-    { name: "Plan", sec: 1, check: null, skills: ["plan-review"], agents: ["plan-review panel: architect, backend, language, platform, product, UX research…"],
-      design: "UI design and React reviewers check the plan against the component catalog.",
+    { name: "Plan", sec: 1, check: null, skills: ["plan-review", "programme"], agents: ["plan-review panel: architect, backend, language, platform, product, UX research…"],
+      design: "For a new screen, the agent drafts mockups from the component catalog and checks them over MCP before the plan.",
       you: "You approve the plan. Nothing is built before that.",
-      what: "The agent writes a plan. A panel of reviewer agents reads it before you do, each from its own angle, and the plan is fixed before it reaches you." },
+      what: "The agent writes a plan. A panel of reviewer agents reads it before you do, each from its own angle, and the plan is fixed before it reaches you. The plan also names the code-review profiles that will read the code. Work too big for one session becomes a programme map instead. <a href=\"#agents\">How the agents hand work over</a>." },
     { name: "Hand out the task", sec: 1, check: "router", skills: ["relais"], agents: ["relais-implementation", "relais-research", "relais-review"],
-      you: "You trust a repository once, the first time.",
-      what: "Each bounded task goes to the cheapest model that can do it, runs in its own worktree, and is checked before it is accepted. When it falls short, it escalates.",
+      you: "You approve the router's checks the first time, and again when they change.",
+      what: "Each bounded task goes to the cheapest model that can do it, runs in its own worktree, and is checked before it is accepted. When it falls short, it escalates. The router is experimental, and so are holdout checks: acceptance checks the worker never sees.",
       term: '<span class="p">$</span> grh router run "fix the flaky retry test"\n→ small model · low effort\n<span class="v">✓</span> checks green · accepted' },
     { name: "Open a worktree", sec: 2, check: null, skills: ["worktree-task"], agents: [], you: null,
-      what: "Every task starts in its own worktree, cut from the latest main, so the checkout you work in is never touched. The approved plan is the first commit, and dependencies are installed before the first edit.",
+      what: "First the agent reads the board: if another session already works on this, it settles that before it starts. Every task starts in its own worktree, cut from the latest main, so the checkout you work in is never touched. The approved plan is the first commit, and dependencies are installed before the first edit.",
       term: '<span class="p">$</span> git worktree add ../wt-retry -b retry origin/main\n→ plan committed · deps installed · ready' },
     { name: "Navigate the code", sec: 2, check: null, skills: [], agents: [], you: null,
       plugin: "fleet-lsp, a Claude Code plugin. It installs on its own, not through grh.",
@@ -935,8 +1029,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       design: "Design-system lint rules run too: no raw colors or sizes, no raw HTML elements.",
       what: "The git pre-commit hook checks the message, conflict markers and secrets, plus the linters of the languages your repository uses.",
       term: '<span class="p">$</span> git commit -m "fix: retry on 503"\n<span class="v">✓ gate</span> · message · secrets · markers · clippy' },
-    { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "interface-review"], you: null,
-      what: "Before the push, a reviewer agent reads the diff against the plan, and the push is refused if that review did not run. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
+    { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "code-review-*", "interface-review"], you: null,
+      what: "Before the push, a reviewer agent reads the diff against the plan, and so does each code-review profile the plan named. The push is refused if any of those reviews did not run on that tree. <a href=\"#agents\">How the agents hand work over</a>. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
     { name: "Review", sec: 3, check: "conform", skills: ["interface-review"], agents: [],
       design: "duro doctor checks how the app wires the design system into its build.",
       you: "You look at UI changes in your own browser.",
