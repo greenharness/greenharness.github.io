@@ -76,6 +76,9 @@ const flip = async (page, name) => {
   await el.scrollIntoViewIfNeeded();
   await el.click({ force: true });
 };
+async function expectChecked(locator, want) {
+  assert.equal(await locator.isChecked(), want);
+}
 const snap = (page) => page.evaluate(() => window.ghGameSnapshot());
 const stageState = (page) => page.locator("#stage").getAttribute("data-state");
 
@@ -89,19 +92,15 @@ async function drive(page) {
 
 test("the switches start on, and a part switched off stays off after a reload", async () => {
   const { page, errors, context } = await open();
-  for (const name of PARTS) await expect_checked(sw(page, name), true);
+  for (const name of PARTS) await expectChecked(sw(page, name), true);
   await flip(page, "gate");
-  await expect_checked(sw(page, "gate"), false);
+  await expectChecked(sw(page, "gate"), false);
   await page.reload();
-  await expect_checked(sw(page, "gate"), false);
-  await expect_checked(sw(page, "router"), true);
+  await expectChecked(sw(page, "gate"), false);
+  await expectChecked(sw(page, "router"), true);
   assert.deepEqual(errors, []);
   await context.close();
 });
-
-async function expect_checked(locator, want) {
-  assert.equal(await locator.isChecked(), want);
-}
 
 test("with gate off, attest is disabled, shown off, and says it needs gate", async () => {
   const { page, context } = await open();
@@ -129,9 +128,9 @@ test("a click on the card body toggles the switch, a click on the router's link 
   await card.scrollIntoViewIfNeeded();
   const box = await card.locator("> span").boundingBox();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await expect_checked(sw(page, "gate"), false);
+  await expectChecked(sw(page, "gate"), false);
   await page.getByRole("link", { name: "How it works" }).click();
-  await expect_checked(sw(page, "router"), true);
+  await expectChecked(sw(page, "router"), true);
   assert.equal(new URL(page.url()).hash, "#router");
   await context.close();
 });
@@ -196,7 +195,7 @@ test("data-parts-off is frozen when a run starts, and H puts all six parts back"
   assert.equal(await stageState(page), "over");
   await page.locator("#game").focus();
   await page.keyboard.press("h");
-  for (const name of PARTS) await expect_checked(sw(page, name), true);
+  for (const name of PARTS) await expectChecked(sw(page, name), true);
   assert.equal(await stageState(page), "over", "H does not start a run");
   assert.deepEqual(errors, []);
   await context.close();
@@ -216,7 +215,10 @@ test("with gate and decisions off, no gate or sign ever spawns", async () => {
     assert.equal(s.ents.sign, 0);
   }
   assert.ok(s.pos > 350, `drove ${s.pos} m`);
-  assert.equal(await page.evaluate(() => 1 + 1), 2);
+  // the loop is still running: one more step moves the car
+  const before = s.pos;
+  await page.clock.runFor(500);
+  assert.ok((await snap(page)).pos > before, "the game loop still advances");
   assert.deepEqual(errors, []);
   await context.close();
 });

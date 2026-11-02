@@ -243,7 +243,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
     <span class="hint" aria-hidden="true">Enter to play · Esc to leave</span>
     <div class="pads" aria-hidden="true"><button type="button" id="padL">◀</button><button type="button" id="padR">▶</button></div>
   </div>
-  <p class="gamelinks"><a href="#parts" id="changeParts" hidden>Change parts</a></p>
+  <p class="gamelinks"><a href="#parts" id="changeParts" hidden>change parts <span aria-hidden="true">↓</span></a></p>
 </div>
 
 <main class="under pad">
@@ -258,7 +258,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
   </section>
 
   <section class="legend" id="parts">
-    <div class="legend-head"><h2>What you just drove through</h2><a href="#game" id="driveBack" hidden>drive with harness 6/6 ↑</a></div>
+    <div class="legend-head"><h2>What you just drove through</h2><a href="#game" id="driveBack" hidden>drive with harness <span id="driveCount">6/6</span> <span aria-hidden="true">↑</span></a></div>
     <p class="sr" role="status" aria-live="polite" id="partsMsg"></p>
     <div class="parts">
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="guardrails" aria-label="guardrails" aria-describedby="guardrails-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>║░        ░║
@@ -274,7 +274,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 ROUTER</pre><b>router <span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small id="router-note"><span class="was">was relais</span><span class="cost" hidden>✗ no boosts: more bugs, same top speed</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="conform" aria-label="conform" aria-describedby="conform-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>    │
     ¦
-    │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small id="conform-note"><span class="was">was adr-lint</span><span class="cost" hidden>✗ no lane line: more slop, and a slop hit costs 3 s</span></small></div>
+    │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small id="conform-note"><span class="was">was adr-lint</span><span class="cost" hidden>✗ no lane line: more slop, and a slop hit costs 3 s, slows you and scrambles longer</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="attest" aria-label="attest" aria-describedby="attest-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>✓ gate ─┐
   signed │
 CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small id="attest-note"><span class="was">signatures come from gate</span><span class="cost" hidden>✗ unsigned: an arch gives +5 s, not +12 s, and slows you</span><span class="needs" hidden>needs gate: nothing to sign</span></small></div>
@@ -757,7 +757,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
 
   // ---------- state ----------
   var S;
-  var stage = document.getElementById("stage");
+  var stage = document.getElementById("stage"), changeParts = document.getElementById("changeParts");
 
   // ---------- parts: the switches below the game decide how hard the road is ----------
   var PIDS = ["guardrails", "gate", "decisions", "router", "conform", "attest"];
@@ -778,7 +778,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     return {
       off: off,
       rails: !has("guardrails"), offroad: has("guardrails") ? { limit: 0.80, speed: 0.15, penalty: 6, hold: 0.6, clamp: 1.1 } : null,
-      gates: !has("gate"), gateBonus: has("attest") ? 5 : 12, gateSlow: has("attest") ? 0.7 : 1,
+      gates: !has("gate"), signed: !has("attest"), gateBonus: has("attest") ? 5 : 12, gateSlow: has("attest") ? 0.7 : 1,
       signs: !has("decisions"), fog: has("decisions") ? 0.33 : 0,
       boosts: !has("router"),
       centre: !has("conform"), bugShare: has("conform") ? 0.40 : 0.55, slopSpeed: has("conform") ? 0.35 : 0.6, slopTime: has("conform") ? 3 : 0, slopGlitch: has("conform") ? 2.4 : 1.6
@@ -794,7 +794,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   function setState(s) {
     S.state = s;
     stage.dataset.state = s;
-    var cp = document.getElementById("changeParts"); if (cp) cp.hidden = s !== "over";
+    changeParts.hidden = s !== "over";
   }
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
@@ -819,7 +819,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       var on = INSTALL.filter(function (p) { return off.indexOf(p) < 0; });
       say("$ grh install " + on.concat("design").join(" "), 0.7);
       if (off.length) say("harness " + (6 - off.length) + "/6 · off: " + off.join(", "), C.bug);
-      else say("harness 6/6 · uncheck parts below to make it harder", 0.7);
+      else say("harness 6/6 · switch parts off below", 0.7);
     }
   }
   window.ghGameSnapshot = function () {
@@ -963,7 +963,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (e.type === "gate") {
         if (d < Z * 0.9) {
           e.done = true; S.gates++; S.time += S.rules.gateBonus; S.speed *= S.rules.gateSlow;
-          say(S.rules.gateBonus === 12 ? "✓ gate · 39 checks passed · signed · +12 s" : "✓ gate · 39 checks passed · unsigned · CI runs them again · +" + S.rules.gateBonus + " s");
+          say(S.rules.signed ? "✓ gate · 39 checks passed · signed · +" + S.rules.gateBonus + " s" : "✓ gate · 39 checks passed · unsigned · CI runs them again · +" + S.rules.gateBonus + " s");
         }
         return;
       }
@@ -1057,7 +1057,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       var lines = [
         "T I M E",
         "",
-        (S.pos / 1000).toFixed(2) + " km   ·   best " + (S.best || 0).toFixed(2) + " km" + (ran.length ? "   ·   best 6/6 " + (bests[""] || 0).toFixed(2) + " km" : ""),
+        (S.pos / 1000).toFixed(2) + " km   ·   best " + (S.best || 0).toFixed(2) + " km",
         "bugs dodged " + S.dodged.bug + "   ·   bugs hit " + S.hit.bug,
         "slop dodged " + S.dodged.slop + "   ·   slop hit " + S.hit.slop,
         "gates passed " + S.gates,
@@ -1065,11 +1065,17 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
         "[ I ]  install the harness  ↓"
       ];
-      if (ran.length) lines.splice(3, 0, "off: " + ran.join(", "));
-      if (ran.length) lines.push(now.length ? (kb ? "[ H ]  put the whole harness back on" : "tick the parts below to put them back ↓") : "harness is back on: drive again for 6/6");
-      lines.push(kb ? "[ P ]  switch parts off below: the road gets harder  ↓" : "switch parts off below: the road gets harder  ↓");
+      if (ran.length) lines.splice(3, 0, "best with all 6 parts: " + (bests[""] || 0).toFixed(2) + " km");
+      if (ran.length) Array.prototype.splice.apply(lines, [4, 0].concat(wrap("off: " + ran.join(", "), 37)));
+      if (ran.length) lines.push(now.length ? (kb ? "[ H ]  whole harness back on" : "switch the parts below back on ↓") : "harness back on: drive for 6/6");
+      lines.push(kb ? "[ P ]  harder road: parts below ↓" : "switch parts off below: harder ↓");
       box(HZ - 6, lines);
     }
+  }
+  function wrap(s, n) { // split at ", " so a long list stays readable on a phone
+    var out = [], cur = "";
+    s.split(", ").forEach(function (w, i) { var add = (i ? ", " : "") + w; if (cur && (cur + add).length > n) { out.push(cur + ","); cur = "  " + w; } else cur += add; });
+    out.push(cur); return out;
   }
   function box(y, lines) {
     var w = 0; lines.forEach(function (l) { w = Math.max(w, l.length); });
@@ -1118,7 +1124,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
 
   // ---------- the switches on the part cards ----------
   var NOW = { guardrails: "off-road costs 6 s", gate: "no time back", decisions: "no signs, the far road in fog", router: "no boosts", conform: "more slop", attest: "gates give +5 s" };
-  var partsMsg = document.getElementById("partsMsg"), driveBack = document.getElementById("driveBack");
+  var partsMsg = document.getElementById("partsMsg"), driveBack = document.getElementById("driveBack"), driveCount = document.getElementById("driveCount");
   var inputs = {}; PIDS.forEach(function (p) { inputs[p] = document.querySelector('input[data-part="' + p + '"]'); });
   function store() {
     try { localStorage.setItem("gh-parts", JSON.stringify(PIDS.filter(function (p) { return !want[p]; }))); } catch (e) {}
@@ -1140,10 +1146,11 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       card.querySelector(".cost").hidden = !isOff || needs;
       var nd = card.querySelector(".needs"); if (nd) nd.hidden = !needs;
     });
-    driveBack.textContent = "drive with harness " + (6 - off.length) + "/6 ↑";
+    driveCount.textContent = (6 - off.length) + "/6";
     label();
   }
-  function announce(text) { partsMsg.textContent = ""; setTimeout(function () { partsMsg.textContent = text; }, 30); }
+  var announceTimer = 0;
+  function announce(text) { clearTimeout(announceTimer); partsMsg.textContent = ""; announceTimer = setTimeout(function () { partsMsg.textContent = text; }, 30); }
   PIDS.forEach(function (p) {
     inputs[p].addEventListener("change", function () {
       want[p] = inputs[p].checked; store(); paint(); driveBack.hidden = false;
@@ -1158,7 +1165,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     document.getElementById("parts").scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
     inputs.guardrails.focus({ preventScroll: true });
   }
-  document.getElementById("changeParts").addEventListener("click", function (e) { e.preventDefault(); toParts(); });
+  changeParts.addEventListener("click", function (e) { e.preventDefault(); toParts(); });
   driveBack.addEventListener("click", function (e) { // reveal the canvas without starting or resuming a run
     e.preventDefault();
     if (stage.classList.contains("is-poster")) { stage.classList.add("is-open"); applyMode(); }
