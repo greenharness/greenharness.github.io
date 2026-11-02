@@ -19,6 +19,15 @@ const CONFIGS = process.argv[4]
       ["conform"],
       ["attest"],
     ];
+const isConfigs = (c) =>
+  Array.isArray(c) &&
+  c.every((o) => Array.isArray(o) && o.every((p) => typeof p === "string"));
+if (!BASE || !Number.isInteger(SEEDS) || SEEDS < 1 || !isConfigs(CONFIGS)) {
+  console.error(
+    "usage: node scripts/balance.mjs <page url> [seeds=20] ['[[],[\"gate\"]]']",
+  );
+  process.exit(2);
+}
 const CAP = 150_000,
   STEP = 100;
 

@@ -216,9 +216,9 @@ test("with gate and decisions off, no gate or sign ever spawns", async () => {
   }
   assert.ok(s.pos > 350, `drove ${s.pos} m`);
   // the loop is still running: one more step moves the car
-  const before = s.pos;
+  const posBefore = s.pos;
   await page.clock.runFor(500);
-  assert.ok((await snap(page)).pos > before, "the game loop still advances");
+  assert.ok((await snap(page)).pos > posBefore, "the game loop still advances");
   assert.deepEqual(errors, []);
   await context.close();
 });

@@ -1072,9 +1072,9 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       box(HZ - 6, lines);
     }
   }
-  function wrap(s, n) { // split at ", " so a long list stays readable on a phone
+  function wrap(s, n) { // split at ", " so a long list stays readable on a phone; n - 1 leaves room for the trailing ","
     var out = [], cur = "";
-    s.split(", ").forEach(function (w, i) { var add = (i ? ", " : "") + w; if (cur && (cur + add).length > n) { out.push(cur + ","); cur = "  " + w; } else cur += add; });
+    s.split(", ").forEach(function (w, i) { var add = (i ? ", " : "") + w; if (cur && (cur + add).length > n - 1) { out.push(cur + ","); cur = "  " + w; } else cur += add; });
     out.push(cur); return out;
   }
   function box(y, lines) {
