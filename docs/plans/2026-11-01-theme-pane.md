@@ -79,3 +79,5 @@ Delta on the removal of the orange "optional" labels (113k tokens, 26 s): approv
 | drag               | a real mouse drag of the header to x - 5000, at 1120 px | the pane moves left by more than 200 px, a fifth of it stays in view, it is not dismissed | passes                |
 | Escape on Advanced | Advanced expanded, focus on it, Escape                  | the pane closes                                                                           | passes                |
 | phone              | the bottom sheet at 390 px                              | no Move control, inside the window                                                        | passes                |
+
+Review of the follow-up: approve, then a delta approve. Kept: the phone test checks that no "Move panel" button renders, with no desktop test asserting the button exists; the name is in the committed bundle today, and a Duro rename would leave that phone check passing without testing anything.
