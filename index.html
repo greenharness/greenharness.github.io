@@ -12,6 +12,8 @@
 <style>
 /* Layout: the hero is the game, a full-width ASCII canvas; a short legend below maps each thing on the road to a part. One dark world on purpose. */
 :root {
+  /* the page's one content width, shared by the header, the game, the links under it and the sections */
+  --gh-page-w: 1240px;
   --void: var(--duro-color-bg); --ink: var(--duro-color-text); --dim: var(--duro-color-text-subtle); --glow: var(--duro-color-accent); --line: var(--duro-color-border); --bug: var(--duro-color-error); --slop: var(--gh-slop); --boost: var(--duro-color-info);
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   color-scheme: dark;
@@ -20,14 +22,14 @@
 html, body { background: var(--void); color: var(--ink) }
 body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .pad { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
-.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 14px; max-width: 1240px; margin: 0 auto; flex-wrap: wrap }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 14px; max-width: var(--gh-page-w); margin: 0 auto; flex-wrap: wrap }
 .logo { font-weight: 800; letter-spacing: .14em; color: var(--glow); text-transform: uppercase; font-size: 13px }
 .logo span { color: var(--ink) }
 .top ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--dim); flex-wrap: wrap }
 .top a { color: inherit; text-decoration: none }
 .top a:hover { color: var(--glow) }
 
-.stage { position: relative; max-width: 1240px; margin: 0 auto; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--duro-color-bg-inset) }
+.stage { position: relative; max-width: var(--gh-page-w); margin: 0 auto; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--duro-color-bg-inset) }
 /* Hero height from the published Duro size tokens: never under the playable minimum, leaves room for the headline and the install command, capped on tall screens. svh stays put when a phone's URL bar collapses. */
 #game { display: block; width: 100%; height: clamp(var(--duro-size-hero-min-h), calc(100svh - var(--duro-size-hero-reserve)), var(--duro-size-hero-max-h)); outline: none; cursor: pointer; touch-action: none }
 /* Below heroMinH + heroReserve of viewport height the game would push the headline out of view: a poster stands in, and a tap opens the game at full height. */
@@ -48,7 +50,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .pads button.on { background: color-mix(in srgb, var(--glow) 22%, transparent) }
 @media (pointer: coarse) { .pads { display: flex } }
 
-.under { max-width: 1240px; margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 40px }
+.under { max-width: var(--gh-page-w); margin: 0 auto; padding-block: 40px 72px; display: grid; gap: 40px }
 .under > * { min-width: 0 }
 .skip { position: absolute; left: max(16px, env(safe-area-inset-left, 0px)); top: 8px; z-index: 10; padding: 6px 12px; background: var(--glow); color: var(--duro-color-accent-contrast); font-weight: 600; text-decoration: none; transform: translateY(-400%) }
 .skip:focus { transform: none; outline: 2px solid var(--ink); outline-offset: 2px }
@@ -75,6 +77,34 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 .part b { color: var(--gh-head); font-size: 15px }
 .part span { color: var(--dim); font-size: 13px }
 .part small { color: var(--ink); font-size: 12px; opacity: .8 }
+/* ---------- part switches: the whole card is the switch (stretched label), links stay above it ---------- */
+.legend-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--duro-spacing-sm); margin-bottom: var(--duro-spacing-md) }
+.legend .legend-head h2 { margin: 0 }
+.legend-head a, .gamelinks a { color: var(--glow); text-decoration: underline; text-underline-offset: var(--duro-spacing-xs) }
+.gamelinks { max-width: var(--gh-page-w); margin: var(--duro-spacing-sm) auto 0; text-align: right }
+.gamelinks a:focus-visible, .legend-head a:focus-visible { outline: var(--duro-border-focus-ring) solid var(--glow); outline-offset: var(--duro-border-focus-offset) }
+.part:has(.pt) { position: relative; cursor: pointer }
+.part:has(.pt):hover { outline: var(--duro-border-hairline) solid var(--glow); outline-offset: calc(-1 * var(--duro-border-hairline)) }
+.part:has(.pt):has(input:focus-visible) { outline: var(--duro-border-focus-ring) solid var(--glow); outline-offset: calc(-1 * var(--duro-border-focus-ring)) }
+.part:has(input:disabled) { cursor: default }
+.part:has(input:disabled):hover { outline: none }
+.pt { display: flex; gap: var(--duro-spacing-sm); align-items: center; color: var(--glow); text-transform: uppercase; letter-spacing: var(--duro-type-scale-letter-spacing-wide); cursor: inherit }
+.pt::after { content: ""; position: absolute; inset: 0 }
+.part .pt-txt { color: inherit; font-size: var(--duro-typography-font-size-xs) }
+.part.off .pt { color: var(--bug) }
+.part:has(input:disabled) .pt { color: var(--you) }
+.pt input { appearance: none; -webkit-appearance: none; position: relative; flex: none; margin: 0; cursor: inherit; width: var(--duro-size-switch-track-w); height: var(--duro-size-switch-track-h); border-radius: var(--duro-radius-full); border: var(--duro-border-hairline) solid var(--line); background: var(--duro-color-bg-inset) }
+.pt input::after { content: ""; position: absolute; top: 50%; left: var(--duro-spacing-xs); width: var(--duro-size-switch-thumb); height: var(--duro-size-switch-thumb); border-radius: var(--duro-radius-full); background: var(--dim); transform: translateY(-50%) }
+.pt input:checked { border-color: var(--glow) }
+.pt input:checked::after { left: calc(100% - var(--duro-size-switch-thumb) - var(--duro-spacing-xs)); background: var(--glow) }
+.pt input:focus-visible { outline: none }
+.part span a { position: relative; z-index: 1 }
+.part.off pre { color: var(--faint) }
+.part small span { font-size: inherit; color: inherit }
+.part.off small { opacity: 1 }
+.part small .cost { color: var(--bug) }
+.part small .needs { color: var(--you) }
+@media (pointer: coarse) { .pt { min-height: var(--duro-size-touch-target) } }
 /* ---------- lifecycle road ---------- */
 :root { --s1: var(--duro-color-info); --s2: var(--duro-color-accent); --s3: var(--gh-white); --you: var(--duro-color-warning); --panel: var(--duro-color-bg-card); --faint: var(--duro-color-border-strong) }
 .sec-head { display: grid; gap: 10px; max-width: 72ch }
@@ -213,6 +243,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
     <span class="hint" aria-hidden="true">Enter to play · Esc to leave</span>
     <div class="pads" aria-hidden="true"><button type="button" id="padL">◀</button><button type="button" id="padR">▶</button></div>
   </div>
+  <p class="gamelinks"><a href="#parts" id="changeParts" hidden>change parts <span aria-hidden="true">↓</span></a></p>
 </div>
 
 <main class="under pad">
@@ -227,25 +258,26 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
   </section>
 
   <section class="legend" id="parts">
-    <h2>What you just drove through</h2>
+    <div class="legend-head"><h2>What you just drove through</h2><a href="#game" id="driveBack" hidden>drive with harness <span id="driveCount">6/6</span> <span aria-hidden="true">↑</span></a></div>
+    <p class="sr" role="status" aria-live="polite" id="partsMsg"></p>
     <div class="parts">
-      <div class="part"><pre>║░        ░║
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="guardrails" aria-label="guardrails" aria-describedby="guardrails-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>║░        ░║
 ║▓  road  ▓║
-║░        ░║</pre><b>guardrails</b><span>The road edges. Every command the agent runs is read first; the ones that go off the road are refused.</span><small>was amont-agent</small></div>
-      <div class="part"><pre>█══ GATE ══█
+║░        ░║</pre><b>guardrails</b><span>The road edges. Every command the agent runs is read first; the ones that go off the road are refused.</span><small id="guardrails-note"><span class="was">was amont-agent</span><span class="cost" hidden>✗ no rails: off the road costs 6 s</span></small></div>
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="gate" aria-label="gate" aria-describedby="gate-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>█══ GATE ══█
 █          █
-█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small>was amont</small></div>
-      <div class="part"><pre>┌─────────┐
+█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small id="gate-note"><span class="was">was amont</span><span class="cost" hidden>✗ no arches: no time back</span></small></div>
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="decisions" aria-label="decisions" aria-describedby="decisions-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>┌─────────┐
 │decided: │
-│curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small>was aval</small></div>
-      <div class="part"><pre>  ▶▶
-ROUTER</pre><b>router <span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small>was relais</small></div>
-      <div class="part"><pre>    │
+│curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small id="decisions-note"><span class="was">was aval</span><span class="cost" hidden>✗ no signs: curves come unannounced, the far road in fog</span></small></div>
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="router" aria-label="router" aria-describedby="router-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>  ▶▶
+ROUTER</pre><b>router <span class="chip exp">experimental</span></b><span>The boost. Each task goes to the model that does it for less, gets checked, and escalates when needed. <a href="#router">How it works</a></span><small id="router-note"><span class="was">was relais</span><span class="cost" hidden>✗ no boosts: more bugs, same top speed</span></small></div>
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="conform" aria-label="conform" aria-describedby="conform-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>    │
     ¦
-    │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small>was adr-lint</small></div>
-      <div class="part"><pre>✓ gate ─┐
+    │</pre><b>conform</b><span>The lane markings. Code is checked against the rules your team decided, so review starts at the right line.</span><small id="conform-note"><span class="was">was adr-lint</span><span class="cost" hidden>✗ no lane line: more slop, and a slop hit costs 3 s, slows you and scrambles longer</span></small></div>
+      <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="attest" aria-label="attest" aria-describedby="attest-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>✓ gate ─┐
   signed │
-CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small>signatures come from gate</small></div>
+CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the gate proved on your laptop is signed, so CI skips it instead of running it again. Anything unsigned still runs.</span><small id="attest-note"><span class="was">signatures come from gate</span><span class="cost" hidden>✗ unsigned: an arch gives +5 s, not +12 s, and slows you</span><span class="needs" hidden>needs gate: nothing to sign</span></small></div>
       <div class="part opt wide" id="designCard"><pre class="swatch"><span class="g1">▓▓</span> <span class="g2">▓▓</span> <span class="g3">▓▓</span>
  tokens ⇄
 <span class="r1">▓▓</span> <span class="r2">▓▓</span> <span class="r3">▓▓</span></pre><b>design</b><span>The paint. The red and green of this road are tokens: <a href="#themeLoad" id="themeInline" role="button">change them</a> and the whole world takes another look. Components, lint rules and a catalog your agent can query. <a href="#design">What it gives your agent</a></span><div id="themePane" class="theme-slot" hidden><button type="button" class="tbtn primary" id="themeLoad">Open the theme panel</button></div><p class="theme-msg" id="themeMsg" role="status" aria-live="polite" hidden></p></div>
@@ -577,14 +609,17 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         if (((x * 7 + Math.floor(s * 0.6)) % 13) === 0) { ch = "."; col = tc(0.22); }
         put(x, r, ch, col);
       }
+      var fogged = S.rules.fog > 0 && g.p < S.rules.fog; // decisions off: the far road is in fog
+      if (fogged) continue;
       // center lane line (conform)
-      if (stripe) put(g.cx, r, g.p > 0.45 ? "│" : "¦", tc(0.55));
+      if (stripe && S.rules.centre) put(g.cx, r, g.p > 0.45 ? "│" : "¦", tc(0.55));
       // kerbs
       for (var k = 1; k <= kw; k++) {
         put(L - k, r, stripe ? "▓" : "░", stripe ? tc(0.9) : tc(0.45));
         put(R + k, r, stripe ? "▓" : "░", stripe ? tc(0.9) : tc(0.45));
       }
       // guardrails
+      if (!S.rules.rails) continue;
       var rail = g.p > 0.35 ? "║" : "|";
       var hot = S.railHot > 0 && g.p > 0.6;
       put(L - kw - 1, r, rail, hot && S.railSide < 0 ? C.white : tc(0.75));
@@ -618,22 +653,33 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
 
   function spawn(type, s, x, extra) { var e = { type: type, s: s, x: x, hit: false, done: false }; if (extra) for (var k in extra) e[k] = extra[k]; S.ents.push(e); }
+  // Every candidate draws the same numbers from its own gameplay stream before any part rule looks at it,
+  // so a part that removes or retypes an entity never shifts what comes after it.
   function spawnAhead() {
+    var R = S.rules, g = S.rng;
     while (S.nextObs < S.pos + 170) {
-      var s = S.nextObs, roll = Math.random();
-      if (roll < 0.55) spawn("bug", s, -0.7 + Math.random() * 1.4);
-      else if (roll < 0.88) spawn("slop", s, -0.65 + Math.random() * 1.3, { w: SLOP[Math.random() * SLOP.length | 0] });
-      else spawn("boost", s, -0.6 + Math.random() * 1.2);
-      if (Math.random() < Math.min(0.45, S.pos / 6000)) spawn("bug", s + 2, -0.7 + Math.random() * 1.4);
-      S.nextObs += Math.max(10, 30 - S.pos / 250) + Math.random() * 18;
+      var s = S.nextObs, rg = g.obs;
+      var roll = rg(), px = rg(), wi = rg(), roll2 = rg(), px2 = rg(), gap = rg();
+      var type = roll < R.bugShare ? "bug" : roll < 0.88 ? "slop" : "boost", noRouter = false;
+      if (type === "boost" && !R.boosts) { type = "bug"; noRouter = true; }
+      if (type === "bug") spawn("bug", s, -0.7 + px * 1.4, noRouter ? { noRouter: true } : null);
+      else if (type === "slop") spawn("slop", s, -0.65 + px * 1.3, { w: SLOP[wi * SLOP.length | 0] });
+      else spawn("boost", s, -0.6 + px * 1.2);
+      if (roll2 < Math.min(0.45, S.pos / 6000)) spawn("bug", s + 2, -0.7 + px2 * 1.4);
+      S.nextObs += Math.max(10, 30 - S.pos / 250) + gap * 18;
     }
     while (S.nextSign < S.pos + 170) {
-      var c = curveAt(S.nextSign + 70), dir = c > 0.25 ? "curve →" : c < -0.25 ? "curve ←" : "straight ↑";
-      var adr = "ADR-00" + (30 + (Math.random() * 20 | 0));
-      spawn("sign", S.nextSign, (Math.random() < 0.5 ? -1 : 1) * 1.55, { lines: [adr, "decided:", dir], dir: dir, adr: adr });
-      S.nextSign += 180 + Math.random() * 80;
+      var sg = g.sign, c = curveAt(S.nextSign + 70), dir = c > 0.25 ? "curve →" : c < -0.25 ? "curve ←" : "straight ↑";
+      var adr = "ADR-00" + (30 + (sg() * 20 | 0)), side = sg() < 0.5 ? -1 : 1, sgap = sg() * 80;
+      if (R.signs) spawn("sign", S.nextSign, side * 1.55, { lines: [adr, "decided:", dir], dir: dir, adr: adr });
+      else S.absent.push({ type: "sign", s: S.nextSign, dir: dir, done: false });
+      S.nextSign += 180 + sgap;
     }
-    while (S.nextGate < S.pos + 170) { spawn("gate", S.nextGate, 0); S.nextGate += 520 + Math.random() * 120; }
+    while (S.nextGate < S.pos + 170) {
+      var ggap = g.gate() * 120;
+      if (R.gates) spawn("gate", S.nextGate, 0); else S.absent.push({ type: "gate", s: S.nextGate, done: false });
+      S.nextGate += 520 + ggap;
+    }
   }
 
   function drawEntities() {
@@ -641,6 +687,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     list.forEach(function (e) {
       var d = e.s - S.pos; if (d <= 0.5 || e.hit && e.type !== "gate") return;
       var pr = project(d); if (pr.p < 0.035 || pr.r > rows + 6) return;
+      if (S.rules.fog > 0 && pr.p < S.rules.fog) return;
       var r = Math.round(pr.r);
       var g = rowGeom(Math.min(rows - 1, Math.max(HZ + 1, r)));
       var size = pr.p < 0.13 ? "t" : pr.p < 0.36 ? "s" : "b";
@@ -710,34 +757,95 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
 
   // ---------- state ----------
   var S;
+  var stage = document.getElementById("stage"), changeParts = document.getElementById("changeParts");
+
+  // ---------- parts: the switches below the game decide how hard the road is ----------
+  var PIDS = ["guardrails", "gate", "decisions", "router", "conform", "attest"];
+  var INSTALL = ["decisions", "gate", "guardrails", "router", "conform", "attest"];
+  var want = {}; PIDS.forEach(function (p) { want[p] = true; }); // what the person chose; attest is also off whenever gate is
+  var bests = {}; // best km per set of parts that are off; outside S so reset() leaves it alone
+  var lastKeyboard = false;
+  function effectiveOff(w) {
+    var off = PIDS.filter(function (p) { return !w[p]; });
+    if (!w.gate && off.indexOf("attest") < 0) off.push("attest");
+    return PIDS.filter(function (p) { return off.indexOf(p) >= 0; });
+  }
+  function offKey(off) { return off.slice().sort().join(" "); }
+  // The costs live in this one table. rules(off) is pure; update() and spawnAhead() read S.rules, never the switches.
+  function buildRules(list) {
+    var w = {}; PIDS.forEach(function (p) { w[p] = list.indexOf(p) < 0; });
+    var off = effectiveOff(w), has = function (p) { return off.indexOf(p) >= 0; };
+    return {
+      off: off,
+      rails: !has("guardrails"), offroad: has("guardrails") ? { limit: 0.80, speed: 0.15, penalty: 6, hold: 0.6, clamp: 1.1 } : null,
+      gates: !has("gate"), signed: !has("attest"), gateBonus: has("attest") ? 5 : 12, gateSlow: has("attest") ? 0.7 : 1,
+      signs: !has("decisions"), fog: has("decisions") ? 0.33 : 0,
+      boosts: !has("router"),
+      centre: !has("conform"), bugShare: has("conform") ? 0.40 : 0.55, slopSpeed: has("conform") ? 0.35 : 0.6, slopTime: has("conform") ? 3 : 0, slopGlitch: has("conform") ? 2.4 : 1.6
+    };
+  }
+  function makeRng(seed) { // mulberry32
+    var a = seed | 0;
+    return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  var gameSeed = (Math.random() * 4294967296) | 0; // gameplay randomness only; rendering keeps Math.random
+  window.ghGameSeed = function (n) { gameSeed = n | 0; };
+  window.ghGameRules = function (offList) { return buildRules(offList || []); };
+  function setState(s) {
+    S.state = s;
+    stage.dataset.state = s;
+    changeParts.hidden = s !== "over";
+  }
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
       msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false,
-      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: S ? S.best : 0, idleSince: 0 };
+      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0,
+      parts: [], rules: buildRules([]), rng: null, absent: [], absentAt: { sign: -99, gate: -99 }, offroad: 0, offroads: 0 };
+    setState("ready");
   }
+  stage.dataset.partsOff = "";
   reset();
 
   function start() {
     if (S.state === "ready" || S.state === "over") {
-      var best = S.best; reset(); S.best = best;
-      S.state = "count"; S.ct = 0;
-      say("$ grh install decisions gate guardrails router conform attest design", 0.7);
+      reset();
+      var off = effectiveOff(want);
+      S.parts = Object.freeze(off.slice()); S.rules = buildRules(off);
+      S.best = bests[offKey(off)] || 0;
+      S.rng = { obs: makeRng(gameSeed ^ 0x1111), sign: makeRng(gameSeed ^ 0x2222), gate: makeRng(gameSeed ^ 0x3333) };
+      gameSeed = (gameSeed + 0x9E3779B9) | 0;
+      stage.dataset.partsOff = off.join(" "); delete stage.dataset.gates;
+      setState("count"); S.ct = 0;
+      var on = INSTALL.filter(function (p) { return off.indexOf(p) < 0; });
+      say("$ grh install " + on.concat("design").join(" "), 0.7);
+      if (off.length) say("harness " + (6 - off.length) + "/6 · off: " + off.join(", "), C.bug);
+      else say("harness 6/6 · switch parts off below", 0.7);
     }
   }
+  window.ghGameSnapshot = function () {
+    var ents = { bug: 0, slop: 0, boost: 0, sign: 0, gate: 0 };
+    S.ents.forEach(function (e) { ents[e.type] = (ents[e.type] || 0) + 1; });
+    // What a player can see: entities ahead that are drawn (past the draw cutoff and outside the fog).
+    var visible = S.ents.filter(function (e) { return !e.done && !e.hit && e.s - S.pos > 0.5; })
+      .map(function (e) { var d = e.s - S.pos; return { type: e.type, x: e.x, d: d, p: project(d).p }; })
+      .filter(function (v) { return v.p >= Math.max(0.035, S.rules.fog); });
+    return { state: S.state, time: S.time, rt: S.rt, pos: S.pos, x: S.x, speed: S.speed, partsOff: S.parts.slice(), gates: S.gates, offroads: S.offroads, ents: ents, visible: visible };
+  };
 
   // Keys belong to the game only while its canvas has focus (WCAG 2.1.1, 2.1.2, 2.1.4).
   var keys = {}, focused = false;
   function pause() {
     if (S.state !== "race" && S.state !== "count") return;
-    S.state = "paused"; S.idleSince = S.clock; keys = {}; padSteer = 0; touchSteer = 0;
+    setState("paused"); S.idleSince = S.clock; keys = {}; padSteer = 0; touchSteer = 0;
   }
-  function resume() { if (S.state === "paused") { S.state = "count"; S.ct = 0; } }
+  function resume() { if (S.state === "paused") { setState("count"); S.ct = 0; } }
   function toInstall() { var c = document.getElementById("copy"); c.focus(); c.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" }); }
   document.getElementById("skipLink").addEventListener("click", function (e) { e.preventDefault(); toInstall(); });
   function label() {
-    cv.setAttribute("aria-label", focused
+    var off = effectiveOff(want);
+    cv.setAttribute("aria-label", (focused
       ? "Driving game, focused. Space or Enter to start or resume, arrow keys or J and L to steer, Escape to leave."
-      : "Driving game. Click it or press Tab to focus it, then Space or Enter to start.");
+      : "Driving game. Click it or press Tab to focus it, then Space or Enter to start.") + (focused && off.length ? " Parts off: " + off.join(", ") + "." : ""));
   }
   cv.addEventListener("focus", function () { focused = true; label(); });
   cv.addEventListener("blur", function () { focused = false; pause(); label(); });
@@ -751,9 +859,13 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       return;
     }
     if ((k === "i" || k === "I") && down && S.state === "over") { e.preventDefault(); toInstall(); return; }
+    if ((k === "h" || k === "H") && down && S.state === "over" && S.parts.length) { e.preventDefault(); restoreAll(); return; }
+    if ((k === "p" || k === "P") && down && S.state === "over") { e.preventDefault(); toParts(); return; }
     var game = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "a", "d", "w", "s", "A", "D", "W", "S", "j", "l", "J", "L"].indexOf(k) > -1;
     if (game && (S.state === "race" || S.state === "count")) { e.preventDefault(); keys[k.toLowerCase()] = down; }
   }
+  addEventListener("keydown", function () { lastKeyboard = true; }, true);
+  addEventListener("pointerdown", function () { lastKeyboard = false; }, true);
   addEventListener("keydown", function (e) { onKey(e, true); });
   addEventListener("keyup", function (e) { onKey(e, false); });
   cv.addEventListener("pointerdown", function (e) {
@@ -773,7 +885,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   var padSteer = 0; pad("padL", -1); pad("padR", 1);
 
   // Short viewports get the poster; the threshold comes from the computed Duro vars, so it follows the tokens.
-  var stage = document.getElementById("stage"), posterBtn = document.getElementById("poster");
+  var posterBtn = document.getElementById("poster");
   var rootCss = getComputedStyle(document.documentElement);
   var heroMin = parseFloat(rootCss.getPropertyValue("--duro-size-hero-min-h")), heroReserve = parseFloat(rootCss.getPropertyValue("--duro-size-hero-reserve"));
   var shortMq = heroMin && heroReserve ? matchMedia("(max-height: " + (heroMin + heroReserve - 0.02) + "px)") : null;
@@ -800,7 +912,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (S.state === "count") {
       S.ct += dt;
       tint = Math.max(0, tint - dt * 3);
-      if (S.ct >= 2.4) { S.state = "race"; S.rt = 0; say("● GREEN. Harness on.", TH.LAMP.green); }
+      if (S.ct >= 2.4) { setState("race"); S.rt = 0; say(S.parts.length ? "● GREEN. Harness " + (6 - S.parts.length) + "/6." : "● GREEN. Harness on.", TH.LAMP.green); }
       return;
     }
     if (S.state === "ready") { tint = Math.min(1, tint + dt); return; }
@@ -825,7 +937,15 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     S.x += (S.steer * 1.55 * (0.35 + sp) + wob * 0.5) * dt;
     S.x -= curveAt(S.pos) * sp * 0.95 * dt;
     S.railHot = Math.max(0, S.railHot - dt);
-    if (Math.abs(S.x) > 0.86) {
+    var OR = S.rules.offroad;
+    if (OR) {
+      S.x = Math.max(-OR.clamp, Math.min(OR.clamp, S.x));
+      if (S.offroad > 0) { S.offroad -= dt; if (S.offroad <= 0) { S.offroad = 0; S.x = 0; } }
+      else if (Math.abs(S.x) > OR.limit) { // one cost per trip off the road, never per frame
+        S.offroad = OR.hold; S.offroads++; S.speed *= OR.speed; S.time -= OR.penalty; S.shake = OR.hold;
+        say("✗ off-road · no guardrails · −" + OR.penalty + " s", C.bug);
+      }
+    } else if (Math.abs(S.x) > 0.86) {
       S.railSide = S.x > 0 ? 1 : -1;
       S.x = 0.86 * S.railSide; S.speed *= Math.pow(0.6, dt); S.railHot = 0.25;
       if (S.clock - S.railMsg > 3) { S.railMsg = S.clock; say("✗ guardrails · off-road denied, back on the road"); }
@@ -841,7 +961,10 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (e.done) return;
       var d = e.s - S.pos;
       if (e.type === "gate") {
-        if (d < Z * 0.9) { e.done = true; S.gates++; S.time += 12; say("✓ gate · 39 checks passed · signed · +12 s"); }
+        if (d < Z * 0.9) {
+          e.done = true; S.gates++; S.time += S.rules.gateBonus; S.speed *= S.rules.gateSlow;
+          say(S.rules.signed ? "✓ gate · 39 checks passed · signed · +" + S.rules.gateBonus + " s" : "✓ gate · 39 checks passed · unsigned · CI runs them again · +" + S.rules.gateBonus + " s");
+        }
         return;
       }
       if (e.type === "sign") {
@@ -852,18 +975,36 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         var reach = e.type === "slop" ? 0.26 : 0.22;
         if (Math.abs(e.x - S.x) < reach) {
           e.hit = true; e.done = true;
-          if (e.type === "bug") { S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45; say("✗ bug hit · −3 s", C.bug); }
-          else if (e.type === "slop") { S.hit.slop++; S.speed *= 0.6; S.glitch = 1.6; say("✗ AI slop · “" + e.w + "” · output scrambled", C.slop); }
+          if (e.type === "bug") { S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45; say(e.noRouter ? "✗ bug · no router · −3 s" : "✗ bug hit · −3 s", C.bug); }
+          else if (e.type === "slop") {
+            var SR = S.rules; S.hit.slop++; S.speed *= SR.slopSpeed; S.time -= SR.slopTime; S.glitch = SR.slopGlitch;
+            say("✗ AI slop · “" + e.w + "” · " + (SR.slopTime ? "−" + SR.slopTime + " s · no conform" : "output scrambled"), C.slop);
+          }
           else if (e.type === "boost") { S.boost = 3.5; S.speed = Math.max(S.speed, 75); say("▶▶ router · escalated to a stronger model", C.boost); }
         }
       }
       if (d < Z * 0.6) { e.done = true; if (!e.hit && (e.type === "bug" || e.type === "slop")) S.dodged[e.type]++; }
     });
     S.ents = S.ents.filter(function (e) { return e.s - S.pos > -5; });
+    S.absent.forEach(function (a) { // the moment a missing part would have acted
+      if (a.done) return;
+      var d = a.s - S.pos;
+      if (d < (a.type === "gate" ? Z * 0.9 : Z * 2.5)) {
+        a.done = true;
+        if (S.clock - S.absentAt[a.type] > 3) {
+          S.absentAt[a.type] = S.clock;
+          say(a.type === "gate" ? "✗ no gate · nothing checked · +0 s" : "✗ no decisions · " + a.dir.split(" ")[0] + " → unannounced", C.bug);
+        }
+      }
+    });
+    S.absent = S.absent.filter(function (a) { return a.s - S.pos > -5; });
 
     if (S.time <= 0) {
-      S.time = 0; S.state = "over"; S.idleSince = S.clock;
-      var km = S.pos / 1000; S.best = Math.max(S.best || 0, km);
+      S.time = 0; S.idleSince = S.clock;
+      var km = S.pos / 1000, bk = offKey(S.parts);
+      S.best = bests[bk] = Math.max(bests[bk] || 0, km);
+      stage.dataset.gates = String(S.gates);
+      setState("over");
       say("■ time · " + km.toFixed(2) + " km driven");
     }
   }
@@ -877,6 +1018,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       text(2, 2, "SPEED " + pad2(Math.round(S.speed * 3.6), 5) + " km/h", tc(0.9));
       text(2, 3, "DIST  " + pad2((S.pos / 1000).toFixed(2), 5) + " km", tc(0.9));
       if (S.boost > 0) text(2, 4, "▶▶ ROUTER BOOST", C.boost);
+      if (S.parts.length) text(2, 5, "HARNESS " + (6 - S.parts.length) + "/6", C.bug);
       var rx = cols - 22;
       if (cols > 60) {
         text(rx, 1, "BUGS DODGED " + pad2(S.dodged.bug, 4), C.bug);
@@ -911,6 +1053,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       box(HZ - 3, ["P A U S E D", "", focused ? "[ ENTER ]  resume" : "[ CLICK ]  resume", "Esc  leave the game"]);
     }
     if (S.state === "over") {
+      var ran = S.parts, kb = lastKeyboard && focused, now = effectiveOff(want);
       var lines = [
         "T I M E",
         "",
@@ -922,8 +1065,17 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
         "[ I ]  install the harness  ↓"
       ];
+      if (ran.length) lines.splice(3, 0, "best with all 6 parts: " + (bests[""] || 0).toFixed(2) + " km");
+      if (ran.length) Array.prototype.splice.apply(lines, [4, 0].concat(wrap("off: " + ran.join(", "), 37)));
+      if (ran.length) lines.push(now.length ? (kb ? "[ H ]  whole harness back on" : "switch the parts below back on ↓") : "harness back on: drive for 6/6");
+      lines.push(kb ? "[ P ]  harder road: parts below ↓" : "switch parts off below: harder ↓");
       box(HZ - 6, lines);
     }
+  }
+  function wrap(s, n) { // split at ", " so a long list stays readable on a phone; n - 1 leaves room for the trailing ","
+    var out = [], cur = "";
+    s.split(", ").forEach(function (w, i) { var add = (i ? ", " : "") + w; if (cur && (cur + add).length > n - 1) { out.push(cur + ","); cur = "  " + w; } else cur += add; });
+    out.push(cur); return out;
   }
   function box(y, lines) {
     var w = 0; lines.forEach(function (l) { w = Math.max(w, l.length); });
@@ -969,6 +1121,58 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       }
     }
   }
+
+  // ---------- the switches on the part cards ----------
+  var NOW = { guardrails: "off-road costs 6 s", gate: "no time back", decisions: "no signs, the far road in fog", router: "no boosts", conform: "more slop", attest: "gates give +5 s" };
+  var partsMsg = document.getElementById("partsMsg"), driveBack = document.getElementById("driveBack"), driveCount = document.getElementById("driveCount");
+  var inputs = {}; PIDS.forEach(function (p) { inputs[p] = document.querySelector('input[data-part="' + p + '"]'); });
+  function store() {
+    try { localStorage.setItem("gh-parts", JSON.stringify(PIDS.filter(function (p) { return !want[p]; }))); } catch (e) {}
+  }
+  function loadStored() {
+    try {
+      var list = JSON.parse(localStorage.getItem("gh-parts"));
+      if (Array.isArray(list)) list.forEach(function (p) { if (PIDS.indexOf(p) >= 0) want[p] = false; });
+    } catch (e) {}
+  }
+  function paint() {
+    var off = effectiveOff(want);
+    PIDS.forEach(function (p) {
+      var inp = inputs[p], card = inp.closest(".part"), isOff = off.indexOf(p) >= 0, needs = p === "attest" && !want.gate;
+      inp.checked = !isOff; inp.disabled = needs;
+      card.classList.toggle("off", isOff);
+      card.querySelector(".pt-txt").textContent = isOff ? "off" : "on";
+      card.querySelector(".was").hidden = isOff;
+      card.querySelector(".cost").hidden = !isOff || needs;
+      var nd = card.querySelector(".needs"); if (nd) nd.hidden = !needs;
+    });
+    driveCount.textContent = (6 - off.length) + "/6";
+    label();
+  }
+  var announceTimer = 0;
+  function announce(text) { clearTimeout(announceTimer); partsMsg.textContent = ""; announceTimer = setTimeout(function () { partsMsg.textContent = text; }, 30); }
+  PIDS.forEach(function (p) {
+    inputs[p].addEventListener("change", function () {
+      want[p] = inputs[p].checked; store(); paint(); driveBack.hidden = false;
+      announce(p + (want[p] ? " on" : " off: " + NOW[p]) + ". Applies to the next run.");
+    });
+  });
+  function restoreAll() {
+    PIDS.forEach(function (p) { want[p] = true; }); store(); paint(); driveBack.hidden = false;
+    announce("All six parts are on. Applies to the next run.");
+  }
+  function toParts() {
+    document.getElementById("parts").scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    inputs.guardrails.focus({ preventScroll: true });
+  }
+  changeParts.addEventListener("click", function (e) { e.preventDefault(); toParts(); });
+  driveBack.addEventListener("click", function (e) { // reveal the canvas without starting or resuming a run
+    e.preventDefault();
+    if (stage.classList.contains("is-poster")) { stage.classList.add("is-open"); applyMode(); }
+    stage.scrollIntoView({ block: "start", behavior: "auto" });
+    cv.focus({ preventScroll: true });
+  });
+  loadStored(); paint();
 
   var last = 0;
   function frame(t) {
