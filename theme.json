@@ -26,7 +26,11 @@
     "error": "#ff4d4d",
     "errorText": "#ff8080",
     "info": "#7ff7ff",
-    "infoText": "#7ff7ff"
+    "infoText": "#7ff7ff",
+    "active": "#39ff7a",
+    "activeBg": "#08210f",
+    "activeBorder": "#135227",
+    "activeText": "#7dffa6"
   },
   "typography": {
     "fontFamily": "'JetBrains Mono', ui-monospace, Menlo, monospace",

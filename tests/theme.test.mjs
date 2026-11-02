@@ -23,13 +23,16 @@ test("contrast matches the known ratios of Phosphor", () => {
   assert.ok(Math.abs(r["accent on bg"] - 15.17) < 0.05);
 });
 
-test("the tokens are exactly the 27 colours of theme.json", () => {
-  assert.deepEqual([...T.TOKENS].sort(), Object.keys(theme.colors).sort());
+test("the tokens are exactly the 27 colours of theme.json, plus the four active* derived from the accent", () => {
+  assert.deepEqual([...T.TOKENS, ...T.ACTIVE].sort(), Object.keys(theme.colors).sort());
   assert.equal(T.TOKENS.length, 27);
 });
 
-test("Phosphor with no edits is theme.json, byte for byte", () => {
-  assert.deepEqual(T.resolve(fresh()).tokens, theme.colors);
+test("Phosphor with no edits exports theme.json, byte for byte", () => {
+  assert.deepEqual(T.exportTheme(fresh(), theme).colors, theme.colors);
+  // What Copy writes: the same text, key order, indentation and final newline included.
+  const shipped = readFileSync(new URL("../theme.json", import.meta.url), "utf8");
+  assert.equal(JSON.stringify(T.exportTheme(fresh()), null, 2) + "\n", shipped);
 });
 
 test("derive(Phosphor core) stays within 16/255 per channel of theme.json", () => {

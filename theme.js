@@ -64,7 +64,7 @@
     "warning", "warningText", "warningBorder", "warningBg",
     "error", "errorText", "info", "infoText"
   ];
-  var ACTIVE = ["active", "activeBg", "activeBorder", "activeText"]; // not in theme.json: derived from the accent
+  var ACTIVE = ["active", "activeBg", "activeBorder", "activeText"]; // in theme.json too, but derived from the accent, never edited
   var CORE = { accent: "accent", bg: "bg", text: "text", danger: "error" }; // core input -> token
   var CORE_KEYS = ["accent", "bg", "text", "danger"];
   var GAME_COLORS = ["car", "tail", "white", "glitch", "slop", "slopShade", "bug", "boost", "brake", "hud"];
