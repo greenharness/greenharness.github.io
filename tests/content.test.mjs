@@ -77,3 +77,30 @@ test("each fixture source records the commit it was read at", () => {
   for (const s of fixture.sources)
     assert.match(s.sha, /^[0-9a-f]{40}$/, `${s.repo} ${s.path}`);
 });
+
+test("the six part cards each hold one switch, the design card holds none", () => {
+  const region =
+    html.match(/<div class="parts">([\s\S]*?)<\/section>/)?.[1] ?? "";
+  const cards = region.split('<div class="part').slice(1);
+  assert.equal(cards.length, 7, "six parts and the design card");
+  const switches = (card) =>
+    [...card.matchAll(/<input\b[^>]*>/g)].filter(
+      (m) =>
+        /type="checkbox"/.test(m[0]) &&
+        /role="switch"/.test(m[0]) &&
+        /data-part="[a-z]+"/.test(m[0]),
+    ).length;
+  const byName = Object.fromEntries(
+    cards.map((card) => [card.match(/<b>([a-z]+)/)?.[1], switches(card)]),
+  );
+  for (const name of [
+    "guardrails",
+    "gate",
+    "decisions",
+    "router",
+    "conform",
+    "attest",
+  ])
+    assert.equal(byName[name], 1, name);
+  assert.equal(byName.design, 0);
+});
