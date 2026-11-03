@@ -266,7 +266,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 ║░        ░║</pre><b>guardrails</b><span>The road edges. Every command the agent runs is read first; the ones that go off the road are refused.</span><small id="guardrails-note"><span class="was">was amont-agent</span><span class="cost" hidden>✗ no rails: off the road costs 6 s</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="gate" aria-label="gate" aria-describedby="gate-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>█══ GATE ══█
 █          █
-█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small id="gate-note"><span class="was">was amont</span><span class="cost" hidden>✗ no arches: no time back</span></small></div>
+█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small id="gate-note"><span class="was">was amont</span><span class="cost" hidden>✗ no arches: no time back, nothing ships</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="decisions" aria-label="decisions" aria-describedby="decisions-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>┌─────────┐
 │decided: │
 │curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small id="decisions-note"><span class="was">was aval</span><span class="cost" hidden>✗ no signs: curves come unannounced, the far road in fog</span></small></div>
@@ -702,31 +702,33 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         var kw = Math.max(1, Math.round(g.p * 3));
         var L = Math.round(g.cx - g.hw) - kw - 1, R = Math.round(g.cx + g.hw) + kw + 1;
         var h = Math.max(1, Math.round(g.p * 14));
-        for (var j = 0; j < h; j++) { put(L, r - j, "█", tc(0.95)); put(R, r - j, "█", tc(0.95)); }
+        var push = gateKind() === "push", gcol = push ? C.white : tc(0.95);
+        for (var j = 0; j < h; j++) { put(L, r - j, "█", gcol); put(R, r - j, "█", gcol); }
         var top = r - h;
-        for (var x = L; x <= R; x++) put(x, top, "═", tc(0.95));
-        var label = g.p > 0.25 ? " GATE · 39 CHECKS " : g.p > 0.1 ? " GATE " : "";
+        for (var x = L; x <= R; x++) put(x, top, "═", gcol);
+        var label = push ? (g.p > 0.25 ? " PUSH · FEATURE-" + (S.feat.shipped + 1) + " " : g.p > 0.1 ? " PUSH " : "") : (g.p > 0.25 ? " COMMIT · 39 CHECKS " : g.p > 0.1 ? " COMMIT " : "");
         if (label && R - L > label.length + 2) text(Math.round((L + R - label.length) / 2), top, label, C.white);
       }
     });
   }
 
   // ---------- car ----------
-  var FEATURE_N = 1; // the feature in progress
-  var PLATE = "FEATURE-" + FEATURE_N;
-  var PLATE_CELLS = 12, plateL = Math.floor((PLATE_CELLS - PLATE.length) / 2);
-  var PLATE_ROW = " " .repeat(plateL) + PLATE + " ".repeat(PLATE_CELLS - PLATE.length - plateL);
+  var PLATE_CELLS = 12;
+  function plateRow() { // FEATURE-<n>, n the feature in progress, centred in its 12 cells
+    var t = "FEATURE-" + (S.feat.shipped + 1), l = Math.max(0, Math.floor((PLATE_CELLS - t.length) / 2));
+    return (" ".repeat(l) + t + " ".repeat(PLATE_CELLS)).slice(0, PLATE_CELLS);
+  }
   // [glyphs, keys]: o outline, g glass, p plate, l lights, b bumper, t tyres
   var CAR = [
     ["   .--------------.   ", "   oooooooooooooooo   "],
     ["  /  ▓▓▓▓▓▓▓▓▓▓▓▓  \\  ", "  o  gggggggggggg  o  "],
-    [" |__/" + PLATE_ROW + "\\__| ", " oooo" + "pppppppppppp" + "oooo "],
+    [" |__/            \\__| ", " oooo" + "pppppppppppp" + "oooo "],
     [" [██]============[██] ", " ollobbbbbbbbbbbbollo "],
     ["  (__)          (__)  ", "  tttt          tttt  "]
   ];
   var CAR_W = 22;
   function carColor(k) {
-    return k === "o" ? C.shade : k === "g" ? C.glass : k === "p" ? tc(1) : k === "l" ? (S.braking ? C.brake : C.tail) : k === "b" ? C.car : C.hud;
+    return k === "o" ? C.shade : k === "g" ? C.glass : k === "p" ? (S.plateHold > 0 ? C.white : tc(1)) : k === "l" ? (S.braking ? C.brake : C.tail) : k === "b" ? C.car : C.hud;
   }
   var HZ_CAR_PAD = 7;
   function carEnter() { var t = S.launch; return t * t * t * (t * (t * 6 - 15) + 10); }
@@ -739,7 +741,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     var lean = Math.round(S.steerVis * 1.6);
     var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
     for (var j = 0; j < CAR.length; j++) {
-      var G = CAR[j][0], K = CAR[j][1], off = (j < 2 ? lean : 0) + jig;
+      var G = j === 2 ? " |__/" + plateRow() + "\\__| " : CAR[j][0], K = CAR[j][1], off = (j < 2 ? lean : 0) + jig;
       for (var k = 0; k < G.length; k++) if (G[k] !== " ") fn(k - CAR_W / 2 + off, j, G[k], carColor(K[k]));
     }
   }
@@ -818,6 +820,35 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     var a = seed | 0;
     return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }
+  function featSize(rng) { return 3 + (rng() * 3 | 0); }
+  // One more arch or bug for the feature in progress; pure. A bug adds a fix commit, never past 5 arches.
+  function featureAfter(f, ev, next) {
+    if (ev === "arch") {
+      if (f.done + 1 === f.need) return { shipped: f.shipped + 1, done: 0, need: next };
+      return { shipped: f.shipped, done: f.done + 1, need: f.need };
+    }
+    var need = Math.min(5, f.need + 1);
+    return { shipped: f.shipped, done: f.done, need: need, grew: need > f.need };
+  }
+  // The bug hits and arch passes a frame triggers, in the order the car reaches them (a bug first on a tie).
+  function frameEvents(ents, pos0, pos1, x) {
+    var out = [];
+    ents.forEach(function (e) {
+      if (e.done) return;
+      var d = e.s - pos1;
+      if (e.type === "bug") {
+        if (!e.hit && d < Z * 1.15 && d > Z * 0.75 && Math.abs(e.x - x) < 0.22) out.push({ type: "bug", e: e, at: e.s - Z * 1.15, o: 0 });
+      } else if (e.type === "gate") {
+        if (d < Z * 0.9) out.push({ type: "arch", e: e, at: e.s - Z * 0.9, o: 1 });
+      }
+    });
+    return out.sort(function (a, b) { return a.at - b.at || a.o - b.o; });
+  }
+  function gateKind() { return S.feat.done + 1 === S.feat.need ? "push" : "commit"; }
+  window.ghFeatureAfter = featureAfter;
+  window.ghFrameEvents = frameEvents;
+  window.ghFeatureSizes = function (seed, n) { var r = makeRng(seed ^ 0x4444), out = []; for (var i = 0; i < n; i++) out.push(featSize(r)); return out; };
+  window.ghGameShipped = function (n) { if (S.state === "race") S.feat.shipped = n | 0; };
   var gameSeed = (Math.random() * 4294967296) | 0; // gameplay randomness only; rendering keeps Math.random
   window.ghGameSeed = function (n) { gameSeed = n | 0; };
   window.ghGameRules = function (offList) { return buildRules(offList || []); };
@@ -829,7 +860,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
       msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false, launch: 0,
-      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0,
+      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0, feat: { shipped: 0, done: 0, need: 3 }, plateHold: 0,
       parts: [], rules: buildRules([]), rng: null, absent: [], absentAt: { sign: -99, gate: -99 }, offroad: 0, offroads: 0 };
     setState("ready");
   }
@@ -842,9 +873,10 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       var off = effectiveOff(want);
       S.parts = Object.freeze(off.slice()); S.rules = buildRules(off);
       S.best = bests[offKey(off)] || 0;
-      S.rng = { obs: makeRng(gameSeed ^ 0x1111), sign: makeRng(gameSeed ^ 0x2222), gate: makeRng(gameSeed ^ 0x3333) };
+      S.rng = { obs: makeRng(gameSeed ^ 0x1111), sign: makeRng(gameSeed ^ 0x2222), gate: makeRng(gameSeed ^ 0x3333), feat: makeRng(gameSeed ^ 0x4444) };
+      S.feat.need = featSize(S.rng.feat);
       gameSeed = (gameSeed + 0x9E3779B9) | 0;
-      stage.dataset.partsOff = off.join(" "); delete stage.dataset.gates;
+      stage.dataset.partsOff = off.join(" "); delete stage.dataset.gates; delete stage.dataset.features;
       setState("count"); S.ct = 0;
       var on = INSTALL.filter(function (p) { return off.indexOf(p) < 0; });
       say("$ grh install " + on.concat("design").join(" "), 0.7);
@@ -857,9 +889,9 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     S.ents.forEach(function (e) { ents[e.type] = (ents[e.type] || 0) + 1; });
     // What a player can see: entities ahead that are drawn (past the draw cutoff and outside the fog).
     var visible = S.ents.filter(function (e) { return !e.done && !e.hit && e.s - S.pos > 0.5; })
-      .map(function (e) { var d = e.s - S.pos; return { type: e.type, x: e.x, d: d, p: project(d).p }; })
+      .map(function (e) { var d = e.s - S.pos; var v = { type: e.type, x: e.x, d: d, p: project(d).p }; if (e.type === "gate") v.kind = gateKind(); return v; })
       .filter(function (v) { return v.p >= Math.max(0.035, S.rules.fog); });
-    return { state: S.state, time: S.time, rt: S.rt, pos: S.pos, x: S.x, speed: S.speed, partsOff: S.parts.slice(), gates: S.gates, offroads: S.offroads, ents: ents, visible: visible };
+    return { state: S.state, time: S.time, rt: S.rt, pos: S.pos, x: S.x, speed: S.speed, partsOff: S.parts.slice(), gates: S.gates, features: S.feat.shipped, commits: S.gates, need: S.feat.need, rider: "car", offroads: S.offroads, ents: ents, visible: visible };
   };
 
   // Keys belong to the game only while its canvas has focus (WCAG 2.1.1, 2.1.2, 2.1.4).
@@ -949,6 +981,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (S.state === "ready") { tint = Math.min(1, tint + dt); return; }
     if (S.state === "over") { tint = Math.max(0, tint - dt); return; }
     S.rt += dt;
+    S.plateHold = Math.max(0, S.plateHold - dt);
     tint = Math.min(1, tint + dt * 1.6);
 
     var left = keys.arrowleft || keys.a || keys.j, right = keys.arrowright || keys.d || keys.l;
@@ -982,22 +1015,31 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (S.clock - S.railMsg > 3) { S.railMsg = S.clock; say("✗ guardrails · off-road denied, back on the road"); }
     }
 
+    var pos0 = S.pos;
     S.pos += S.speed * dt;
     S.time -= dt;
     S.glitch = Math.max(0, S.glitch - dt);
     S.shake = Math.max(0, S.shake - dt);
     spawnAhead();
 
+    frameEvents(S.ents, pos0, S.pos, S.x).forEach(function (ev) {
+      var e = ev.e;
+      if (ev.type === "bug") {
+        e.hit = true; e.done = true;
+        var fa = featureAfter(S.feat, "bug"); S.feat = { shipped: fa.shipped, done: fa.done, need: fa.need };
+        S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45;
+        say((e.noRouter ? "✗ bug · no router · −3 s" : "✗ bug hit · −3 s") + (S.rules.gates && fa.grew ? " · fix commit before the push" : ""), C.bug);
+      } else {
+        var f = S.feat, ships = f.done + 1 === f.need, nf = featureAfter(f, "arch", ships ? featSize(S.rng.feat) : 0), bonus = S.rules.gateBonus;
+        e.done = true; S.gates++; S.time += bonus; S.speed *= S.rules.gateSlow; S.feat = nf;
+        if (ships) { S.plateHold = 0.5; say("✓ push · FEATURE-" + nf.shipped + " shipped" + (S.rules.signed ? "" : " · unsigned · CI runs them again") + " · +" + bonus + " s"); }
+        else say("✓ commit " + nf.done + "/" + nf.need + " · 39 checks passed · " + (S.rules.signed ? "signed" : "unsigned · CI runs them again") + " · +" + bonus + " s");
+      }
+    });
     S.ents.forEach(function (e) {
       if (e.done) return;
       var d = e.s - S.pos;
-      if (e.type === "gate") {
-        if (d < Z * 0.9) {
-          e.done = true; S.gates++; S.time += S.rules.gateBonus; S.speed *= S.rules.gateSlow;
-          say(S.rules.signed ? "✓ gate · 39 checks passed · signed · +" + S.rules.gateBonus + " s" : "✓ gate · 39 checks passed · unsigned · CI runs them again · +" + S.rules.gateBonus + " s");
-        }
-        return;
-      }
+      if (e.type === "gate") return;
       if (e.type === "sign") {
         if (d < Z * 2.5) { e.done = true; say("decisions · " + e.adr + " decided: " + e.dir, C.white); }
         return;
@@ -1006,8 +1048,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         var reach = e.type === "slop" ? 0.26 : 0.22;
         if (Math.abs(e.x - S.x) < reach) {
           e.hit = true; e.done = true;
-          if (e.type === "bug") { S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45; say(e.noRouter ? "✗ bug · no router · −3 s" : "✗ bug hit · −3 s", C.bug); }
-          else if (e.type === "slop") {
+          if (e.type === "slop") {
             var SR = S.rules; S.hit.slop++; S.speed *= SR.slopSpeed; S.time -= SR.slopTime; S.glitch = SR.slopGlitch;
             say("✗ AI slop · “" + e.w + "” · " + (SR.slopTime ? "−" + SR.slopTime + " s · no conform" : "output scrambled"), C.slop);
           }
@@ -1024,7 +1065,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         a.done = true;
         if (S.clock - S.absentAt[a.type] > 3) {
           S.absentAt[a.type] = S.clock;
-          say(a.type === "gate" ? "✗ no gate · nothing checked · +0 s" : "✗ no decisions · " + a.dir.split(" ")[0] + " → unannounced", C.bug);
+          say(a.type === "gate" ? "✗ no gate · nothing checked · nothing ships · +0 s" : "✗ no decisions · " + a.dir.split(" ")[0] + " → unannounced", C.bug);
         }
       }
     });
@@ -1034,7 +1075,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       S.time = 0; S.idleSince = S.clock;
       var km = S.pos / 1000, bk = offKey(S.parts);
       S.best = bests[bk] = Math.max(bests[bk] || 0, km);
-      stage.dataset.gates = String(S.gates);
+      stage.dataset.gates = String(S.gates); stage.dataset.features = String(S.feat.shipped);
       setState("over");
       say("■ time · " + km.toFixed(2) + " km driven");
     }
@@ -1054,8 +1095,13 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (cols > 60) {
         text(rx, 1, "BUGS DODGED " + pad2(S.dodged.bug, 4), C.bug);
         text(rx, 2, "SLOP DODGED " + pad2(S.dodged.slop, 4), C.slop);
-        text(rx, 3, "GATES       " + pad2(S.gates, 4), tc(0.9));
+        text(rx, 3, "COMMITS     " + pad2(S.gates, 4), tc(0.9));
+        text(rx, 4, "SHIPPED     " + pad2(S.feat.shipped, 4), tc(0.9));
       }
+    }
+    if (S.state !== "ready") {
+      var pips = ""; for (var pi = 0; pi < S.feat.need; pi++) pips += pi < S.feat.done ? "●" : "○";
+      text(2, 6, "FEATURE " + (S.feat.shipped + 1) + "  " + pips, tc(0.9));
     }
     // terminal log
     var shown = S.msgs.filter(function (m) { return S.clock - m.t < 5; }).slice(-2);
@@ -1091,7 +1137,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         (S.pos / 1000).toFixed(2) + " km   ·   best " + (S.best || 0).toFixed(2) + " km",
         "bugs dodged " + S.dodged.bug + "   ·   bugs hit " + S.hit.bug,
         "slop dodged " + S.dodged.slop + "   ·   slop hit " + S.hit.slop,
-        "gates passed " + S.gates,
+        "features shipped " + S.feat.shipped + " · commits " + S.gates,
         "",
         focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
         "[ I ]  install the harness  ↓"
@@ -1155,7 +1201,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
 
   // ---------- the switches on the part cards ----------
-  var NOW = { guardrails: "off-road costs 6 s", gate: "no time back", decisions: "no signs, the far road in fog", router: "no boosts", conform: "more slop", attest: "gates give +5 s" };
+  var NOW = { guardrails: "off-road costs 6 s", gate: "no time back, nothing ships", decisions: "no signs, the far road in fog", router: "no boosts", conform: "more slop", attest: "gates give +5 s" };
   var partsMsg = document.getElementById("partsMsg"), driveBack = document.getElementById("driveBack"), driveCount = document.getElementById("driveCount");
   var inputs = {}; PIDS.forEach(function (p) { inputs[p] = document.querySelector('input[data-part="' + p + '"]'); });
   function store() {
