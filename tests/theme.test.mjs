@@ -234,3 +234,11 @@ test("a custom accent moves the page colours; the traffic-light lamps never move
   assert.notEqual(r.page.g2, "#1d8f45");
   assert.deepEqual(T.LAMP, { green: "#39ff7a", red: "#ff3030", off: "#3a1414" });
 });
+
+test("the unicorn keeps her gold horn and six-colour rainbow in every theme", () => {
+  assert.deepEqual(T.UNICORN, {
+    horn: "#ffd75e",
+    rainbow: ["#ff4d6d", "#ffa94d", "#ffe14d", "#5dff8a", "#4dc3ff", "#d36bff"],
+  });
+  for (const hex of [T.UNICORN.horn, ...T.UNICORN.rainbow]) assert.equal(T.norm(hex), hex);
+});

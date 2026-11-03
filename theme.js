@@ -170,6 +170,9 @@
   var PAGE_KEYS = ["head", "cmdBg", "partOpt", "g1", "g2", "g3", "r1", "r2", "r3", "white", "slop"];
   /* The traffic-light lamps and the GREEN message never follow the theme: red and green keep their meaning. */
   var LAMP = { green: "#39ff7a", red: "#ff3030", off: "#3a1414" };
+  /* The unicorn's gold horn and rainbow mane stay in every theme (her body, flanks and brake-lit
+   * hooves follow the theme's car and brake colours). */
+  var UNICORN = { horn: "#ffd75e", rainbow: ["#ff4d6d", "#ffa94d", "#ffe14d", "#5dff8a", "#4dc3ff", "#d36bff"] };
 
   var PRESETS = {
     phosphor: {
@@ -371,7 +374,7 @@
 
   var api = {
     TOKENS: TOKENS, ACTIVE: ACTIVE, CORE: CORE, CORE_KEYS: CORE_KEYS, GAME_COLORS: GAME_COLORS, PRESETS: PRESETS,
-    PAGE_KEYS: PAGE_KEYS, LAMP: LAMP, BASE: BASE, derivePage: derivePage,
+    PAGE_KEYS: PAGE_KEYS, LAMP: LAMP, UNICORN: UNICORN, BASE: BASE, derivePage: derivePage,
     PRESET_ORDER: PRESET_ORDER, BARS: BARS,
     parseHex: parseHex, toHex: toHex, norm: norm, mix: mix, luminance: luminance, contrast: contrast,
     rgbDistance: rgbDistance, oklabDistance: oklabDistance, hue: hue, hueGap: hueGap, chroma: chroma,

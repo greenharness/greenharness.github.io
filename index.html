@@ -746,9 +746,57 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     }
   }
   function carCenter() { return Math.round(cols / 2 - CAR_W / 2) + CAR_W / 2; }
+  // ---------- unicorn (the bonus rider) ----------
+  // Rear view. Each row: the glyphs, then one colour key per cell:
+  // blank = body, S = flank shade, H = horn, r o y g b v = rainbow (ripples down while she gallops).
+  var UNI = [
+    ["       ▴       ", "       H       "],
+    ["      ▲┃▲      ", "       H       "],
+    ["      ▜█▛≈≈    ", "      S Sro    "],
+    ["      ▐█▌≈≈≈   ", "      S Sygb   "],
+    ["     ▟█≈█▙  ≈  ", "     S r S  v  "],
+    ["     ▜█≈█▛     ", "     S o S     "]
+  ];
+  var LEGS = [ // standing, then the two gallop frames
+    [["     ▐▌≈▐▌     ", "     SSy SS    "], ["     ▐▌≈▐▌     ", "     SSg SS    "]],
+    [["     ▐▌≈▝▙     ", "     SSy       "], ["     ▐▌  ≈     ", "     SS  g     "]],
+    [["     ▟▘≈▐▌     ", "       y SS    "], ["      ≈  ▐▌    ", "      g  SS    "]]
+  ];
+  var UNI_W = 15, UNI_H = UNI.length + 2;
+  var RAIN = TH.UNICORN.rainbow, RI = { r: 0, o: 1, y: 2, g: 3, b: 4, v: 5 };
+  var MORPH_S = 0.6;
+  function uniGallop() { return S.state === "race" && S.speed > 1; }
+  function uniColor(k, j, moving) {
+    if (k in RI) {
+      var n = RI[k];
+      if (moving) n = ((n - Math.floor(S.clock * 8)) % 6 + 6) % 6;
+      return RAIN[n];
+    }
+    if (k === "H") return TH.UNICORN.horn;
+    if (j === UNI_H - 1 && S.braking) return C.brake; // the hooves light on the brake
+    return k === "S" ? C.shade : C.car;
+  }
+  function uniEach(fn) {
+    var gallop = uniGallop();
+    var R = UNI.concat(LEGS[gallop ? 1 + (Math.floor(S.gait) % 2) : 0]);
+    var moving = !reduce && gallop;
+    var lean = Math.round(S.steerVis * 1.6);
+    var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
+    for (var j = 0; j < R.length; j++) {
+      var L = R[j][0], K = R[j][1], off = (j < 4 ? lean : 0) + jig; // horn, ears, head and neck lean into the turn
+      for (var i = 0; i < L.length; i++) if (L[i] !== " ") fn(i - UNI_W / 2 + off, j, L[i], uniColor(K[i] || " ", j, moving));
+    }
+  }
+  function uniCenter() { return Math.round(cols / 2 - UNI_W / 2) + UNI_W / 2; }
   function drawCar() {
     var by = rows - 2, cx = cols / 2;
-    if (carScale() <= 1.001) { // at chase distance the car is on the character grid; closer, render() draws it scaled
+    if (S.rider === "unicorn") {
+      var U = uniCenter(), seam = S.morph >= 1 ? -Infinity : by - (UNI_H - 1) + Math.floor(S.morph * UNI_H);
+      // a top-to-bottom wipe: rows above the seam are the unicorn, rows below it the car
+      if (S.morph < 1) carEach(function (dx, j, ch, col) { var y = by - (CAR.length - 1 - j); if (y > seam) put(Math.round(carCenter() + dx), y, ch, col); });
+      uniEach(function (dx, j, ch, col) { var y = by - (UNI_H - 1 - j); if (S.morph >= 1 || y < seam) put(Math.round(U + dx), y, ch, col); });
+      if (S.morph > 0 && S.morph < 1) for (var sx = -UNI_W / 2; sx < UNI_W / 2; sx += 2) put(Math.round(U + sx), seam, "✦", RAIN[(Math.floor(sx + UNI_W) + Math.floor(S.rt * 8)) % 6]);
+    } else if (carScale() <= 1.001) { // at chase distance the car is on the character grid; closer, render() draws it scaled
       var A = carCenter();
       carEach(function (dx, j, ch, col) { put(Math.round(A + dx), by - (CAR.length - 1 - j), ch, col); });
     }
@@ -848,7 +896,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   window.ghFeatureAfter = featureAfter;
   window.ghFrameEvents = frameEvents;
   window.ghFeatureSizes = function (seed, n) { var r = makeRng(seed ^ 0x4444), out = []; for (var i = 0; i < n; i++) out.push(featSize(r)); return out; };
-  window.ghGameShipped = function (n) { if (S.state === "race") S.feat.shipped = n | 0; };
+  window.ghGameShipped = function (n, done) { if (S.state === "race") { S.feat.shipped = n | 0; if (done != null) S.feat.done = done | 0; } };
   var gameSeed = (Math.random() * 4294967296) | 0; // gameplay randomness only; rendering keeps Math.random
   window.ghGameSeed = function (n) { gameSeed = n | 0; };
   window.ghGameRules = function (offList) { return buildRules(offList || []); };
@@ -860,7 +908,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
       msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false, launch: 0,
-      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0, feat: { shipped: 0, done: 0, need: 3 }, plateHold: 0,
+      dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0, feat: { shipped: 0, done: 0, need: 3 }, plateHold: 0, rider: "car", morph: 0, gait: 0,
       parts: [], rules: buildRules([]), rng: null, absent: [], absentAt: { sign: -99, gate: -99 }, offroad: 0, offroads: 0 };
     setState("ready");
   }
@@ -891,7 +939,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     var visible = S.ents.filter(function (e) { return !e.done && !e.hit && e.s - S.pos > 0.5; })
       .map(function (e) { var d = e.s - S.pos; var v = { type: e.type, x: e.x, d: d, p: project(d).p }; if (e.type === "gate") v.kind = gateKind(); return v; })
       .filter(function (v) { return v.p >= Math.max(0.035, S.rules.fog); });
-    return { state: S.state, time: S.time, rt: S.rt, pos: S.pos, x: S.x, speed: S.speed, partsOff: S.parts.slice(), gates: S.gates, features: S.feat.shipped, commits: S.gates, need: S.feat.need, rider: "car", offroads: S.offroads, ents: ents, visible: visible };
+    return { state: S.state, time: S.time, rt: S.rt, pos: S.pos, x: S.x, speed: S.speed, partsOff: S.parts.slice(), gates: S.gates, features: S.feat.shipped, commits: S.gates, need: S.feat.need, rider: S.rider, offroads: S.offroads, ents: ents, visible: visible };
   };
 
   // Keys belong to the game only while its canvas has focus (WCAG 2.1.1, 2.1.2, 2.1.4).
@@ -981,6 +1029,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (S.state === "ready") { tint = Math.min(1, tint + dt); return; }
     if (S.state === "over") { tint = Math.max(0, tint - dt); return; }
     S.rt += dt;
+    S.gait += dt * (2 + S.speed / 20);
+    if (S.rider === "unicorn" && S.morph < 1) S.morph = Math.min(1, S.morph + dt / MORPH_S);
     S.plateHold = Math.max(0, S.plateHold - dt);
     tint = Math.min(1, tint + dt * 1.6);
 
@@ -1032,7 +1082,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       } else {
         var f = S.feat, ships = f.done + 1 === f.need, nf = featureAfter(f, "arch", ships ? featSize(S.rng.feat) : 0), bonus = S.rules.gateBonus;
         e.done = true; S.gates++; S.time += bonus; S.speed *= S.rules.gateSlow; S.feat = nf;
-        if (ships) { S.plateHold = 0.5; say("✓ push · FEATURE-" + nf.shipped + " shipped" + (S.rules.signed ? "" : " · unsigned · CI runs them again") + " · +" + bonus + " s"); }
+        if (ships && f.shipped === 2 && nf.shipped === 3) { S.rider = "unicorn"; S.morph = reduce ? 1 : 0; }
+        if (ships) { S.plateHold = 0.5; say("✓ push · FEATURE-" + nf.shipped + " shipped" + (S.rules.signed ? "" : " · unsigned · CI runs them again") + " · +" + bonus + " s"); if (S.rider === "unicorn" && nf.shipped === 3) say("★ 3 features shipped · bonus: the unicorn", TH.UNICORN.horn); }
         else say("✓ commit " + nf.done + "/" + nf.need + " · 39 checks passed · " + (S.rules.signed ? "signed" : "unsigned · CI runs them again") + " · +" + bonus + " s");
       }
     });
@@ -1138,10 +1189,12 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         "bugs dodged " + S.dodged.bug + "   ·   bugs hit " + S.hit.bug,
         "slop dodged " + S.dodged.slop + "   ·   slop hit " + S.hit.slop,
         "features shipped " + S.feat.shipped + " · commits " + S.gates,
+        S.rider === "unicorn" ? "★ unicorn earned" : S.feat.shipped > 0 ? "ship 3 features in a run: ★" : null,
         "",
         focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
         "[ I ]  install the harness  ↓"
       ];
+      lines = lines.filter(function (l) { return l !== null; });
       if (ran.length) lines.splice(3, 0, "best with all 6 parts: " + (bests[""] || 0).toFixed(2) + " km");
       if (ran.length) Array.prototype.splice.apply(lines, [4, 0].concat(wrap("off: " + ran.join(", "), 37)));
       if (ran.length) lines.push(now.length ? (kb ? "[ H ]  whole harness back on" : "switch the parts below back on ↓") : "harness back on: drive for 6/6");
