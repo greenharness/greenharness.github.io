@@ -72,6 +72,8 @@ reused here.
 
 ### The start shot (kept from the unicorn work, now for the car)
 
+_Removed at preview: see the Decision log entry "at preview (decided by the person)". The car keeps its size, as on main._
+
 - In the ready state, the car stands close to the camera. It is drawn scaled by
   `s0 = clamp((rows − HZ − 7) / spriteRows, 1, 2.2)` (the ready box gains two lines, so its border moves to HZ+4; one row stays free), so its top stays below the title box
   and the log.
@@ -158,7 +160,7 @@ The person previews the commit as usual, with a guide, before the push.
       from `origin/main`; this plan is its first commit. Keep the `feat/unicorn` worktree and its
       local branch (never pushed) as the source for Phases 1–3; remove them only after Phase 3 is merged.
 - [x] Phase 1: today's car with tinted glass, the themed colours, the `FEATURE-n` plate, and the car's start
-      shot (shared rider drawing).
+      shot (shared rider drawing); the start shot was removed at preview (Decision log).
 - [x] Phase 2: commits and push. This covers `featureAfter`, the arch kinds and labels, the
       log lines, gate-off behaviour and its cost note, the HUD row, the end screen, the snapshot
       and `ghGameShipped`.
@@ -224,12 +226,12 @@ Screenshots are in `/tmp/uni/shots/` (copied to the attestation for the preview)
 Format: input → expected → observed.
 
 - Phase 1:
-  - 1100×760, Start → big car under the title box, rolls to its spot by 2.1 s, still at
-    2.4 s, chase size in the race → as expected (`p1-sheet.png`).
+  - 1100×760, ready → red lights → race → the car at chase size the whole time, below the
+    ready box → as expected (`z-ab.png`). (The start-shot rows checked before the preview are
+    superseded: that code is removed.)
   - Hold ↓ → tail lights in `C.brake` → as expected (`p1-brake.png`).
-  - 390×844 → car between the ◀ ▶ pads → at first the pads covered its lights at 2.2×;
-    fixed with the 55% width cap (Decision log), then as expected (`p4-ready2.png`).
-    Reduced motion → chase size from the start, no roll → as expected.
+  - 390×844, ready → the car at chase size, clear of the ◀ ▶ pads and below the ready box →
+    as expected (`z-m.png`).
   - Amber preset → outline, glass and plate follow the theme → as expected (`l-amber-c.png`).
 - Phase 2:
   - Bot run, seed 1 → COMMIT arches, then a white PUSH arch, then the plate `FEATURE-2` in white
