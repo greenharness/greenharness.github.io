@@ -101,7 +101,7 @@ test("export has the 27 keys plus the derived active* keys, and passes typograph
 });
 
 test("an Advanced override, then a core edit, then a reload, then an export: the override is unchanged", () => {
-  let s = T.setToken(fresh("amber"), "textMuted", "#123456");
+  let s = T.setToken(fresh("moss"), "textMuted", "#123456");
   s = T.setCore(s, "accent", "#ff8800");
   assert.equal(s.overrides.textMuted, "#123456");
   const reloaded = T.validateState(JSON.parse(JSON.stringify(s)));
@@ -111,7 +111,7 @@ test("an Advanced override, then a core edit, then a reload, then an export: the
   assert.equal(out.colors.accent, "#ff8800");
   // The exported file, read back as an Advanced edit of every token, gives the same colours: no re-derivation.
   const text = JSON.stringify(out, null, 2);
-  let back = T.presetState("amber");
+  let back = T.presetState("moss");
   for (const k of T.TOKENS) back = T.setToken(back, k, JSON.parse(text).colors[k]);
   const again = T.exportTheme(back, theme).colors;
   for (const k of T.TOKENS) assert.equal(again[k], out.colors[k], k);
@@ -139,8 +139,8 @@ test("theme.js loads when reading localStorage throws (site data blocked)", asyn
   vm.runInContext(rf(new URL("../theme.js", import.meta.url), "utf8"), sandbox);
   assert.equal(typeof sandbox.ghTheme, "object");
   assert.equal(set["--duro-color-accent"], "#39ff7a");
-  assert.doesNotThrow(() => sandbox.ghTheme.set(sandbox.ghTheme.presetState("amber")));
-  assert.equal(set["--duro-color-accent"], T.PRESETS.amber.core.accent);
+  assert.doesNotThrow(() => sandbox.ghTheme.set(sandbox.ghTheme.presetState("moss")));
+  assert.equal(set["--duro-color-accent"], T.PRESETS.moss.core.accent);
 });
 
 test("hold notifies no listener, so a focus move never rebuilds the road", () => {
@@ -162,9 +162,9 @@ test("an Advanced edit to a core token updates the core input, not an override",
 test("a preset or Reset clears the overrides, and the last custom state comes back", () => {
   let s = T.setToken(fresh(), "textMuted", "#123456");
   assert.equal(T.isCustom(s), true);
-  const p = T.selectPreset(s, "cyan");
+  const p = T.selectPreset(s, "jade");
   assert.deepEqual(p.overrides, {});
-  assert.equal(p.preset, "cyan");
+  assert.equal(p.preset, "jade");
   assert.equal(T.isCustom(p), false);
   assert.equal(p.lastCustom.overrides.textMuted, "#123456");
   const back = T.restoreCustom(p);
@@ -241,4 +241,26 @@ test("the unicorn keeps her gold horn and six-colour rainbow in every theme", ()
     rainbow: ["#ff4d6d", "#ffa94d", "#ffe14d", "#5dff8a", "#4dc3ff", "#d36bff"],
   });
   for (const hex of [T.UNICORN.horn, ...T.UNICORN.rainbow]) assert.equal(T.norm(hex), hex);
+});
+
+test("every preset is a green, and a stored Amber or Cyan choice moves to Moss or Jade", () => {
+  assert.deepEqual(T.PRESET_ORDER, ["phosphor", "jade", "moss", "mono"]);
+  for (const name of ["phosphor", "jade", "moss"]) {
+    const h = T.hue(T.PRESETS[name].core.accent);
+    assert.ok(h > 110 && h < 185, `${name} accent hue ${h.toFixed(0)} is a green`);
+  }
+  const old = { v: 1, preset: "amber", core: { accent: "#ff9f1a", bg: "#0a0600", text: "#fff1d4", danger: "#ff2a7f" }, overrides: {}, lastCustom: null };
+  const moved = T.validateState(old);
+  assert.equal(moved.preset, "moss");
+  assert.deepEqual(moved.core, T.PRESETS.moss.core);
+  const custom = T.validateState({ v: 1, preset: "cyan", core: { accent: "#123456", bg: "#000000", text: "#ffffff", danger: "#ff0000" }, overrides: {}, lastCustom: null });
+  assert.equal(custom.preset, "jade");
+  assert.equal(custom.core.accent, "#123456");
+  const withLast = T.validateState({
+    v: 1, preset: "phosphor", core: { ...T.PRESETS.phosphor.core }, overrides: {},
+    lastCustom: { preset: "amber", core: { accent: "#123456", bg: "#000000", text: "#ffffff", danger: "#ff0000" }, overrides: {} },
+  });
+  assert.ok(withLast, "a stored custom theme on Amber is kept, not dropped");
+  assert.equal(withLast.lastCustom.preset, "moss");
+  assert.equal(withLast.lastCustom.core.accent, "#123456");
 });
