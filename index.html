@@ -548,6 +548,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     PAL = TH.current(); TGR = PAL.tint.green; TRD = PAL.tint.red; cache = {};
     for (var k in PAL.game) C[k] = PAL.game[k];
     C.inset = PAL.tokens.bgInset;
+    C.shade = TH.mix(C.car, C.inset, 0.35);
+    C.glass = TH.mix(C.inset, PAL.tokens.accent, 0.3);
   }
   refreshPalette();
   TH.onChange(refreshPalette);
@@ -710,28 +712,56 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
 
   // ---------- car ----------
+  var FEATURE_N = 1; // the feature in progress
+  var PLATE = "FEATURE-" + FEATURE_N;
+  var PLATE_CELLS = 12, plateL = Math.floor((PLATE_CELLS - PLATE.length) / 2);
+  var PLATE_ROW = " " .repeat(plateL) + PLATE + " ".repeat(PLATE_CELLS - PLATE.length - plateL);
+  // [glyphs, keys]: o outline, g glass, p plate, l lights, b bumper, t tyres
   var CAR = [
-    "   .--------------.   ",
-    "  /  ____________  \\  ",
-    " |__/    GH-1    \\__| ",
-    " [##]============[##] ",
-    "  (__)          (__)  "
+    ["   .--------------.   ", "   oooooooooooooooo   "],
+    ["  /  ▓▓▓▓▓▓▓▓▓▓▓▓  \\  ", "  o  gggggggggggg  o  "],
+    [" |__/" + PLATE_ROW + "\\__| ", " oooo" + "pppppppppppp" + "oooo "],
+    [" [██]============[██] ", " ollobbbbbbbbbbbbollo "],
+    ["  (__)          (__)  ", "  tttt          tttt  "]
   ];
-  function drawCar() {
-    var by = rows - 2, cx = cols / 2;
+  var CAR_W = 22;
+  function carColor(k) {
+    return k === "o" ? C.shade : k === "g" ? C.glass : k === "p" ? tc(1) : k === "l" ? (S.braking ? C.brake : C.tail) : k === "b" ? C.car : C.hud;
+  }
+  var HZ_CAR_PAD = 7;
+  function carEnter() { var t = S.launch; return t * t * t * (t * (t * 6 - 15) + 10); }
+  function carScale() {
+    if (reduce) return 1;
+    var s0 = Math.max(1, Math.min(2.2, (rows - HZ - HZ_CAR_PAD) / CAR.length));
+    return 1 / (1 / s0 + (1 - 1 / s0) * carEnter());
+  }
+  function carEach(fn) {
     var lean = Math.round(S.steerVis * 1.6);
     var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
     for (var j = 0; j < CAR.length; j++) {
-      var L = CAR[j], off = j < 2 ? lean : 0;
-      var x0 = Math.round(cx - L.length / 2 + off + jig);
-      for (var k = 0; k < L.length; k++) {
-        var ch = L[k]; if (ch === " ") continue;
-        var col = ch === "#" ? (S.braking ? C.brake : C.tail) : j === 2 && /[A-Z0-9-]/.test(ch) ? tc(1) : C.car;
-        put(x0 + k, by - (CAR.length - 1 - j), ch, col);
-      }
+      var G = CAR[j][0], K = CAR[j][1], off = (j < 2 ? lean : 0) + jig;
+      for (var k = 0; k < G.length; k++) if (G[k] !== " ") fn(k - CAR_W / 2 + off, j, G[k], carColor(K[k]));
+    }
+  }
+  function carCenter() { return Math.round(cols / 2 - CAR_W / 2) + CAR_W / 2; }
+  function drawCar() {
+    var by = rows - 2, cx = cols / 2;
+    if (carScale() <= 1.001) { // at chase distance the car is on the character grid; closer, render() draws it scaled
+      var A = carCenter();
+      carEach(function (dx, j, ch, col) { put(Math.round(A + dx), by - (CAR.length - 1 - j), ch, col); });
     }
     // exhaust / speed dust
     if (S.state === "race" && S.speed > 20) for (var q = 0; q < 3; q++) put(cx + (Math.random() * 16 - 8), rows - 1, Math.random() < .5 ? "." : "·", tc(0.35));
+  }
+  function drawCarClose(sx, sy) {
+    var s = carScale(); if (s <= 1.001) return;
+    var font = ctx.font, A = carCenter(), bot = oy + (rows - 1) * chh;
+    ctx.font = (fs * s) + 'px "JetBrains Mono", ui-monospace, Menlo, monospace';
+    carEach(function (dx, j, ch, col) {
+      ctx.fillStyle = col;
+      ctx.fillText(ch, ox + (A + dx * s) * cw + sx, bot - (CAR.length - j) * chh * s + sy);
+    });
+    ctx.font = font;
   }
 
   // ---------- traffic light ----------
@@ -798,7 +828,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
-      msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false,
+      msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false, launch: 0,
       dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0,
       parts: [], rules: buildRules([]), rng: null, absent: [], absentAt: { sign: -99, gate: -99 }, offroad: 0, offroads: 0 };
     setState("ready");
@@ -912,6 +942,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (S.state === "count") {
       S.ct += dt;
       tint = Math.max(0, tint - dt * 3);
+      S.launch = Math.min(1, S.launch + dt / 2.1);
       if (S.ct >= 2.4) { setState("race"); S.rt = 0; say(S.parts.length ? "● GREEN. Harness " + (6 - S.parts.length) + "/6." : "● GREEN. Harness on.", TH.LAMP.green); }
       return;
     }
@@ -1120,6 +1151,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         ctx.fillText(chars[idx], ox + x * cw + sx + gshift, oy + row * chh + sy);
       }
     }
+    drawCarClose(sx, sy);
   }
 
   // ---------- the switches on the part cards ----------
