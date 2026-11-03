@@ -180,15 +180,16 @@
       core: { accent: "#39ff7a", bg: "#020803", text: "#b9f5c8", danger: "#ff4d4d" },
       extra: { warning: "#ffd27f", info: "#7ff7ff" }
     },
-    amber: {
-      label: "Amber",
-      core: { accent: "#ff9f1a", bg: "#0a0600", text: "#fff1d4", danger: "#ff2a7f" },
-      extra: { warning: "#ffe566", info: "#7ff7ff" }
+    /* Every preset is a green: we are Green Harness. Jade leans blue, Moss leans yellow. */
+    jade: {
+      label: "Jade",
+      core: { accent: "#3cd6b4", bg: "#010a08", text: "#d6faf0", danger: "#ff5c6c" },
+      extra: { warning: "#ffd27f", info: "#8fb4ff" }
     },
-    cyan: {
-      label: "Cyan",
-      core: { accent: "#3ee8ff", bg: "#02080a", text: "#e0fafd", danger: "#ff5c6c" },
-      extra: { warning: "#ffd27f", info: "#b79cff" }
+    moss: {
+      label: "Moss",
+      core: { accent: "#b4dc4a", bg: "#070902", text: "#eef4d4", danger: "#ff4f6d" },
+      extra: { warning: "#ffb35c", info: "#7ff7ff" }
     },
     mono: {
       label: "Mono",
@@ -196,7 +197,21 @@
       extra: { warning: "#ffd27f", info: "#7ff7ff" }
     }
   };
-  var PRESET_ORDER = ["phosphor", "amber", "cyan", "mono"];
+  var PRESET_ORDER = ["phosphor", "jade", "moss", "mono"];
+  /* Presets that were renamed: a visitor's stored choice moves to the new one, and an untouched
+   * core moves to the new preset's core (2026-11-03: Cyan became Jade, Amber became Moss). */
+  var RENAMED = {
+    cyan: { to: "jade", core: { accent: "#3ee8ff", bg: "#02080a", text: "#e0fafd", danger: "#ff5c6c" } },
+    amber: { to: "moss", core: { accent: "#ff9f1a", bg: "#0a0600", text: "#fff1d4", danger: "#ff2a7f" } }
+  };
+  function renamed(st) { // { preset, core, … } -> the same with the preset renamed, or st unchanged
+    var r = st && typeof st === "object" && Object.prototype.hasOwnProperty.call(RENAMED, st.preset) ? RENAMED[st.preset] : null;
+    if (!r) return st;
+    var out = copy(st), same = !!st.core && CORE_KEYS.every(function (k) { return norm(st.core[k]) === r.core[k]; });
+    out.preset = r.to;
+    if (same) out.core = copy(PRESETS[r.to].core);
+    return out;
+  }
 
   function copy(o) { var r = {}; for (var k in o) r[k] = o[k]; return r; }
 
@@ -282,6 +297,8 @@
   }
   function validateState(raw) {
     try {
+      raw = renamed(raw);
+      if (raw && raw.lastCustom) { raw = copy(raw); raw.lastCustom = renamed(raw.lastCustom); }
       if (!raw || typeof raw !== "object" || raw.v !== 1 || !PRESETS[raw.preset]) return null;
       var core = validColors(raw.core, CORE_KEYS);
       if (!core || Object.keys(core).length !== CORE_KEYS.length) return null;
