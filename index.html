@@ -870,6 +870,9 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
   }
   function featSize(rng) { return 3 + (rng() * 3 | 0); }
+  // Shipping is what counts: a push gives PUSH_EXTRA s more than a commit, and the UNICORN_AT-th push of a run
+  // brings the unicorn (20 bot runs: 4 earn her at 2 features with the extra; none ever reached 3).
+  var PUSH_EXTRA = 8, UNICORN_AT = 2;
   // One more arch or bug for the feature in progress; pure. A bug adds a fix commit, never past 5 arches.
   function featureAfter(f, ev, next) {
     if (ev === "arch") {
@@ -1081,10 +1084,10 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         S.hit.bug++; S.speed *= 0.35; S.time -= 3; S.shake = 0.45;
         say((e.noRouter ? "✗ bug · no router · −3 s" : "✗ bug hit · −3 s") + (S.rules.gates && fa.grew ? " · fix commit before the push" : ""), C.bug);
       } else {
-        var f = S.feat, ships = f.done + 1 === f.need, nf = featureAfter(f, "arch", ships ? featSize(S.rng.feat) : 0), bonus = S.rules.gateBonus;
+        var f = S.feat, ships = f.done + 1 === f.need, nf = featureAfter(f, "arch", ships ? featSize(S.rng.feat) : 0), bonus = S.rules.gateBonus + (ships ? PUSH_EXTRA : 0);
         e.done = true; S.gates++; S.time += bonus; S.speed *= S.rules.gateSlow; S.feat = nf;
-        if (ships && f.shipped === 2 && nf.shipped === 3) { S.rider = "unicorn"; S.morph = reduce ? 1 : 0; }
-        if (ships) { S.plateHold = 0.5; say("✓ push · FEATURE-" + nf.shipped + " shipped" + (S.rules.signed ? "" : " · unsigned · CI runs them again") + " · +" + bonus + " s"); if (S.rider === "unicorn" && nf.shipped === 3) say("★ 3 features shipped · bonus: the unicorn", TH.UNICORN.horn); }
+        if (ships && f.shipped === UNICORN_AT - 1 && nf.shipped === UNICORN_AT) { S.rider = "unicorn"; S.morph = reduce ? 1 : 0; }
+        if (ships) { S.plateHold = 0.5; say("✓ push · FEATURE-" + nf.shipped + " shipped" + (S.rules.signed ? "" : " · unsigned · CI runs them again") + " · +" + bonus + " s"); if (S.rider === "unicorn" && nf.shipped === UNICORN_AT) say("★ " + UNICORN_AT + " features shipped · bonus: the unicorn", TH.UNICORN.horn); }
         else say("✓ commit " + nf.done + "/" + nf.need + " · 39 checks passed · " + (S.rules.signed ? "signed" : "unsigned · CI runs them again") + " · +" + bonus + " s");
       }
     });
@@ -1192,7 +1195,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         "bugs dodged " + S.dodged.bug + "   ·   bugs hit " + S.hit.bug,
         "slop dodged " + S.dodged.slop + "   ·   slop hit " + S.hit.slop,
         "features shipped " + S.feat.shipped + " · commits " + S.gates,
-        S.rider === "unicorn" ? "★ unicorn earned" : S.feat.shipped > 0 ? "ship 3 features in a run: ★" : null,
+        S.rider === "unicorn" ? "★ unicorn earned" : S.feat.shipped > 0 ? "ship " + UNICORN_AT + " features in a run: ★" : null,
         "",
         focused ? "[ SPACE / ENTER ]  drive again" : "[ CLICK ]  drive again",
         "[ I ]  install the harness  ↓"

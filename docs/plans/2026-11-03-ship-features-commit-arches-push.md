@@ -191,6 +191,16 @@ The person previews the commit as usual, with a guide, before the push.
   2.4 s red light, smootherstep on distance, still camera at green). This follows the
   research: a racing game's intro camera hands over to the chase camera before control, and
   moving from a cinematic shot back to gameplay uses an S-curve.
+- 2026-11-03, implementation: `window.ghGameShipped(n, done)` takes an optional `done`, so a
+  test reaches a push at the next arch; an idle test car runs out of time before 3 to 5 arches.
+- 2026-11-03, implementation: the car's close-up before Start is also capped at 55% of the
+  width, because at 390 px the ◀ ▶ pads covered its tail lights at the planned 2.2×.
+- 2026-11-03, balance (scope change, decided by the person): 20 seeded bot runs with all parts
+  on, as planned, shipped 1 feature in 19 runs and 2 in one; none reached 3. Two variants did
+  no better (no fix commits: 0/20 reach 3, 10/20 reach 2; push +8 s: 0/20 reach 3, 4/20
+  reach 2). The person chose: the unicorn comes at the **2nd** push, and a push gives 8 s more
+  than a commit (`PUSH_EXTRA`, `UNICORN_AT` in index.html). The sections above still say 3;
+  this entry supersedes them.
 
 ## Verification
 

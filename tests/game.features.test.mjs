@@ -172,7 +172,7 @@ test("a run ends with data-features and, with gate off, none shipped", async () 
   await on.context.close();
 });
 
-test("the third push turns the car into the unicorn; the next Start has the car again", async () => {
+test("the second push turns the car into the unicorn; the next Start has the car again", async () => {
   const { page, errors, context } = await open({ clock: true });
   await page.evaluate(() => window.ghGameSeed(7));
   await page.locator("#game").click();
@@ -180,17 +180,17 @@ test("the third push turns the car into the unicorn; the next Start has the car 
   await page.keyboard.down("ArrowUp");
   let s = await page.evaluate(() => window.ghGameSnapshot());
   assert.equal(s.rider, "car");
-  await page.evaluate(() => window.ghGameShipped(3));
+  await page.evaluate(() => window.ghGameShipped(2));
   assert.equal(
     (await page.evaluate(() => window.ghGameSnapshot())).rider,
     "car",
   );
-  await page.evaluate((need) => window.ghGameShipped(2, need - 1), s.need);
+  await page.evaluate((need) => window.ghGameShipped(1, need - 1), s.need);
   for (let i = 0; i < 400 && s.rider !== "unicorn" && s.state === "race"; i++) {
     await page.clock.runFor(250);
     s = await page.evaluate(() => window.ghGameSnapshot());
   }
-  assert.equal(s.features, 3);
+  assert.equal(s.features, 2);
   assert.equal(s.rider, "unicorn");
   await page.clock.runFor(1000);
   assert.equal(
