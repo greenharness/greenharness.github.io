@@ -779,7 +779,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
   function uniEach(fn) {
     var gallop = uniGallop();
-    var R = UNI.concat(LEGS[gallop ? 1 + (Math.floor(S.gait) % 2) : 0]);
+    var R = UNI.concat(LEGS[gallop && !reduce ? 1 + (Math.floor(S.gait) % 2) : 0]);
     var moving = !reduce && gallop;
     var lean = Math.round(S.steerVis * 1.6);
     var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
@@ -883,13 +883,14 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     return { shipped: f.shipped, done: f.done, need: need, grew: need > f.need };
   }
   // The bug hits and arch passes a frame triggers, in the order the car reaches them (a bug first on a tie).
-  function frameEvents(ents, pos0, pos1, x) {
+  var HIT_NEAR = Z * 1.15, HIT_FAR = Z * 0.75, BUG_REACH = 0.22; // a bug or slop is hit between these distances
+  function frameEvents(ents, pos, x) {
     var out = [];
     ents.forEach(function (e) {
       if (e.done) return;
-      var d = e.s - pos1;
+      var d = e.s - pos;
       if (e.type === "bug") {
-        if (!e.hit && d < Z * 1.15 && d > Z * 0.75 && Math.abs(e.x - x) < 0.22) out.push({ type: "bug", e: e, at: e.s - Z * 1.15, o: 0 });
+        if (!e.hit && d < HIT_NEAR && d > HIT_FAR && Math.abs(e.x - x) < BUG_REACH) out.push({ type: "bug", e: e, at: e.s - HIT_NEAR, o: 0 });
       } else if (e.type === "gate") {
         if (d < Z * 0.9) out.push({ type: "arch", e: e, at: e.s - Z * 0.9, o: 1 });
       }
@@ -900,7 +901,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   window.ghFeatureAfter = featureAfter;
   window.ghFrameEvents = frameEvents;
   window.ghFeatureSizes = function (seed, n) { var r = makeRng(seed ^ 0x4444), out = []; for (var i = 0; i < n; i++) out.push(featSize(r)); return out; };
-  window.ghGameShipped = function (n, done) { if (S.state === "race") { S.feat.shipped = n | 0; if (done != null) S.feat.done = done | 0; } };
+  window.ghGameShipped = function (n, done) { if (S.state === "race") { S.feat.shipped = n | 0; if (done != null) S.feat.done = Math.max(0, Math.min(done | 0, S.feat.need - 1)); } };
   var gameSeed = (Math.random() * 4294967296) | 0; // gameplay randomness only; rendering keeps Math.random
   window.ghGameSeed = function (n) { gameSeed = n | 0; };
   window.ghGameRules = function (offList) { return buildRules(offList || []); };
@@ -1069,14 +1070,13 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (S.clock - S.railMsg > 3) { S.railMsg = S.clock; say("✗ guardrails · off-road denied, back on the road"); }
     }
 
-    var pos0 = S.pos;
     S.pos += S.speed * dt;
     S.time -= dt;
     S.glitch = Math.max(0, S.glitch - dt);
     S.shake = Math.max(0, S.shake - dt);
     spawnAhead();
 
-    frameEvents(S.ents, pos0, S.pos, S.x).forEach(function (ev) {
+    frameEvents(S.ents, S.pos, S.x).forEach(function (ev) {
       var e = ev.e;
       if (ev.type === "bug") {
         e.hit = true; e.done = true;
@@ -1099,8 +1099,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         if (d < Z * 2.5) { e.done = true; say("decisions · " + e.adr + " decided: " + e.dir, C.white); }
         return;
       }
-      if (!e.hit && d < Z * 1.15 && d > Z * 0.75) {
-        var reach = e.type === "slop" ? 0.26 : 0.22;
+      if (!e.hit && d < HIT_NEAR && d > HIT_FAR) {
+        var reach = e.type === "slop" ? 0.26 : BUG_REACH;
         if (Math.abs(e.x - S.x) < reach) {
           e.hit = true; e.done = true;
           if (e.type === "slop") {

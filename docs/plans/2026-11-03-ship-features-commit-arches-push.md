@@ -201,6 +201,10 @@ The person previews the commit as usual, with a guide, before the push.
   reach 2). The person chose: the unicorn comes at the **2nd** push, and a push gives 8 s more
   than a commit (`PUSH_EXTRA`, `UNICORN_AT` in index.html). The sections above still say 3;
   this entry supersedes them.
+- 2026-11-03, implementation review: `frameEvents` is `frameEvents(ents, pos, x)`, not
+  `(ents, pos0, pos1, x)`. Eligibility is read at the frame's end, as the old loop did, and
+  two reviewers found `pos0` unused. A swept test would make bugs hit at boost speed, where
+  they pass through today, which is a gameplay change this plan does not make.
 
 ## Verification
 
