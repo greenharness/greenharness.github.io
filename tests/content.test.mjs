@@ -55,6 +55,15 @@ test("the page explains the design part, the router and how the agents work toge
   );
 });
 
+test("the page says the agent commits often and pushes a whole feature once", () => {
+  const gate = html.match(/<b>gate<\/b><span>([^<]*)<\/span>/);
+  assert.ok(gate, "the gate card is found");
+  assert.ok(gate[1].includes("pushes a whole feature"), gate[1]);
+  const push = html.match(/\{ name: "Push",[\s\S]*?what: "([^"]*)/);
+  assert.ok(push, "the Push stop is found");
+  assert.ok(push[1].includes("not every commit"), push[1]);
+});
+
 test("every skill and agent the table names is one a part ships", () => {
   const missing = tableChips().filter((name) => !shipped.has(name));
   assert.deepEqual(
