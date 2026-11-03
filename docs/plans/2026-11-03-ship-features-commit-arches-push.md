@@ -211,6 +211,12 @@ The person previews the commit as usual, with a guide, before the push.
   `ghGameShipped(0, need − 1)`, because an idle test car runs out of time before 3 real
   commits.
 
+- 2026-11-03, at preview (decided by the person): "I don't like the zoom out of the car. I
+  prefer the old behavior with the car keeping the same size." The start shot is removed: the
+  car is drawn at chase size from the first frame, as on main. This supersedes the start-shot
+  section, its Phase 1 rows and the 55% width cap. The person also dropped the idea of adding
+  the mockup's game-explanation sections.
+
 ## Verification
 
 Playwright, with the clock installed and paused so only `runFor` moves game time.

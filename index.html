@@ -730,14 +730,6 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   function carColor(k) {
     return k === "o" ? C.shade : k === "g" ? C.glass : k === "p" ? (S.plateHold > 0 ? C.white : tc(1)) : k === "l" ? (S.braking ? C.brake : C.tail) : k === "b" ? C.car : C.hud;
   }
-  var HZ_CAR_PAD = 7;
-  function carEnter() { var t = S.launch; return t * t * t * (t * (t * 6 - 15) + 10); }
-  function carScale() {
-    if (reduce) return 1;
-    // below the title box and the log, and at most 55% of the width so the phone's ◀ ▶ pads never cover it
-    var s0 = Math.max(1, Math.min(2.2, (rows - HZ - HZ_CAR_PAD) / CAR.length, 0.55 * cols / CAR_W));
-    return 1 / (1 / s0 + (1 - 1 / s0) * carEnter());
-  }
   function carEach(fn) {
     var lean = Math.round(S.steerVis * 1.6);
     var jig = S.shake > 0 ? (Math.random() * 3 - 1.5) : 0;
@@ -797,22 +789,12 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       if (S.morph < 1) carEach(function (dx, j, ch, col) { var y = by - (CAR.length - 1 - j); if (y > seam) put(Math.round(carCenter() + dx), y, ch, col); });
       uniEach(function (dx, j, ch, col) { var y = by - (UNI_H - 1 - j); if (S.morph >= 1 || y < seam) put(Math.round(U + dx), y, ch, col); });
       if (S.morph > 0 && S.morph < 1) for (var sx = -UNI_W / 2; sx < UNI_W / 2; sx += 2) put(Math.round(U + sx), seam, "✦", RAIN[(Math.floor(sx + UNI_W) + Math.floor(S.rt * 8)) % 6]);
-    } else if (carScale() <= 1.001) { // at chase distance the car is on the character grid; closer, render() draws it scaled
+    } else {
       var A = carCenter();
       carEach(function (dx, j, ch, col) { put(Math.round(A + dx), by - (CAR.length - 1 - j), ch, col); });
     }
     // exhaust / speed dust
     if (S.state === "race" && S.speed > 20) for (var q = 0; q < 3; q++) put(cx + (Math.random() * 16 - 8), rows - 1, Math.random() < .5 ? "." : "·", tc(0.35));
-  }
-  function drawCarClose(sx, sy) {
-    var s = carScale(); if (s <= 1.001) return;
-    var font = ctx.font, A = carCenter(), bot = oy + (rows - 1) * chh;
-    ctx.font = (fs * s) + 'px "JetBrains Mono", ui-monospace, Menlo, monospace';
-    carEach(function (dx, j, ch, col) {
-      ctx.fillStyle = col;
-      ctx.fillText(ch, ox + (A + dx * s) * cw + sx, bot - (CAR.length - j) * chh * s + sy);
-    });
-    ctx.font = font;
   }
 
   // ---------- traffic light ----------
@@ -912,7 +894,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   }
   function reset() {
     S = { state: "ready", clock: 0, ct: 0, rt: 0, pos: 0, speed: 0, x: 0, steer: 0, steerVis: 0, time: 40, ents: [], nextObs: 90, nextSign: 120, nextGate: 520,
-      msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false, launch: 0,
+      msgs: [], glitch: 0, shake: 0, boost: 0, railHot: 0, railSide: 0, railMsg: 0, braking: false,
       dodged: { bug: 0, slop: 0 }, hit: { bug: 0, slop: 0 }, gates: 0, best: 0, idleSince: 0, feat: { shipped: 0, done: 0, need: 3 }, plateHold: 0, rider: "car", morph: 0, gait: 0,
       parts: [], rules: buildRules([]), rng: null, absent: [], absentAt: { sign: -99, gate: -99 }, offroad: 0, offroads: 0 };
     setState("ready");
@@ -1027,7 +1009,6 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
     if (S.state === "count") {
       S.ct += dt;
       tint = Math.max(0, tint - dt * 3);
-      S.launch = Math.min(1, S.launch + dt / 2.1);
       if (S.ct >= 2.4) { setState("race"); S.rt = 0; say(S.parts.length ? "● GREEN. Harness " + (6 - S.parts.length) + "/6." : "● GREEN. Harness on.", TH.LAMP.green); }
       return;
     }
@@ -1256,7 +1237,6 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         ctx.fillText(chars[idx], ox + x * cw + sx + gshift, oy + row * chh + sy);
       }
     }
-    drawCarClose(sx, sy);
   }
 
   // ---------- the switches on the part cards ----------
