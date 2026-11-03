@@ -266,7 +266,7 @@ body { font-family: var(--mono); font-size: 14px; line-height: 1.55; margin: 0 }
 ║░        ░║</pre><b>guardrails</b><span>The road edges. Every command the agent runs is read first; the ones that go off the road are refused.</span><small id="guardrails-note"><span class="was">was amont-agent</span><span class="cost" hidden>✗ no rails: off the road costs 6 s</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="gate" aria-label="gate" aria-describedby="gate-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>█══ GATE ══█
 █          █
-█          █</pre><b>gate</b><span>The arches. Every commit and push goes through 39 built-in checks. Each one buys you time.</span><small id="gate-note"><span class="was">was amont</span><span class="cost" hidden>✗ no arches: no time back, nothing ships</span></small></div>
+█          █</pre><b>gate</b><span>The arches. Your agent commits often and pushes a whole feature once. Every commit and every push goes through 39 built-in checks, and each one buys you time.</span><small id="gate-note"><span class="was">was amont</span><span class="cost" hidden>✗ no arches: no time back, nothing ships</span></small></div>
       <div class="part"><label class="pt"><input type="checkbox" role="switch" data-part="decisions" aria-label="decisions" aria-describedby="decisions-note" autocomplete="off" checked><span class="pt-txt">on</span></label><pre>┌─────────┐
 │decided: │
 │curve ←  │</pre><b>decisions</b><span>The road signs. They tell the agent what is decided before it gets there, straight from your ADRs.</span><small id="decisions-note"><span class="was">was aval</span><span class="cost" hidden>✗ no signs: curves come unannounced, the far road in fog</span></small></div>
@@ -734,7 +734,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   function carEnter() { var t = S.launch; return t * t * t * (t * (t * 6 - 15) + 10); }
   function carScale() {
     if (reduce) return 1;
-    var s0 = Math.max(1, Math.min(2.2, (rows - HZ - HZ_CAR_PAD) / CAR.length));
+    // below the title box and the log, and at most 55% of the width so the phone's ◀ ▶ pads never cover it
+    var s0 = Math.max(1, Math.min(2.2, (rows - HZ - HZ_CAR_PAD) / CAR.length, 0.55 * cols / CAR_W));
     return 1 / (1 / s0 + (1 - 1 / s0) * carEnter());
   }
   function carEach(fn) {
@@ -1171,6 +1172,8 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
         "",
         "Keep your coding agent on the road.",
         "Dodge the bugs. Dodge the AI slop.",
+        "Commit at each arch.",
+        "Every 3–5 arches, push a feature.",
         "",
         focused ? "[ SPACE / ENTER ]  start at the red light" : "[ CLICK / TAB HERE ]  to drive",
         cols > 60 ? "← → or J L  steer   ↑ faster   ↓ brake" : "◀ ▶  steer",
@@ -1364,7 +1367,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
       what: "The git pre-commit hook checks the message, conflict markers and secrets, plus the linters of the languages your repository uses.",
       term: '<span class="p">$</span> git commit -m "fix: retry on 503"\n<span class="v">✓ gate</span> · message · secrets · markers · clippy' },
     { name: "Push", sec: 2, check: "gate", skills: ["relais-verified-push"], agents: ["implementation-review", "code-review profiles (7)", "interface-review"], you: null,
-      what: "Before the push, a reviewer agent reads the diff against the plan, and so does each code-review profile the plan named. The push is refused if any of those reviews did not run on that tree. <a href=\"#agents\">How the agents hand work over</a>. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
+      what: "The agent pushes a finished feature, not every commit. Before the push, a reviewer agent reads the diff against the plan, and so does each code-review profile the plan named. The push is refused if any of those reviews did not run on that tree. <a href=\"#agents\">How the agents hand work over</a>. The pre-push hook runs the tests and signs what it proved, then the push is checked to have reached the remote." },
     { name: "Review", sec: 3, check: "conform", skills: ["interface-review"], agents: [],
       design: "duro doctor checks how the app wires the design system into its build.",
       you: "You look at UI changes in your own browser.",
