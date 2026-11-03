@@ -256,4 +256,11 @@ test("every preset is a green, and a stored Amber or Cyan choice moves to Moss o
   const custom = T.validateState({ v: 1, preset: "cyan", core: { accent: "#123456", bg: "#000000", text: "#ffffff", danger: "#ff0000" }, overrides: {}, lastCustom: null });
   assert.equal(custom.preset, "jade");
   assert.equal(custom.core.accent, "#123456");
+  const withLast = T.validateState({
+    v: 1, preset: "phosphor", core: { ...T.PRESETS.phosphor.core }, overrides: {},
+    lastCustom: { preset: "amber", core: { accent: "#123456", bg: "#000000", text: "#ffffff", danger: "#ff0000" }, overrides: {} },
+  });
+  assert.ok(withLast, "a stored custom theme on Amber is kept, not dropped");
+  assert.equal(withLast.lastCustom.preset, "moss");
+  assert.equal(withLast.lastCustom.core.accent, "#123456");
 });
