@@ -154,17 +154,17 @@ The person previews the commit as usual, with a guide, before the push.
 
 ## Phases
 
-- [ ] Phase 0: new worktree `gh-site-import-wt-feature-push` (branch `feat/feature-push`)
+- [x] Phase 0: new worktree `gh-site-import-wt-feature-push` (branch `feat/feature-push`)
       from `origin/main`; this plan is its first commit. Keep the `feat/unicorn` worktree and its
       local branch (never pushed) as the source for Phases 1–3; remove them only after Phase 3 is merged.
-- [ ] Phase 1: today's car with tinted glass, the themed colours, the `FEATURE-n` plate, and the car's start
+- [x] Phase 1: today's car with tinted glass, the themed colours, the `FEATURE-n` plate, and the car's start
       shot (shared rider drawing).
-- [ ] Phase 2: commits and push. This covers `featureAfter`, the arch kinds and labels, the
+- [x] Phase 2: commits and push. This covers `featureAfter`, the arch kinds and labels, the
       log lines, gate-off behaviour and its cost note, the HUD row, the end screen, the snapshot
       and `ghGameShipped`.
-- [ ] Phase 3: the unicorn bonus. This covers the sprite, `TH.UNICORN`, the wipe, the log
+- [x] Phase 3: the unicorn bonus. This covers the sprite, `TH.UNICORN`, the wipe, the log
       line and the end-screen line.
-- [ ] Phase 4: the site copy (ready box, gate card, Push stop) and the tests below.
+- [x] Phase 4: the site copy (ready box, gate card, Push stop) and the tests below.
 
 ## Decision log
 
@@ -205,44 +205,80 @@ The person previews the commit as usual, with a guide, before the push.
   `(ents, pos0, pos1, x)`. Eligibility is read at the frame's end, as the old loop did, and
   two reviewers found `pos0` unused. A swept test would make bugs hit at boost speed, where
   they pass through today, which is a gameplay change this plan does not make.
+- 2026-11-03, implementation review: the bug-flip test hits a bug while the push is _next_
+  (seed 7: first bug at 125 m, first arch at 520 m), before the arch is in view, and then
+  checks the arch shows as a commit. The seeded test makes the second arch the push with
+  `ghGameShipped(0, need − 1)`, because an idle test car runs out of time before 3 real
+  commits.
 
 ## Verification
 
-Playwright with the clock installed and paused (`clock.pauseAt`, so screenshots do not move
-game time). Screenshots go to `~/.claude/amont-agent/attestations/<sha>/`.
+Playwright, with the clock installed and paused so only `runFor` moves game time.
+Screenshots are in `/tmp/uni/shots/` (copied to the attestation for the preview).
+Format: input → expected → observed.
 
 - Phase 1:
-  - Load at 1100×760, then Start. Expect the car big under the title box, then rolling to
-    its spot by 2.1 s, still at 2.4 s, at chase size in the race.
-  - Hold ↓. Expect the tail lights in `C.brake`.
-  - At 390×844, expect the car between the ◀ ▶ pads. With reduced motion, expect chase size
-    from the start.
-  - Pick Amber in the theme pane. Expect the outline, bumper and glass to follow the theme.
+  - 1100×760, Start → big car under the title box, rolls to its spot by 2.1 s, still at
+    2.4 s, chase size in the race → as expected (`p1-sheet.png`).
+  - Hold ↓ → tail lights in `C.brake` → as expected (`p1-brake.png`).
+  - 390×844 → car between the ◀ ▶ pads → at first the pads covered its lights at 2.2×;
+    fixed with the 55% width cap (Decision log), then as expected (`p4-ready2.png`).
+    Reduced motion → chase size from the start, no roll → as expected.
+  - Amber preset → outline, glass and plate follow the theme → as expected (`l-amber-c.png`).
 - Phase 2:
-  - Drive with a fixed `ghGameSeed`. Expect `need − 1` arches labelled COMMIT and then PUSH, with
-    `need` between 3 and 5; the plate `FEATURE-2` after the push; and `snapshot.features === 1`.
-  - Seed so a bug sits before the push; hit it while the push is visible. Expect the label to read COMMIT, the log ` · fix commit before the push`, and `snapshot.need` one higher (when it was under 5).
-  - Turn gate off. Expect `features === 0` at the end and the absent arch's line naming "nothing
-    ships".
-  - With gate off at 390×844, expect `HARNESS 5/6` on row 5 and `FEATURE 1` with `need` empty pips (○○○ to ○○○○○) on row 6, neither overlapping.
-- Phase 3:
-  - Call `ghGameShipped(2)`, then pass the next push. Expect the wipe frame by frame, then the
-    unicorn galloping with `snapshot.rider === "unicorn"`, and `★ unicorn earned` on the end
-    screen.
-- Phase 4: the ready box, the gate card and the Push stop show the new sentences at 1100 and
-  390 px.
-- Tests:
-  - `ghFeatureAfter`: a feature of `need` n ships at its nth arch, then takes `next` as its new
-    `need`; a bug before the push adds one arch; it is capped at 5.
-  - `window.ghFeatureSizes(7, 300)` (a pure hook over `makeRng(seed ^ 0x4444)`) returns only 3, 4 and 5, each between 75 and 126 times (100 ± 3σ). Seed 7's first 4 arch positions in `visible[].s` equal today's.
-  - Seeded run: the gates' `visible[].kind` reads commit for `need − 1` arches, then push; then `features === 1`.
-  - A bug hit while the push is visible flips its `kind` to `"commit"` and `need` to its value + 1 (seed chosen so it was under 5).
-  - `ghGameShipped(2)`, then run the clock past the next push: `features === 3`, `rider === "unicorn"`; the next Start has `rider === "car"`.
-  - The existing gate-off run (game.parts.test.mjs:156) also asserts `data-features` is `"0"`. Its everything-on run asserts `commits >= 1` in the snapshot.
-  - Balance (measured, not a test): 20 seeded runs with all parts on, driven by a lane-keeping bot that dodges what `visible` shows. Report how many reach 3 features; 0 means the bonus is out of reach and the 3–5 range is revisited (ux-research's reachability check, kept for all parts on). Parts switched off may make it unreachable: that is the harder road they are meant to be.
-  - `theme.test.mjs`: `TH.UNICORN` is fixed, and `index.html` has no hex.
-  - `content.test.mjs`: the gate card contains "pushes a whole feature"; the Push stop contains "not every commit".
+  - Bot run, seed 1 → COMMIT arches, then a white PUSH arch, then the plate `FEATURE-2` in white
+    → as expected (`p2-push-arch.png`, `p2-shipped.png`). HUD: `COMMITS` and `SHIPPED` on the
+    right, `FEATURE 1 ●●●●○` on the left → as expected (`p2-hud.png`).
+  - Bug hit while the push is next → `need` one higher, the arch reads COMMIT, the log says
+    `· fix commit before the push` in full at 390 px → as expected (test 7, `u-phone-log.png`).
+  - Gate off at 390×844 → `features === 0`, row 5 `HARNESS 4/6` (attest goes off with gate),
+    row 6 `FEATURE 1  ○○○`, no overlap → as expected (`l-gateoff-c.png`).
+  - End screen → `features shipped F · commits C` → as expected (`p2-end.png`).
+- Phase 3 (unicorn at the 2nd push, per the Decision log):
+  - `ghGameShipped(1, need − 1)` just before an arch, pass it → `+20 s` push, the 0.6 s wipe
+    with sparkles, then the galloping unicorn, `rider === "unicorn"`, `★ unicorn earned` on
+    the end screen → as expected (`p3-wipe.png`, `p5-log.png`). A run with 1 feature ends
+    with `ship 2 features in a run: ★` → as expected (`p5-nend.png`).
+- Phase 4: ready box, gate card and Push stop at 1100 and 390 px → new sentences, no sideways
+  scroll, no `…` → as expected (`p4-d-ready.png`, `p4-m-ready.png`, `p4-cards.png`,
+  `p4-m-push.png`). The content test fails on main's page and passes here.
+- Tests (`pnpm test`, the full suite, passed; `game.features.test.mjs` 7/7 five times):
+  `ghFeatureAfter`, `ghFeatureSizes(7, 300)` (only 3/4/5, each in 76–124), `ghFrameEvents`
+  in both orders and another lane, seed 7 arches at 520 and 1101.003 m (baseline from
+  `origin/main` a76ba98) with a commit then a push shipping feature 1, gate off ships none,
+  the 2nd push brings the unicorn and the next Start the car, a bug while the push is next
+  adds a fix commit (fails on a build without fix commits), `TH.UNICORN`, the copy.
+- Not run: the five-person hallway test of the bug-flip rule (Behaviour); raised with the
+  person at the preview.
+- Known limit: in the Mono preset the white push pillars and the near-white commit pillars
+  look alike; the COMMIT/PUSH label and the HUD pips carry the difference, and beyond label
+  distance nothing does (`u-mono.png`).
 
 ## Outcome
+
+Shipped: today's car with tinted glass, colours from the theme and a `FEATURE-n` plate,
+rolling in from close to the camera during the red lights; commit arches and a push after a
+random 3 to 5 arches, with fix commits for bugs, pips on every width, white push arches, the
+new log and end-screen lines; the unicorn as a bonus; the site copy.
+
+Changed on the way (Decision log): the unicorn comes at the 2nd push, and a push gives 8 s
+more than a commit. Balance, 20 seeded bot runs each with all parts on: planned rules 0/20
+reach 3 features (1/20 reach 2); no fix commits 0/20 and 10/20; push +8 s 0/20 and 4/20.
+
+Not done: the hallway test; a live region for the race log (pre-existing gap); the lifecycle
+road's SVG car is unchanged (non-goal).
+
+Surprised: Playwright's installed clock keeps running in real time unless paused, which
+made the first launch captures and the first tests misleading.
+
+## Implementation review
+
+- implementation-review: round 1 approve-with-changes (3 high: phases, results, a test that
+  could not fail); delta approve-with-changes, the rest recorded here (51k, 36 s).
+- lang:typescript: round 1 approve-with-changes (shared hit window, clamp, `pos0`); delta
+  approve (25k, 15 s). deliberate: `featureAfter`'s two shapes; `commits` beside `gates`.
+- ui-design: round 1 rework (2 features / +8 s vs the plan body: the person's decision,
+  recorded; legs under reduced motion fixed); delta approve-with-changes (33k, 33 s).
+  deliberate: no design-system inputs, the repo has no decision corpus.
 
 <!-- panel: repos=gh-site-import reviewers=backend,game-ux,lang:typescript,react,ui-design,ux-research,codex body-sha=f5b291aa1318 -->
