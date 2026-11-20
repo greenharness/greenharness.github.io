@@ -361,8 +361,8 @@
   function kebab(k) { return k.replace(/[A-Z]/g, function (c) { return "-" + c.toLowerCase(); }); }
   function cssVars(r) {
     var vars = {};
-    TOKENS.forEach(function (k) { vars["--duro-color-" + kebab(k)] = r.tokens[k]; });
-    ACTIVE.forEach(function (k) { vars["--duro-color-" + kebab(k)] = r.active[k]; });
+    TOKENS.forEach(function (k) { vars["--gr-color-" + kebab(k)] = r.tokens[k]; });
+    ACTIVE.forEach(function (k) { vars["--gr-color-" + kebab(k)] = r.active[k]; });
     PAGE_KEYS.forEach(function (k) { vars["--gh-" + kebab(k)] = r.page[k]; });
     return vars;
   }

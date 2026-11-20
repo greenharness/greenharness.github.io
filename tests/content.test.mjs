@@ -113,3 +113,27 @@ test("the six part cards each hold one switch, the design card holds none", () =
     assert.equal(byName[name], 1, name);
   assert.equal(byName.design, 0);
 });
+
+test("the page and the theme name greenrack, not Duro", () => {
+  const theme = readFileSync(new URL("../theme.js", import.meta.url), "utf8");
+  for (const [name, text] of [
+    ["index.html", html],
+    ["theme.js", theme],
+  ]) {
+    assert.doesNotMatch(text, /--duro-/, `${name} uses a --duro-* variable`);
+    assert.doesNotMatch(
+      text,
+      /@duro-app\//,
+      `${name} names an @duro-app package`,
+    );
+  }
+  for (const tool of [
+    "greenrack_list",
+    "greenrack_lookup",
+    "greenrack_manifest",
+    "greenrack_mockup_canvas",
+    "greenrack_mockup_check",
+    "greenrack doctor",
+  ])
+    assert.ok(html.includes(tool), `the page names ${tool}`);
+});

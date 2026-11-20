@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react'
-import {ColorInput, Field, Inline, Input, Text} from '@duro-app/ui'
+import {ColorInput, Field, Inline, Input, Text} from '@greenharness/greenrack-ui'
 
 interface ThemeColorRowProps {
   id: string

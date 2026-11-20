@@ -7,7 +7,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
-    "@duro-app/ui": "6.3.0",
+    "@greenharness/greenrack-ui": "7.1.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-hook-form": "7.91.0",
