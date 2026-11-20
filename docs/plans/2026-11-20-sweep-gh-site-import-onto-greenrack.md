@@ -180,10 +180,37 @@ of Phase 4.
 - Residue: `git grep -i -w duro` outside the allowlist → 0 lines; rebuilt
   `theme-pane.css` → 0 `--duro-`.
 
+## Outcome
+
+Measured before the push (`attestations/6ccc61d`: `m0` main, `m1` commit 1,
+`m2b` commit 2, with `measure.mjs`, `cmp.py` and the visitor seed).
+
+| Check                                                                           | Expected                                                | Actual                                                                                                                                                       |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| typecheck, build, bundle current                                                | pass at each commit                                     | pass at main, 8cfe383, 6ccc61d                                                                                                                               |
+| `pnpm test`                                                                     | pass                                                    | main 63/63, 8cfe383 63/63, 6ccc61d 64/64                                                                                                                     |
+| bundle gzipped (js + css)                                                       | ≤ 204,800                                               | main 194,314; 6.3.0 196,079 (+0.9%); 7.1.2 196,067 (+0.9%)                                                                                                   |
+| 6.3.0 and 7.1.2 CDN files                                                       | 200; 30 tokens and hashed vars defined; 74 colour names | both 200; all defined; 74 unchanged                                                                                                                          |
+| 30 `:root` tokens, default and returning visitor                                | 0 differences                                           | 0 at 1280, touch 390 and touch 1024, both commits; the seeded accent `#12d47a` applies                                                                       |
+| layout boxes, scrollWidth                                                       | 0 differences                                           | 0, except the design section at touch 1024: 646 → 668px, because the longer `greenrack_*` names wrap one more line (copy change)                             |
+| panel: control boxes, preset rows, Pane size and scroll, Background row in view | 0 differences                                           | 0 (at 390 the Background row is below the sheet's first height on main too)                                                                                  |
+| LiveRegion after preset, Copy, forced failure, low contrast                     | the same text, still mounted                            | the same at every width; `role=status`, `aria-live=polite`                                                                                                   |
+| `aria-pressed`, focus after Close and after Escape inside, Escape outside       | as on main                                              | as on main; one run at commit 2 lost focus after Close at 390, and the re-run matched main (flaky timing)                                                    |
+| new content test                                                                | fails on main, passes on the branch                     | `PAGE=<main index.html>` fails 1; the branch passes                                                                                                          |
+| residue outside the allowlist                                                   | 0                                                       | `git grep -i -w duro`, `duro_ds_`, `@duro-app/`, `--duro-`: 0 (`ci.yml`'s comment fixed); rebuilt `theme-pane.css` and `.js`: 0 `--duro-`; lockfile 0 `duro` |
+
+DS 5.44+ changed nothing measurable here: `useNarrow` already gave the phone
+panel 44px controls on 5.43, and every desktop control is unchanged.
+
 ## Decision log
 
 - Two steps, 6.3.0 then 7.1.2: bisectable.
 - `shipped.json`/`shipped-names.mjs` left as history; follow-up filed.
 - By hand, not relais: sed, prose and rebuilds.
+- The fixed browser check is a Playwright script, `measure.mjs`, run per
+  commit; its JSON is the report, so no screenshots enter the session. The
+  cold-load preview check and the live check go through `browser-check`.
+- The landed file is named `2026-11-20-sweep-gh-site-import-onto-greenrack.md`,
+  not the shorter name in Phases, which stays as reviewed.
 
 <!-- panel: repos=gh-site-import,decisions reviewers=backend,lang:typescript,react,ui-design,ux-research,game-ux,codex body-sha=7bcb3f69d868 -->
