@@ -209,7 +209,7 @@ panel 44px controls on 5.43, and every desktop control is unchanged.
 - backend: approve-with-changes → Delta approve. Fixed: a tokens-exist test and the `hook install --check` copy pin. Deliberate: the stale-cache window, at most 10 min under `max-age=600`, is stated in the PR (49k + 25k).
 - ui-design: approve-with-changes → Delta approve. Its two findings were about the brief (scope block, aval note); both were supplied in the Delta (61k + 27k).
 - react: approve, no findings (45k, 35 s). lang:typescript: approve, no findings (49k, 38 s).
-- CI pin (ec8b839), implementation-review: approve-with-changes. Fixed: the pin's `holds-until` ceiling, and the Decision log line below (34k, 20 s).
+- CI image (ec8b839, then afcb691), implementation-review: approve-with-changes → approve. Fixed: the pin's ceiling (later replaced by the 26.04 pin and Playwright 1.65.1) and the Decision log line below (34k, 20 s; deltas 34k, 50 s).
 
 ## Decision log
 
@@ -221,10 +221,12 @@ panel 44px controls on 5.43, and every desktop control is unchanged.
   cold-load preview check and the live check go through `browser-check`.
 - The landed file is named `2026-11-20-sweep-gh-site-import-onto-greenrack.md`,
   not the shorter name in Phases, which stays as reviewed.
-- `ci.yml` `runs-on` is pinned to `ubuntu-24.04`, with a `holds-until`
-  ceiling. PR #15's first run failed at `playwright install`:
-  `ubuntu-latest` is now 26.04, and Playwright 1.58.2 installs no chromium
-  there. Main last passed on 2026-11-06, on the older image. The step was
-  not in the phases. A Playwright bump is a separate change.
+- `ci.yml` `runs-on` is pinned to `ubuntu-26.04`, with Playwright 1.58.2 →
+  1.65.1 (afcb691, the person's call). PR #15's first run failed at
+  `playwright install`: `ubuntu-latest` is now 26.04, and 1.58.2 installs
+  no chromium there. Main last passed on 2026-11-06, on the older image.
+  1.65.1 lists ubuntu26.04 as a host; the suite passes 65/65 on it locally.
+  The image is pinned so the next change is a reviewed edit. An interim
+  ubuntu-24.04 pin (ec8b839) was replaced. The step was not in the phases.
 
 <!-- panel: repos=gh-site-import,decisions reviewers=backend,lang:typescript,react,ui-design,ux-research,game-ux,codex body-sha=7bcb3f69d868 -->
