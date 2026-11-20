@@ -138,9 +138,9 @@ test("theme.js loads when reading localStorage throws (site data blocked)", asyn
   vm.createContext(sandbox);
   vm.runInContext(rf(new URL("../theme.js", import.meta.url), "utf8"), sandbox);
   assert.equal(typeof sandbox.ghTheme, "object");
-  assert.equal(set["--duro-color-accent"], "#39ff7a");
+  assert.equal(set["--gr-color-accent"], "#39ff7a");
   assert.doesNotThrow(() => sandbox.ghTheme.set(sandbox.ghTheme.presetState("moss")));
-  assert.equal(set["--duro-color-accent"], T.PRESETS.moss.core.accent);
+  assert.equal(set["--gr-color-accent"], T.PRESETS.moss.core.accent);
 });
 
 test("hold notifies no listener, so a focus move never rebuilds the road", () => {
@@ -203,11 +203,11 @@ test("visitor input may fall below the bars, and the guard says which row", () =
   assert.equal(T.warnings(T.resolve(close).tokens).length, 1);
 });
 
-test("the CSS variables carry the --duro-color-* names, with active* derived from the accent", () => {
+test("the CSS variables carry the --gr-color-* names, with active* derived from the accent", () => {
   const vars = T.cssVars(T.resolve(fresh()));
-  assert.equal(vars["--duro-color-bg-card"], theme.colors.bgCard);
-  assert.equal(vars["--duro-color-accent-contrast"], theme.colors.accentContrast);
-  assert.equal(vars["--duro-color-active"], theme.colors.accent);
+  assert.equal(vars["--gr-color-bg-card"], theme.colors.bgCard);
+  assert.equal(vars["--gr-color-accent-contrast"], theme.colors.accentContrast);
+  assert.equal(vars["--gr-color-active"], theme.colors.accent);
   assert.equal(vars["--gh-head"], "#e6ffec");
   assert.equal(Object.keys(vars).length, 31 + T.PAGE_KEYS.length);
 });

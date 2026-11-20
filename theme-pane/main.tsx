@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState, useSyncExternalStore} from 'react'
 import {createRoot} from 'react-dom/client'
-import '@duro-app/ui/dist/index.css'
+import '@greenharness/greenrack-ui/dist/index.css'
 import {
   Button,
   Cluster,
@@ -12,7 +12,7 @@ import {
   Textarea,
   ThemeProvider,
   Toggle,
-} from '@duro-app/ui'
+} from '@greenharness/greenrack-ui'
 import {ThemeColorRow} from './ThemeColorRow'
 import type {GhTheme, ThemeState} from './ghTheme'
 

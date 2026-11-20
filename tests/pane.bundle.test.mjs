@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import {gzipSync} from 'node:zlib'
 
-// The panel is Duro's Pane with React, loaded on the first press. This is its weight budget:
+// The panel is greenrack's Pane with React, loaded on the first press. This is its weight budget:
 // raise it on purpose, in a PR that says why.
 const BUDGET_GZIP_BYTES = 200 * 1024
 
