@@ -437,7 +437,7 @@ CI ◀─────┘ skip</pre><b>attest</b><span>The time bonus. What the g
   if (!G) return;
   var $ = function (id) { return document.getElementById(id); };
   var link = $("themeLink"), inline = $("themeInline"), btn = $("themeLoad"), msg = $("themeMsg"), loading = false, loaded = false;
-  // The panel is greenrack's Pane, bundled with React: about 180 KB gzipped, so it loads on the first press, not with the page.
+  // The panel is greenrack's Pane, bundled with React: about 195 KB gzipped, so it loads on the first press, not with the page.
   function load() {
     // Once the panel is there, a press only asks it to open (the page's button has been replaced by its own).
     if (loaded) { window.dispatchEvent(new Event("gh-theme-open")); return; }

@@ -7,7 +7,7 @@ The Green Harness site: one static page, `index.html`, served by GitHub Pages fr
 The page's colours come from `theme.js` (presets, contrast checks, `theme.json` export). The panel
 that edits them is greenrack's `Pane` (`@greenharness/greenrack-ui`, pinned exactly in `package.json`), built with
 React into `theme-pane.js` and `theme-pane.css`. The page loads them on the first press of
-"Open the theme panel", not with the page (about 185 KB gzipped).
+"Open the theme panel", not with the page (about 195 KB gzipped).
 
 ```sh
 pnpm install --frozen-lockfile

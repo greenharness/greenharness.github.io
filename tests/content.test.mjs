@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, realpathSync } from "node:fs";
+import { createRequire } from "node:module";
+import { join } from "node:path";
 
 // PAGE lets the test run against another copy of the page (e.g. main's) to prove it can fail.
 const html = readFileSync(
@@ -134,6 +136,42 @@ test("the page and the theme name greenrack, not Duro", () => {
     "greenrack_mockup_canvas",
     "greenrack_mockup_check",
     "greenrack doctor",
+    "greenrack hook install --check",
   ])
     assert.ok(html.includes(tool), `the page names ${tool}`);
+});
+
+test("every --gr-* name the page reads or theme.js writes is defined by the pinned greenrack tokens", () => {
+  // pnpm keeps greenrack-tokens beside greenrack-ui, not at the top of node_modules.
+  const ui = realpathSync(
+    new URL("../node_modules/@greenharness/greenrack-ui", import.meta.url),
+  );
+  const tokens = join(ui, "..", "greenrack-tokens");
+  const version = JSON.parse(
+    readFileSync(join(tokens, "package.json"), "utf8"),
+  ).version;
+  assert.ok(
+    html.includes(`@greenharness/greenrack-tokens@${version}/dist/vars.css`),
+    `the page links the vars.css of the installed tokens, ${version}`,
+  );
+  const defined = new Set(
+    [
+      ...readFileSync(join(tokens, "dist/vars.css"), "utf8").matchAll(
+        /(--gr-[a-z0-9-]+):/g,
+      ),
+    ].map((m) => m[1]),
+  );
+  const used = new Set(
+    [...html.matchAll(/var\((--gr-[a-z0-9-]+)\)|"(--gr-[a-z0-9-]+)"/g)].map(
+      (m) => m[1] ?? m[2],
+    ),
+  );
+  const T = createRequire(import.meta.url)("../theme.js");
+  for (const name of Object.keys(
+    T.cssVars(T.resolve(T.presetState("phosphor"))),
+  ))
+    if (name.startsWith("--gr-")) used.add(name);
+  assert.ok(used.size > 30, `found ${used.size} names`);
+  const missing = [...used].filter((name) => !defined.has(name));
+  assert.deepEqual(missing, [], "names vars.css does not define");
 });
