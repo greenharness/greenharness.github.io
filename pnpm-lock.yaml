@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@duro-app/ui':
-        specifier: 5.43.0
-        version: 5.43.0(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.2.14)(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))(react@19.3.1)
+        specifier: 6.3.0
+        version: 6.3.0(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.2.14)(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))(react@19.3.1)
       react:
         specifier: 19.3.1
         version: 19.3.1
@@ -119,16 +119,16 @@ packages:
   '@dual-bundle/import-meta-resolve@4.2.1':
     resolution: {integrity: sha512-id+7YRUgoUX6CgV0DtuhirQWodeeA7Lf4i2x71JS/vtA5pRb/hIGWlw+G6MeXvsM+MXrz0VAydTGElX1rAfgPg==}
 
-  '@duro-app/tokens@5.43.0':
-    resolution: {integrity: sha512-qX5UHe951rSrFtIaKdmQP0fmbLuwhtbsAiO/swKFvk2ckWtOOQEAuwo6YUpxVAHHOsUAhiaGgTEyIdy0tV4EdQ==}
+  '@duro-app/tokens@6.3.0':
+    resolution: {integrity: sha512-7XegmzBUu4tP4jeRkklCeuvwygbA6TdEc+B7mDY2mgr5syyXE8XZiOOHtlyVCOi6I9ydsVegGhXmni94iM3w3A==}
     peerDependencies:
       react-strict-dom: ^0.0.55
     peerDependenciesMeta:
       react-strict-dom:
         optional: true
 
-  '@duro-app/ui@5.43.0':
-    resolution: {integrity: sha512-3LAI4DmkA1aZS15op5sdUT9kNKQ4gwzIDZlka3MwONkgigKNojocsjoAlnlt2lK6+0EhcADlqZ4Qq7s1uUMgWQ==}
+  '@duro-app/ui@6.3.0':
+    resolution: {integrity: sha512-T09gI1T+aHn7GNyPrpFrPjCC+kKflX5KIIve9T0WpX/ZTICOg00dEf9X/hFpI3nz73iNkNJZPpictAxvDZLZ9A==}
     peerDependencies:
       '@hookform/resolvers': ^5.0.0
       '@tanstack/react-table': '>=8.0.0'
@@ -1409,13 +1409,13 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.2.1': {}
 
-  '@duro-app/tokens@5.43.0(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))':
+  '@duro-app/tokens@6.3.0(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))':
     optionalDependencies:
       react-strict-dom: 0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1)
 
-  '@duro-app/ui@5.43.0(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.2.14)(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))(react@19.3.1)':
+  '@duro-app/ui@6.3.0(react-dom@19.3.1(react@19.3.1))(react-hook-form@7.91.0(@types/react@19.2.14)(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))(react@19.3.1)':
     dependencies:
-      '@duro-app/tokens': 5.43.0(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))
+      '@duro-app/tokens': 6.3.0(react-strict-dom@0.0.55(postcss@8.5.32)(react-dom@19.3.1(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7)(@types/react@19.2.14)(react@19.3.1))(react@19.3.1))
       '@tanstack/react-virtual': 3.14.25(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       qrcode: 1.5.4
       react: 19.3.1
