@@ -10,9 +10,9 @@ permissions:
 
 jobs:
   site:
-    # Playwright 1.58.2 installs no browser on ubuntu-latest once it is 26.04 (refused 2026-11-20).
-    # holds-until: Playwright supports chromium on ubuntu 26.04 (or 24.04 is retired); revisit then.
-    runs-on: ubuntu-24.04
+    # Pinned, so an image change is a reviewed edit: ubuntu-latest moving to 26.04 broke Playwright 1.58.2 (2026-11-20).
+    # Playwright 1.65.1 lists ubuntu26.04 as a supported host; 1.58.2 did not.
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
